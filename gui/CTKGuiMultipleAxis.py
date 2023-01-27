@@ -127,8 +127,10 @@ class Application(tk.CTkFrame):
         self.canvas.draw()
 
 
-root = tk.CTk()
-app = Application(master=root)
 
-# run
-app.mainloop()
+if __name__=="__main__":
+    root = tk.CTk()
+    app = Application(master=root)
+
+    # run
+    app.mainloop()
