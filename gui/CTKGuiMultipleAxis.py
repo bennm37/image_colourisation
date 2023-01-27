@@ -57,14 +57,13 @@ class Application(tk.CTkFrame):
             i.axis('off')
         ax = self.axes[0]
 
-        self.fileName = tk.filedialog.askopenfilename(initialdir='../images/', title='Select A File', filetypes=(
+        fileName = tk.filedialog.askopenfilename(initialdir='../images/', title='Select A File', filetypes=(
             ('jpg files', '*.jpg'), ('jpeg files', '*.jpeg'), ('all files', '*.*'))) #TODO: initialdir?
-
-        if self.fileName:
-            self.rawImage = mpimg.imread(self.fileName)
-            #print(self.fileName)
-            #print(rawImage)
-            ax.imshow(self.rawImage)
+        self.fileName = fileName
+        if fileName:
+            rawImage = mpimg.imread(fileName)
+            self.rawImage = rawImage
+            ax.imshow(rawImage)
             ax.axis('off')
             ax.set_title('Coloured Image')
             self.canvas.draw()
@@ -77,42 +76,44 @@ class Application(tk.CTkFrame):
         ax = self.ax2
         ax.clear()  # clear axes from previous plot
         # convert to grayscale
-        self.grayImage = np.dot(self.rawImage[..., :3], [0.299, 0.587, 0.114])
+        grayImage = np.dot(self.rawImage[..., :3], [0.299, 0.587, 0.114])
 
         # round to integers
-        self.grayImage = np.round(self.grayImage).astype(np.uint8)
-
+        grayImage = np.round(grayImage).astype(np.uint8)
         # show grayscale image
-        ax.imshow(self.grayImage, cmap='gray')
+        ax.imshow(grayImage, cmap='gray')
         ax.axis('off')
         ax.set_title('Gray Image')
         self.canvas.draw()
+        self.grayImage = grayImage
 
     def addColor(self):
         ax = self.ax3
+        grayImage = self.grayImage
+        rawImage = self.rawImage
         ax.clear()  # clear axes from previous plot
-        self.grayImage3D = np.stack((self.grayImage,) * 3, axis=-1)
+        grayImage3D = np.stack((grayImage,) * 3, axis=-1)
         # plt.imsave('image_gray_3d.jpg', img_gray_3d)
 
         # replace the pixels of the grayscale image with the pixels of the original image
         percentage = 0.1
-        mask = np.random.rand(*self.grayImage.shape) < percentage
-        self.grayImage3D[mask, :] = self.rawImage[mask, :]
+        mask = np.random.rand(*grayImage.shape) < percentage
+        grayImage3D[mask, :] = rawImage[mask, :]
 
         # save the new image
-        self.grayImage3D = np.stack((self.grayImage,) * 3, axis=-1)
+        grayImage3D = np.stack((grayImage,) * 3, axis=-1)
 
         # grid colourization
         I = 100
         J = 100
 
-        xSize, ySize = self.grayImage.shape
+        xSize, ySize = grayImage.shape
 
         for x in np.linspace(0, xSize, I, dtype=int, endpoint=False):
             for y in np.linspace(0, ySize, J, dtype=int, endpoint=False):
-                self.grayImage3D[x, y, :] = self.rawImage[x, y, :]
-
-        ax.imshow(self.grayImage3D)
+                grayImage3D[x, y, :] = self.rawImage[x, y, :]
+        self.grayImage3D = grayImage3D
+        ax.imshow(grayImage3D)
         ax.axis('off')
         ax.set_title('Image with Some Colour')
         self.canvas.draw()
