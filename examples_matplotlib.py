@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # load RGB image in numpy array
-img = plt.imread('image2.jpg')
+img = plt.imread('images/image2.jpg')
 
 # convert to grayscale
 img_gray = np.dot(img[...,:3], [0.299, 0.587, 0.114])
@@ -11,7 +11,7 @@ img_gray = np.dot(img[...,:3], [0.299, 0.587, 0.114])
 img_gray = np.round(img_gray).astype(np.uint8)
 
 # save grayscale image
-plt.imsave('image_gray2.jpg', img_gray, cmap='gray')
+plt.imsave('images/image_gray2.jpg', img_gray, cmap='gray')
 
 # show grayscale image
 plt.imshow(img_gray, cmap='gray')
@@ -29,7 +29,7 @@ print(img.shape)
 img_gray_3d[mask, :] = img[mask, :]
 
 # save the new image
-plt.imsave('image_coloured2.jpg', img_gray_3d)
+# plt.imsave('images/image_coloured2.jpg', img_gray_3d)
 
 
 
