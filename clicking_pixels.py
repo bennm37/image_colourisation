@@ -9,7 +9,8 @@ gs = GridSpec(2,3)
 ax0 = fig.add_subplot(gs[0:2,0:2])
 ax1 = fig.add_subplot(gs[0,2])
 ax2 = fig.add_subplot(gs[1,2])
-img = plt.imread("images/apple.jpeg")
+img = plt.imread("images/fresco.png")
+img = grayscale(img)
 wheel = plt.imread("images/color_wheel.jpeg")
 selected_color = np.ones([2,2,3])*0
 ax0.imshow(img)
@@ -26,7 +27,8 @@ def onclick(event):
     if event.inaxes==ax0:
         x,y = event.xdata,event.ydata
         x,y = np.round(x).astype(int),np.round(y).astype(int)
-        img[y:y+5,x:x+5,:] = sc
+        img[y:y+100,x:x+100,:] = sc
+        print("clicked image")
         ax0.clear()
         ax0.imshow(img)
         ax0.axis('off')
