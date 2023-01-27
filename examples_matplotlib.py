@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # load RGB image in numpy array
-img = plt.imread('images/banana.jpeg')
+img = plt.imread('images/images/banana.jpeg')
 
 # convert to grayscale
 img_gray = np.dot(img[...,:3], [0.299, 0.587, 0.114])
@@ -29,7 +29,7 @@ mask = np.random.rand(*img_gray.shape) < percentage
 img_gray_3d[mask, :] = img[mask, :]
 
 # save the new image
-plt.imsave('images/image_coloured2.jpg', img_gray_3d)
+# plt.imsave('images/images/image_coloured2.jpg', img_gray_3d)
 
 img_gray_3d = np.stack((img_gray,)*3, axis=-1)
 
