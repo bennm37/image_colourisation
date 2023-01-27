@@ -1,4 +1,7 @@
 import matplotlib.pyplot as plt
+from tkinter.messagebox import showinfo
+
+import customtkinter as ctk
 from matplotlib.figure import Figure
 
 import matplotlib.image as mpimg
@@ -15,40 +18,46 @@ class Application(tk.Frame):
         fig=plt.figure(figsize=(6,4))
         ax = fig.add_subplot(111)
         plt.axis('off')
-#        ax=fig.add_axes([0.1,0.1,0.8,0.8])
         canvas=FigureCanvasTkAgg(fig,master=root)
         canvas.get_tk_widget().grid(row=0,column=1)
-        #canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
-        #canvas.get_tk_widget().pack(side="top", fill="x", expand=0)
-        #canvas._tkcanvas.pack(side="top", fill="x", expand=0)
 
         canvas.draw()
 
-        self.plotButton=tk.Button(master=root, text="plot", command=lambda: self.displayImage(canvas,ax,fig))
+        self.displayButton=tk.Button(master=root, text="plot", command=lambda: self.displayImage(canvas,ax,fig))
+        self.grayButton=tk.Button(master=root, text="gray", command=lambda: self.convertGray(canvas,ax,filename))
         self.saveButton=tk.Button(master=root, text="save", command=lambda: self.saveImage(canvas,fig))
         self.exitButton = tk.Button(root, text="Exit", command=root.destroy)
 
-        #self.plotbutton.pack(expand=True)
-        #self.exit_button.pack(expand=True)
-
-        self.plotButton.grid(row=0,column=3)
-        self.saveButton.grid(row=2,column=3)
-        self.exitButton.grid(row=3,column=3)
+        self.displayButton.grid(row=0,column=3)
+        self.grayButton.grid(row=1,column=3)
+        self.saveButton.grid(row=1,column=3)
+        self.exitButton.grid(row=2,column=3)
 
     def displayImage(self,canvas,ax,fig):
         ax.clear()         # clear axes from previous plot
-        filenamme = tk.filedialog.askopenfilename(initialdir='../images/', title='Select A File', filetypes=(
+        global filename
+        filename = tk.filedialog.askopenfilename(initialdir='../images/', title='Select A File', filetypes=(
+        filename = tk.filedialog.askopenfilename(initialdir='../images/', title='Select A File', filetypes=(
         ('jpg files', '*.jpg'), ('png files', '*.png'), ('all files', '*.*')))
-        if filenamme:
-            img_arr = mpimg.imread(filenamme)
+
+        showinfo(
+            title='Selected File',
+            message=filename
+        )
+
+        if filename:
+            img_arr = mpimg.imread(filename)
             ax.imshow(img_arr)
             plt.axis('off')
             canvas.draw()
+
     def saveImage(self,canvas,fig):
         fig.savefig('./image.png')
-
+    def convertGray(self,canvas,ax,filename):
+        print("hello")
 
 
 root=tk.Tk()
+root2 = ctk.CTk()
 app=Application(master=root)
 app.mainloop()
