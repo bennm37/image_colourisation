@@ -59,7 +59,7 @@ def select_file():
         ('All files', '*.*')
     )
 
-    global filename
+    global fileName
     filename = fd.askopenfilename(
         title='Open a file',
         initialdir='/home/sulch/imageC/',
@@ -76,7 +76,7 @@ def select_file():
 exit_button = tk.Button(root, text="Exit", command=root.destroy)
 exit_button.pack(pady=20)
 
-filename = open_button = tk.Button(
+fileName = open_button = tk.Button(
     root,
     text='Open a File',
     command=select_file
@@ -85,11 +85,11 @@ filename = open_button = tk.Button(
 show_button = tk.Button(
     root,
     text='show imagee',
-    command=lambda: showw(filename)
+    command=lambda: showw(fileName)
 )
 
 
 open_button.pack(expand=True)
 show_button.pack(expand=True)
 root.mainloop()
-print(filename)
+print(fileName)

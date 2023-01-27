@@ -19,20 +19,23 @@ class Application(tk.CTkFrame):
         ax2 = fig.add_subplot(222)
         ax3 = fig.add_subplot(223)
         ax4 = fig.add_subplot(224)
-        ax1.axis('off')
-        ax2.axis('off')
-        ax3.axis('off')
-        ax4.axis('off')
+        axes = [ax1,ax2,ax3,ax4]
+        for i in axes:
+            i.axis('off')
+        # ax1.axis('off')
+        # ax2.axis('off')
+        # ax3.axis('off')
+        # ax4.axis('off')
         canvas=FigureCanvasTkAgg(fig,master=root)
         canvas.get_tk_widget().grid(row=0,column=1)
 
         canvas.draw()
 
-        self.plotButton=tk.CTkButton(master=root, text="plot", command=lambda: self.displayImage(canvas,ax1,fig))
+        self.plotButton=tk.CTkButton(master=root, text="plot", command=lambda: self.displayImage(canvas,axes))
         self.saveButton=tk.CTkButton(master=root, text="save", command=lambda: self.saveImage(canvas,fig))
         self.exitButton = tk.CTkButton(root, text="Exit", command=root.destroy)
-        self.grayButton=tk.CTkButton(master=root, text="gray", command=lambda: self.convertGray(canvas,ax2,filename))
-        self.colorButton=tk.CTkButton(master=root, text="color", command=lambda: self.addColor(canvas,ax3,filename))
+        self.grayButton=tk.CTkButton(master=root, text="gray", command=lambda: self.convertGray(canvas, ax2, fileName))
+        self.colorButton=tk.CTkButton(master=root, text="color", command=lambda: self.addColor(canvas, ax3, fileName))
 
         self.plotButton.grid(row=0,column=3)
         self.grayButton.grid(row=1,column=3)
@@ -40,65 +43,70 @@ class Application(tk.CTkFrame):
         self.saveButton.grid(row=3,column=3)
         self.exitButton.grid(row=4,column=3)
 
-    def displayImage(self,canvas,ax,fig):
-        ax.clear()         # clear axes from previous plot
-        global filename
-        filename = tk.filedialog.askopenfilename(initialdir='../images/', title='Select A File', filetypes=(
+    def displayImage(self,canvas,axes):
+        for i in axes:
+            i.clear()
+            i.axis('off')
+        ax = axes[0]
+        #ax.clear()
+        #fig.clf()# clear axes from previous plot
+        global fileName
+        fileName = tk.filedialog.askopenfilename(initialdir='../images/', title='Select A File', filetypes=(
         ('jpg files', '*.jpg'), ('jpeg files', '*.jpeg'), ('all files', '*.*')))
-
-        if filename:
-            img_arr = mpimg.imread(filename)
-            ax.imshow(img_arr)
+        global rawImage
+        if fileName:
+            rawImage = mpimg.imread(fileName)
+            ax.imshow(rawImage)
             ax.axis('off')
+            ax.set_title('Coloured Image')
             canvas.draw()
     def saveImage(self,canvas,fig):
         fig.savefig('./image.png')
 
     def convertGray(self,canvas,ax,filename):
         ax.clear()         # clear axes from previous plot
-        global img
-        img = plt.imread(filename)
-
         # convert to grayscale
-        global img_gray
-        img_gray = np.dot(img[..., :3], [0.299, 0.587, 0.114])
+        global grayImage
+        grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114])
 
         # round to integers
-        img_gray = np.round(img_gray).astype(np.uint8)
+        grayImage = np.round(grayImage).astype(np.uint8)
 
         # show grayscale image
-        ax.imshow(img_gray, cmap='gray')
+        ax.imshow(grayImage, cmap='gray')
         ax.axis('off')
+        ax.set_title('Gray Image')
         canvas.draw()
 
     def addColor(self,canvas,ax,filename):
         ax.clear()         # clear axes from previous plot
-        img_gray_3d = np.stack((img_gray,)*3, axis=-1)
+        grayImage3D = np.stack((grayImage,) * 3, axis=-1)
         #plt.imsave('image_gray_3d.jpg', img_gray_3d)
 
         # replace the pixels of the grayscale image with the pixels of the original image
         percentage = 0.1
-        mask = np.random.rand(*img_gray.shape) < percentage
-        img_gray_3d[mask, :] = img[mask, :]
+        mask = np.random.rand(*grayImage.shape) < percentage
+        grayImage3D[mask, :] = rawImage[mask, :]
 
         # save the new image
         #plt.imsave('images/image_coloured2.jpg', img_gray_3d)
 
-        img_gray_3d = np.stack((img_gray,)*3, axis=-1)
+        grayImage3D = np.stack((grayImage,) * 3, axis=-1)
 
         # grid colourization
         I = 100
         J = 100
 
-        size_x, size_y = img_gray.shape
+        xSize, ySize = grayImage.shape
 
-        for x in np.linspace(0, size_x, I, dtype=int, endpoint=False):
-            for y in np.linspace(0, size_y, J, dtype=int, endpoint=False):
-                img_gray_3d[x, y, :] = img[x, y, :]
+        for x in np.linspace(0, xSize, I, dtype=int, endpoint=False):
+            for y in np.linspace(0, ySize, J, dtype=int, endpoint=False):
+                grayImage3D[x, y, :] = rawImage[x, y, :]
 
         #plt.imsave('images/image_coloured_grid.jpg', img_gray_3d)
-        ax.imshow(img_gray_3d)
+        ax.imshow(grayImage3D)
         ax.axis('off')
+        ax.set_title('Image with Some Colour')
         canvas.draw()
 
 
