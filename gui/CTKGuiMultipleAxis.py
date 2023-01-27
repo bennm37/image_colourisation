@@ -7,18 +7,17 @@ import numpy as np
 # TODO: make stuff look good
 # TODO: get the clicky thing to work (not working on my machine -Z)
 
-
+# dark theme
 tk.set_appearance_mode("dark")
 
 
 class Application(tk.CTkFrame):
+    # work in OOP
     def __init__(self, master=None):
-        tk.CTkFrame.__init__(self, master)
-        self.createWidgets()
+        tk.CTkFrame.__init__(self, master) 
+        self.createWidgets() 
 
     def createWidgets(self):
-        # fileName = None
-        # rawImage = None
         fig = plt.figure(figsize=(6, 4)) #TODO: what size?
 
         self.ax1 = fig.add_subplot(221)
@@ -30,16 +29,15 @@ class Application(tk.CTkFrame):
         for i in self.axes:
             i.axis('off')
 
+        # define the canvas upon which we place the images
         self.canvas = FigureCanvasTkAgg(fig, master=root)
         self.canvas.get_tk_widget().grid(row=0, column=1)
         self.canvas.draw()
 
+        # define the buttons
         self.plotButton = tk.CTkButton(master=root, text="Choose Image",command=self.displayImage)
-                                      # command=lambda: self.displayImage(canvas, axes))
         self.grayButton = tk.CTkButton(master=root, text="Make Image Gray",command=self.convertGray)
-                                      # command=lambda: self.convertGray(canvas, ax2, fig))
         self.colorButton = tk.CTkButton(master=root, text="Add Coloured Pixels",command=self.addColor)
- #                                       command=lambda: self.addColor(canvas, ax3))
         self.saveButton = tk.CTkButton(master=root, text="Save Images", command=lambda: self.saveImage(canvas, fig))
         self.exitButton = tk.CTkButton(root, text="Exit", command=root.destroy)
 
@@ -49,17 +47,21 @@ class Application(tk.CTkFrame):
         self.saveButton.grid(row=3, column=3)
         self.exitButton.grid(row=4, column=3)
 
-    # def displayButtonPress(self,displayImage, *args):
-    #     rawImage,fileName = displayImage(*args)
+    # select an image and show it
     def displayImage(self):
+        # clear all axes; new image to be loaded
         for i in self.axes:
             i.clear()
             i.axis('off')
         ax = self.axes[0]
 
+        # load file
         fileName = tk.filedialog.askopenfilename(initialdir='../images/', title='Select A File', filetypes=(
             ('jpg files', '*.jpg'), ('jpeg files', '*.jpeg'), ('all files', '*.*'))) #TODO: initialdir?
+        
+        # save file name to be referenced
         self.fileName = fileName
+
         if fileName:
             rawImage = mpimg.imread(fileName)
             self.rawImage = rawImage
@@ -67,19 +69,22 @@ class Application(tk.CTkFrame):
             ax.axis('off')
             ax.set_title('Coloured Image')
             self.canvas.draw()
-        return #rawImage,fileName
+        return 
 
-    def saveImage(self, canvas, fig):
+    def saveImage(self, canvas, fig): #TODO: fix this
         fig.savefig('./image.png')
 
+    # convert image to grayscale
     def convertGray(self):
         ax = self.ax2
-        ax.clear()  # clear axes from previous plot
+        ax.clear()  
+
         # convert to grayscale
         grayImage = np.dot(self.rawImage[..., :3], [0.299, 0.587, 0.114])
 
         # round to integers
         grayImage = np.round(grayImage).astype(np.uint8)
+
         # show grayscale image
         ax.imshow(grayImage, cmap='gray')
         ax.axis('off')
@@ -87,20 +92,22 @@ class Application(tk.CTkFrame):
         self.canvas.draw()
         self.grayImage = grayImage
 
+    # add some colour to the grayscale image
     def addColor(self):
         ax = self.ax3
         grayImage = self.grayImage
         rawImage = self.rawImage
-        ax.clear()  # clear axes from previous plot
+
+        ax.clear()  
+
+        # made 3-dim grid array to hold RGb
         grayImage3D = np.stack((grayImage,) * 3, axis=-1)
-        # plt.imsave('image_gray_3d.jpg', img_gray_3d)
 
         # replace the pixels of the grayscale image with the pixels of the original image
         percentage = 0.1
         mask = np.random.rand(*grayImage.shape) < percentage
         grayImage3D[mask, :] = rawImage[mask, :]
 
-        # save the new image
         grayImage3D = np.stack((grayImage,) * 3, axis=-1)
 
         # grid colourization
@@ -112,6 +119,7 @@ class Application(tk.CTkFrame):
         for x in np.linspace(0, xSize, I, dtype=int, endpoint=False):
             for y in np.linspace(0, ySize, J, dtype=int, endpoint=False):
                 grayImage3D[x, y, :] = self.rawImage[x, y, :]
+
         self.grayImage3D = grayImage3D
         ax.imshow(grayImage3D)
         ax.axis('off')
@@ -121,4 +129,6 @@ class Application(tk.CTkFrame):
 
 root = tk.CTk()
 app = Application(master=root)
+
+# run
 app.mainloop()
