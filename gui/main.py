@@ -7,17 +7,17 @@ import numpy as np
 import random
 
 # TODO: make stuff look good
-# TODO: the block colourisation: make it random? or are we using user input
+# TODO: the block colorisation: make it random? or are we using user input
 # dark theme
 tk.set_appearance_mode("dark")
 
 
-class imageColouriser(tk.CTkFrame):
+class imageColoriser(tk.CTkFrame):
     # Internal attributes:
     # fileName
     # rawImage
     # grayImage
-    # grayImageWithSomeColour (contextually dependant)
+    # grayImageWithSomeColor (contextually dependant)
 
     # work in OOP
     def __init__(self, master=None):
@@ -52,23 +52,23 @@ class imageColouriser(tk.CTkFrame):
         self.grayButton = tk.CTkButton(
             master=root, text="Make Image Gray", command=self.convertGray
         )
-        self.randomisedColourButton = tk.CTkButton(
-            master=root, text="Add Coloured Pixels", command=self.addRandomisedColour
+        self.randomisedColorButton = tk.CTkButton(
+            master=root, text="Add Colored Pixels", command=self.addRandomisedColor
         )
-        self.manualColourButton = tk.CTkButton(
-            master=root, text="Manually Colour", command=self.manualColourPopupWindow
+        self.manualColorButton = tk.CTkButton(
+            master=root, text="Manually Color", command=self.manualColorPopupWindow
         )
-        self.addBlockColourButton = tk.CTkButton(
-            master=root, text="Add Colour Block", command=self.addBlockColour
+        self.addBlockColorButton = tk.CTkButton(
+            master=root, text="Add Color Block", command=self.addBlockColor
         )
         self.saveButton = tk.CTkButton(root, text="Save", command=self.savePicture)
         self.exitButton = tk.CTkButton(root, text="Exit", command=root.destroy)
 
         self.plotButton.grid(row=0, column=3)
         self.grayButton.grid(row=1, column=3)
-        self.randomisedColourButton.grid(row=2, column=3)
-        self.manualColourButton.grid(row=3, column=3)
-        self.addBlockColourButton.grid(row=4, column=3)
+        self.randomisedColorButton.grid(row=2, column=3)
+        self.manualColorButton.grid(row=3, column=3)
+        self.addBlockColorButton.grid(row=4, column=3)
         self.saveButton.grid(row=5, column=3)
         self.exitButton.grid(row=6, column=3)
 
@@ -99,7 +99,7 @@ class imageColouriser(tk.CTkFrame):
             self.rawImage = rawImage
             rawImagePLTWindow.imshow(rawImage)
             rawImagePLTWindow.axis("off")
-            rawImagePLTWindow.set_title("Coloured Image")
+            rawImagePLTWindow.set_title("Colored Image")
             self.canvas.draw()
         return
 
@@ -135,16 +135,16 @@ class imageColouriser(tk.CTkFrame):
         grayImage3D = np.stack((grayImage,) * 3, axis=-1)
         return grayImage3D
 
-    # add some colour to the grayscale image
-    def addRandomisedColour(self):
-        randomisedColourPLTWindow = self.mainPLTWindowBottomLeft
+    # add some color to the grayscale image
+    def addRandomisedColor(self):
+        randomisedColorPLTWindow = self.mainPLTWindowBottomLeft
         grayImage = self.grayImage
         rawImage = self.rawImage
 
-        randomisedColourPLTWindow.clear()
-        grayImageWithRandomColour = self.dimensionalise(rawImage, grayImage)
+        randomisedColorPLTWindow.clear()
+        grayImageWithRandomColor = self.dimensionalise(rawImage, grayImage)
 
-        # grid colourization
+        # grid colorization
         I = 100
         J = 100
 
@@ -152,18 +152,18 @@ class imageColouriser(tk.CTkFrame):
 
         for x in np.linspace(0, xSize, I, dtype=int, endpoint=False):
             for y in np.linspace(0, ySize, J, dtype=int, endpoint=False):
-                grayImageWithRandomColour[x, y, :] = self.rawImage[x, y, :]
+                grayImageWithRandomColor[x, y, :] = self.rawImage[x, y, :]
 
-        self.grayImageWithSomeColour = grayImageWithRandomColour
-        randomisedColourPLTWindow.imshow(grayImageWithRandomColour)
-        randomisedColourPLTWindow.axis("off")
-        randomisedColourPLTWindow.set_title("Image with Some Colour")
+        self.grayImageWithSomeColor = grayImageWithRandomColor
+        randomisedColorPLTWindow.imshow(grayImageWithRandomColor)
+        randomisedColorPLTWindow.axis("off")
+        randomisedColorPLTWindow.set_title("Image with Some Color")
         self.canvas.draw()
 
-    def addBlockColour(self):
+    def addBlockColor(self):
         print("hi")
 
-    def manualColourPopupWindow(self):
+    def manualColorPopupWindow(self):
         popup = tk.CTkToplevel(self)
 
         popupWindowFigure = plt.figure(figsize=(6, 4))  # TODO: what size?
@@ -177,22 +177,22 @@ class imageColouriser(tk.CTkFrame):
         gs = GridSpec(2, 3)
 
         popup.mainPLTWindow = popupWindowFigure.add_subplot(gs[0:2, 0:2])
-        popup.colourWheelPLTWindow = popupWindowFigure.add_subplot(gs[0, 2])
-        popup.chosenColourPLTWindow = popupWindowFigure.add_subplot(gs[1, 2])
+        popup.colorWheelPLTWindow = popupWindowFigure.add_subplot(gs[0, 2])
+        popup.chosenColorPLTWindow = popupWindowFigure.add_subplot(gs[1, 2])
 
-        grayImageWithManualColour = self.dimensionalise(self.rawImage, self.grayImage)
+        grayImageWithManualColor = self.dimensionalise(self.rawImage, self.grayImage)
 
-        colourWheel = plt.imread("../images/color_wheel.jpeg")
-        selectedColour = np.ones([2, 2, 3]) * 0
+        colorWheel = plt.imread("../images/color_wheel.jpeg")
+        selectedColor = np.ones([2, 2, 3]) * 0
 
-        popup.mainPLTWindow.imshow(grayImageWithManualColour)
-        popup.colourWheelPLTWindow.imshow(colourWheel)
+        popup.mainPLTWindow.imshow(grayImageWithManualColor)
+        popup.colorWheelPLTWindow.imshow(colorWheel)
         popup.mainPLTWindow.axis("off")
-        popup.colourWheelPLTWindow.axis("off")
-        popup.chosenColourPLTWindow.axis("off")
-        popup.chosenColourPLTWindow.imshow(selectedColour)
+        popup.colorWheelPLTWindow.axis("off")
+        popup.chosenColorPLTWindow.axis("off")
+        popup.chosenColorPLTWindow.imshow(selectedColor)
 
-        nx, ny, d = grayImageWithManualColour.shape
+        nx, ny, d = grayImageWithManualColor.shape
         sc = [0, 0, 0]
 
         def onClick(event):
@@ -202,32 +202,32 @@ class imageColouriser(tk.CTkFrame):
                 x, y = event.xdata, event.ydata
                 x, y = np.round(x).astype(int), np.round(y).astype(int)
 
-                grayImageWithManualColour[y : y + 5, x : x + 5, :] = sc
+                grayImageWithManualColor[y : y + 5, x : x + 5, :] = sc
 
                 popup.mainPLTWindow.clear()
-                popup.mainPLTWindow.imshow(grayImageWithManualColour)
+                popup.mainPLTWindow.imshow(grayImageWithManualColor)
                 popup.mainPLTWindow.axis("off")
 
-                self.mainPLTWindowBottomLeft.imshow(grayImageWithManualColour)
+                self.mainPLTWindowBottomLeft.imshow(grayImageWithManualColor)
 
-                self.grayImageWithSomeColour = grayImageWithManualColour
-            if event.inaxes == popup.colourWheelPLTWindow:
+                self.grayImageWithSomeColor = grayImageWithManualColor
+            if event.inaxes == popup.colorWheelPLTWindow:
                 x, y = event.xdata, event.ydata
                 x, y = np.round(x).astype(int), np.round(y).astype(int)
 
-                sc = colourWheel[y, x]
-                selectedColour = np.tile(sc, (2, 2, 1))
+                sc = colorWheel[y, x]
+                selectedColor = np.tile(sc, (2, 2, 1))
 
-                popup.chosenColourPLTWindow.imshow(selectedColour)
-                popup.chosenColourPLTWindow.axis("off")
+                popup.chosenColorPLTWindow.imshow(selectedColor)
+                popup.chosenColorPLTWindow.axis("off")
 
                 print("selected color is ", sc)
-                print(selectedColour.shape)
+                print(selectedColor.shape)
             popupWindowFigure.canvas.draw_idle()
 
         cid = popupWindowFigure.canvas.mpl_connect("button_press_event", onClick)
 
-        self.mainPLTWindowBottomLeft.set_title("Image with Manual Colour")
+        self.mainPLTWindowBottomLeft.set_title("Image with Manual Color")
 
         popupCloseButton = tk.CTkButton(
             popup, text="Close Window", command=popup.destroy
@@ -245,5 +245,5 @@ class imageColouriser(tk.CTkFrame):
 
 if __name__ == "__main__":
     root = tk.CTk()
-    app = imageColouriser(master=root)
+    app = imageColoriser(master=root)
     app.mainloop()
