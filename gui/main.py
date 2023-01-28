@@ -6,6 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import random
 
+# TODO: button frames for the popup
 # TODO: make stuff look good
 # TODO: the block colorisation: make it random? or are we using user input
 # dark theme
@@ -45,32 +46,43 @@ class imageColoriser(tk.CTkFrame):
         self.canvas.get_tk_widget().grid(row=0, column=1)
         self.canvas.draw()
 
-        # define the buttons
-        self.plotButton = tk.CTkButton(
-            master=root, text="Choose Image", command=self.displayImage
-        )
-        self.grayButton = tk.CTkButton(
-            master=root, text="Make Image Gray", command=self.convertGray
-        )
-        self.randomisedColorButton = tk.CTkButton(
-            master=root, text="Add Colored Pixels", command=self.addRandomisedColor
-        )
-        self.manualColorButton = tk.CTkButton(
-            master=root, text="Manually Color", command=self.manualColorPopupWindow
-        )
-        self.addBlockColorButton = tk.CTkButton(
-            master=root, text="Add Color Block", command=self.addBlockColor
-        )
-        self.saveButton = tk.CTkButton(root, text="Save", command=self.savePicture)
-        self.exitButton = tk.CTkButton(root, text="Exit", command=root.destroy)
+        buttonFrame = tk.CTkFrame(root)
+        buttonFrame.grid(row=0, column=2)
 
-        self.plotButton.grid(row=0, column=3)
-        self.grayButton.grid(row=1, column=3)
-        self.randomisedColorButton.grid(row=2, column=3)
-        self.manualColorButton.grid(row=3, column=3)
-        self.addBlockColorButton.grid(row=4, column=3)
-        self.saveButton.grid(row=5, column=3)
-        self.exitButton.grid(row=6, column=3)
+        saveExitFrame = tk.CTkFrame(root)
+        saveExitFrame.grid(row=0, column=0)
+
+        # define the buttons
+        plotButton = tk.CTkButton(
+            buttonFrame, text="Choose Image", command=self.displayImage
+        )
+        grayButton = tk.CTkButton(
+            buttonFrame, text="Make Image Gray", command=self.convertGray
+        )
+        randomisedColorButton = tk.CTkButton(
+            buttonFrame, text="Add Colored Pixels", command=self.addRandomisedColor
+        )
+        manualColorButton = tk.CTkButton(
+            buttonFrame, text="Manually Color", command=self.manualColorPopupWindow
+        )
+        addBlockColorButton = tk.CTkButton(
+            buttonFrame, text="Add Color Block", command=self.addBlockColor
+        )
+        saveButton = tk.CTkButton(saveExitFrame, text="Save", command=self.savePicture)
+        exitButton = tk.CTkButton(saveExitFrame, text="Exit", command=root.destroy)
+
+        #self.plotButton.grid(row=0, column=0)
+        
+
+
+        plotButton.pack(side="top",pady=4)
+        saveButton.pack(side="top",pady=4)
+        exitButton.pack(side="top",pady=4)
+
+        grayButton.pack(side="top",pady=4)
+        randomisedColorButton.pack(side="top",pady=4)
+        manualColorButton.pack(side="top",pady=4)
+        addBlockColorButton.pack(side="top",pady=4)
 
     # select an image and show it
     def displayImage(self):
