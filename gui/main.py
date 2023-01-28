@@ -26,6 +26,16 @@ class imageColoriser(tk.CTkFrame):
         self.createWidgets()
 
     def createWidgets(self):
+        # define frames to hold buttons etc
+        mainWindowCentreFrame = tk.CTkFrame(root)
+        mainWindowCentreFrame.grid(row=0, column=1)
+
+        mainWindowLeftFrame = tk.CTkFrame(root)
+        mainWindowLeftFrame.grid(row=0, column=0)
+
+        mainWindowRightFrame = tk.CTkFrame(root)
+        mainWindowRightFrame.grid(row=0, column=2)
+
         mainWindowFigure = plt.figure(figsize=(6, 4))  # TODO: what size?
         self.mainPLTWindowTopLeft = mainWindowFigure.add_subplot(221)
         self.mainPLTWindowTopRight = mainWindowFigure.add_subplot(222)
@@ -42,47 +52,45 @@ class imageColoriser(tk.CTkFrame):
             axis.axis("off")
 
         # define the canvas upon which we place the images
-        self.canvas = FigureCanvasTkAgg(mainWindowFigure, master=root)
-        self.canvas.get_tk_widget().grid(row=0, column=1)
+        self.canvas = FigureCanvasTkAgg(mainWindowFigure, mainWindowCentreFrame)
+        self.canvas.get_tk_widget().pack(side="top", padx=4, pady=4)
         self.canvas.draw()
-
-        buttonFrame = tk.CTkFrame(root)
-        buttonFrame.grid(row=0, column=2)
-
-        saveExitFrame = tk.CTkFrame(root)
-        saveExitFrame.grid(row=0, column=0)
 
         # define the buttons
         plotButton = tk.CTkButton(
-            buttonFrame, text="Choose Image", command=self.displayImage
+            mainWindowRightFrame, text="Choose Image", command=self.displayImage
         )
         grayButton = tk.CTkButton(
-            buttonFrame, text="Make Image Gray", command=self.convertGray
+            mainWindowRightFrame, text="Make Image Gray", command=self.convertGray
         )
         randomisedColorButton = tk.CTkButton(
-            buttonFrame, text="Add Colored Pixels", command=self.addRandomisedColor
+            mainWindowRightFrame,
+            text="Add Colored Pixels",
+            command=self.addRandomisedColor,
         )
         manualColorButton = tk.CTkButton(
-            buttonFrame, text="Manually Color", command=self.manualColorPopupWindow
+            mainWindowRightFrame,
+            text="Manually Color",
+            command=self.manualColorPopupWindow,
         )
         addBlockColorButton = tk.CTkButton(
-            buttonFrame, text="Add Color Block", command=self.addBlockColor
+            mainWindowRightFrame, text="Add Color Block", command=self.addBlockColor
         )
-        saveButton = tk.CTkButton(saveExitFrame, text="Save", command=self.savePicture)
-        exitButton = tk.CTkButton(saveExitFrame, text="Exit", command=root.destroy)
+        saveButton = tk.CTkButton(
+            mainWindowLeftFrame, text="Save", command=self.savePicture
+        )
+        exitButton = tk.CTkButton(
+            mainWindowLeftFrame, text="Exit", command=root.destroy
+        )
 
-        #self.plotButton.grid(row=0, column=0)
-        
+        saveButton.pack(side="top", pady=4)
+        exitButton.pack(side="top", pady=4)
 
-
-        plotButton.pack(side="top",pady=4)
-        saveButton.pack(side="top",pady=4)
-        exitButton.pack(side="top",pady=4)
-
-        grayButton.pack(side="top",pady=4)
-        randomisedColorButton.pack(side="top",pady=4)
-        manualColorButton.pack(side="top",pady=4)
-        addBlockColorButton.pack(side="top",pady=4)
+        plotButton.pack(side="top", pady=4)
+        grayButton.pack(side="top", pady=4)
+        randomisedColorButton.pack(side="top", pady=4)
+        manualColorButton.pack(side="top", pady=4)
+        addBlockColorButton.pack(side="top", pady=4)
 
     # select an image and show it
     def displayImage(self):
@@ -178,12 +186,21 @@ class imageColoriser(tk.CTkFrame):
     def manualColorPopupWindow(self):
         popup = tk.CTkToplevel(self)
 
+        popupLeftFrame = tk.CTkFrame(popup)
+        popupLeftFrame.grid(row=0, column=0)
+
+        popupCentreFrame = tk.CTkFrame(popup)
+        popupCentreFrame.grid(row=0, column=1)
+
+        popupRightFrame = tk.CTkFrame(popup)
+        popupRightFrame.grid(row=0, column=2)
+
         popupWindowFigure = plt.figure(figsize=(6, 4))  # TODO: what size?
         popup.PLTWindow = popupWindowFigure.add_subplot(111)
         popup.PLTWindow.axis("off")
 
-        popupCanvas = FigureCanvasTkAgg(popupWindowFigure, master=popup)
-        popupCanvas.get_tk_widget().grid(row=0, column=1)
+        popupCanvas = FigureCanvasTkAgg(popupWindowFigure, popupCentreFrame)
+        popupCanvas.get_tk_widget().pack(side="top", pady=4, padx=4)
         popupCanvas.draw()
 
         gs = GridSpec(2, 3)
@@ -242,14 +259,14 @@ class imageColoriser(tk.CTkFrame):
         self.mainPLTWindowBottomLeft.set_title("Image with Manual Color")
 
         popupCloseButton = tk.CTkButton(
-            popup, text="Close Window", command=popup.destroy
+            popupLeftFrame, text="Close Window", command=popup.destroy
         )
         saveImageButton = tk.CTkButton(
-            popup, text="Write to Main", command=self.saveImage
+            popupRightFrame, text="Write to Main", command=self.saveImage
         )
 
-        popupCloseButton.grid(row=1, column=0)
-        saveImageButton.grid(row=2, column=0)
+        popupCloseButton.pack(side="top", pady=4, padx=4)
+        saveImageButton.pack(side="top", pady=4, padx=4)
 
     def saveImage(self):
         self.canvas.draw()
