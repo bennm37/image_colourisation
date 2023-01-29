@@ -8,6 +8,7 @@ import random
 
 # TODO: make stuff look good
 # TODO: the block colorisation: make it random? or are we using user input
+# TODO: add text explaining how to use manual colour mode
 # dark theme
 tk.set_appearance_mode("dark")
 
