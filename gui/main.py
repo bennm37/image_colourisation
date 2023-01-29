@@ -6,7 +6,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import random
 
-# TODO: button frames for the popup
 # TODO: make stuff look good
 # TODO: the block colorisation: make it random? or are we using user input
 # dark theme
@@ -56,25 +55,38 @@ class imageColoriser(tk.CTkFrame):
         self.canvas.get_tk_widget().pack(side="top", padx=4, pady=4)
         self.canvas.draw()
 
+        # flags to check if various image states exist, toggle buttons in toggleButtons()
+        self.rawImageExists = 0
+        self.grayImageExists = 0
+        self.grayImageWithSomeColorExists = 0
+
         # define the buttons
         plotButton = tk.CTkButton(
             mainWindowRightFrame, text="Choose Image", command=self.displayImage
         )
-        grayButton = tk.CTkButton(
-            mainWindowRightFrame, text="Make Image Gray", command=self.convertGray
+        self.grayButton = tk.CTkButton(
+            mainWindowRightFrame,
+            text="Make Image Gray",
+            command=self.convertGray,
+            state="disabled",
         )
-        randomisedColorButton = tk.CTkButton(
+        self.randomisedColorButton = tk.CTkButton(
             mainWindowRightFrame,
             text="Add Colored Pixels",
             command=self.addRandomisedColor,
+            state="disabled",
         )
-        manualColorButton = tk.CTkButton(
+        self.manualColorButton = tk.CTkButton(
             mainWindowRightFrame,
             text="Manually Color",
             command=self.manualColorPopupWindow,
+            state="disabled",
         )
-        addBlockColorButton = tk.CTkButton(
-            mainWindowRightFrame, text="Add Color Block", command=self.addBlockColor
+        self.addBlockColorButton = tk.CTkButton(
+            mainWindowRightFrame,
+            text="Add Color Block",
+            command=self.addBlockColor,
+            state="disabled",
         )
         saveButton = tk.CTkButton(
             mainWindowLeftFrame, text="Save", command=self.savePicture
@@ -87,13 +99,18 @@ class imageColoriser(tk.CTkFrame):
         exitButton.pack(side="top", pady=4)
 
         plotButton.pack(side="top", pady=4)
-        grayButton.pack(side="top", pady=4)
-        randomisedColorButton.pack(side="top", pady=4)
-        manualColorButton.pack(side="top", pady=4)
-        addBlockColorButton.pack(side="top", pady=4)
+        self.grayButton.pack(side="top", pady=4)
+        self.randomisedColorButton.pack(side="top", pady=4)
+        self.manualColorButton.pack(side="top", pady=4)
+        self.addBlockColorButton.pack(side="top", pady=4)
 
     # select an image and show it
     def displayImage(self):
+        self.grayImageExists = 0
+        self.rawImageExists = 0
+        self.grayImageWithSomeColorExists = 0
+        self.toggleButtons()
+
         # clear all axes; new image to be loaded
         for axis in self.mainPLTWindowAxes:
             axis.clear()
@@ -117,6 +134,8 @@ class imageColoriser(tk.CTkFrame):
         if fileName:
             rawImage = mpimg.imread(fileName)
             self.rawImage = rawImage
+            self.rawImageExists = 1
+            self.toggleButtons()
             rawImagePLTWindow.imshow(rawImage)
             rawImagePLTWindow.axis("off")
             rawImagePLTWindow.set_title("Colored Image")
@@ -128,6 +147,7 @@ class imageColoriser(tk.CTkFrame):
 
     # convert image to grayscale
     def convertGray(self):
+        self.grayImageWithSomeColorExists = 0
         grayImagePLTWindow = self.mainPLTWindowTopRight
         grayImagePLTWindow.clear()
 
@@ -137,6 +157,8 @@ class imageColoriser(tk.CTkFrame):
         # round to integers
         grayImage = np.round(grayImage).astype(np.uint8)
         self.grayImage = grayImage
+        self.grayImageExists = 1
+        self.toggleButtons()
 
         # show grayscale image
         grayImagePLTWindow.imshow(grayImage, cmap="gray")
@@ -157,6 +179,7 @@ class imageColoriser(tk.CTkFrame):
 
     # add some color to the grayscale image
     def addRandomisedColor(self):
+        self.grayImageWithSomeColorExists = 0
         randomisedColorPLTWindow = self.mainPLTWindowBottomLeft
         grayImage = self.grayImage
         rawImage = self.rawImage
@@ -175,15 +198,19 @@ class imageColoriser(tk.CTkFrame):
                 grayImageWithRandomColor[x, y, :] = self.rawImage[x, y, :]
 
         self.grayImageWithSomeColor = grayImageWithRandomColor
+        self.grayImageWithSomeColorExists = 1
         randomisedColorPLTWindow.imshow(grayImageWithRandomColor)
         randomisedColorPLTWindow.axis("off")
         randomisedColorPLTWindow.set_title("Image with Some Color")
         self.canvas.draw()
 
     def addBlockColor(self):
+        self.grayImageWithSomeColorExists = 0
         print("hi")
+        self.grayImageWithSomeColorExists = 1
 
     def manualColorPopupWindow(self):
+        self.grayImageWithSomeColorExists = 0
         popup = tk.CTkToplevel(self)
 
         popupLeftFrame = tk.CTkFrame(popup)
@@ -240,6 +267,7 @@ class imageColoriser(tk.CTkFrame):
                 self.mainPLTWindowBottomLeft.imshow(grayImageWithManualColor)
 
                 self.grayImageWithSomeColor = grayImageWithManualColor
+                self.grayImageWithSomeColorExists = 1
             if event.inaxes == popup.colorWheelPLTWindow:
                 x, y = event.xdata, event.ydata
                 x, y = np.round(x).astype(int), np.round(y).astype(int)
@@ -270,6 +298,21 @@ class imageColoriser(tk.CTkFrame):
 
     def saveImage(self):
         self.canvas.draw()
+
+    def toggleButtons(self):
+        if self.grayImageExists == 0:  # if no grayImage set
+            self.addBlockColorButton.configure(state="disabled")
+            self.randomisedColorButton.configure(state="disabled")
+            self.manualColorButton.configure(state="disabled")
+        else:
+            self.addBlockColorButton.configure(state="enabled")
+            self.randomisedColorButton.configure(state="enabled")
+            self.manualColorButton.configure(state="enabled")
+
+        if self.rawImageExists == 0:
+            self.grayButton.configure(state="disabled")
+        else:
+            self.grayButton.configure(state="enabled")
 
 
 if __name__ == "__main__":
