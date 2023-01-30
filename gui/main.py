@@ -4,7 +4,6 @@ import customtkinter as tk
 import matplotlib.image as mpimg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
-import random
 
 # TODO: make stuff look good
 # TODO: the block colorisation: make it random? or are we using user input
@@ -207,8 +206,31 @@ class imageColoriser(tk.CTkFrame):
 
     def addBlockColor(self):
         self.grayImageWithSomeColorExists = 0
-        print("hi")
+
+        blockColorPLTWindow = self.mainPLTWindowBottomLeft
+        blockColorPLTWindow.clear()
+
+        grayImage = self.grayImage
+        rawImage = self.rawImage
+
+        ySize, xSize, null = rawImage.shape
+        yStart = np.random.randint(0, ySize - 50)
+        xStart = np.random.randint(0, xSize - 50)
+
+        grayImageWithBlockColor = self.dimensionalise(rawImage, grayImage)
+
+        def addColorBox(xStart, xEnd, yStart, yEnd):
+            for i in range(xStart, xEnd):
+                for j in range(yStart, yEnd):
+                    grayImageWithBlockColor[i, j, :] = rawImage[i, j, 0:3]
+
+        addColorBox(xStart, xStart + 50, yStart, yStart + 50)
         self.grayImageWithSomeColorExists = 1
+
+        blockColorPLTWindow.axis("off")
+        blockColorPLTWindow.imshow(grayImageWithBlockColor)
+        blockColorPLTWindow.set_title("Image with Block Color")
+        self.canvas.draw()
 
     def manualColorPopupWindow(self):
         self.grayImageWithSomeColorExists = 0
@@ -237,6 +259,10 @@ class imageColoriser(tk.CTkFrame):
         popup.colorWheelPLTWindow = popupWindowFigure.add_subplot(gs[0, 2])
         popup.chosenColorPLTWindow = popupWindowFigure.add_subplot(gs[1, 2])
 
+        popup.mainPLTWindow.axis("off")
+        popup.colorWheelPLTWindow.axis("off")
+        popup.chosenColorPLTWindow.axis("off")
+
         grayImageWithManualColor = self.dimensionalise(self.rawImage, self.grayImage)
 
         colorWheel = plt.imread("../images/color_wheel.jpeg")
@@ -244,9 +270,6 @@ class imageColoriser(tk.CTkFrame):
 
         popup.mainPLTWindow.imshow(grayImageWithManualColor)
         popup.colorWheelPLTWindow.imshow(colorWheel)
-        popup.mainPLTWindow.axis("off")
-        popup.colorWheelPLTWindow.axis("off")
-        popup.chosenColorPLTWindow.axis("off")
         popup.chosenColorPLTWindow.imshow(selectedColor)
 
         nx, ny, d = grayImageWithManualColor.shape
