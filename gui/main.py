@@ -4,10 +4,10 @@ import customtkinter as tk
 import matplotlib.image as mpimg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
+from pathlib import Path
 
 # TODO: make stuff look good
 # TODO: the block colorisation: make it random? or are we using user input
-# TODO: add text explaining how to use manual colour mode
 # dark theme
 tk.set_appearance_mode("dark")
 
@@ -22,9 +22,9 @@ class imageColoriser(tk.CTkFrame):
     # work in OOP
     def __init__(self, master=None):
         tk.CTkFrame.__init__(self, master)
-        self.createWidgets()
+        self.createUI()
 
-    def createWidgets(self):
+    def createUI(self):
         # define frames to hold buttons etc
         mainWindowCentreFrame = tk.CTkFrame(root)
         mainWindowCentreFrame.grid(row=0, column=1)
@@ -119,7 +119,7 @@ class imageColoriser(tk.CTkFrame):
 
         # load file
         fileName = tk.filedialog.askopenfilename(
-            initialdir="../images/",
+            initialdir=str(Path("..", "images")),
             title="Select A File",
             filetypes=(
                 ("jpg files", "*.jpg"),
@@ -143,7 +143,7 @@ class imageColoriser(tk.CTkFrame):
         return
 
     def savePicture(self):
-        self.canvas.figure.savefig("./image.png")  # TODO: might not work on windows?
+        self.canvas.figure.savefig("myImage.png")
 
     # convert image to grayscale
     def convertGray(self):
@@ -271,24 +271,26 @@ class imageColoriser(tk.CTkFrame):
 
         grayImageWithManualColor = self.dimensionalise(self.rawImage, self.grayImage)
 
-        colorWheel = plt.imread("../images/color_wheel.jpeg")
+        colorWheel = plt.imread(str(Path("..", "images", "color_wheel.jpeg")))
         selectedColor = np.ones([2, 2, 3]) * 0
 
         popup.mainPLTWindow.imshow(grayImageWithManualColor)
         popup.colorWheelPLTWindow.imshow(colorWheel)
         popup.chosenColorPLTWindow.imshow(selectedColor)
 
-        nx, ny, d = grayImageWithManualColor.shape
-        sc = [0, 0, 0]
+        # nx, ny, d = grayImageWithManualColor.shape
+
+        # preset color to have on the color wheel
+        self.selectedColor = [0, 0, 0]
 
         def onClick(event):
-            global sc
+            # global sc
             # print("clicked")
             if event.inaxes == popup.mainPLTWindow:
                 x, y = event.xdata, event.ydata
                 x, y = np.round(x).astype(int), np.round(y).astype(int)
 
-                grayImageWithManualColor[y : y + 5, x : x + 5, :] = sc
+                grayImageWithManualColor[y : y + 5, x : x + 5, :] = self.selectedColor
 
                 popup.mainPLTWindow.clear()
                 popup.mainPLTWindow.imshow(grayImageWithManualColor)
@@ -302,8 +304,8 @@ class imageColoriser(tk.CTkFrame):
                 x, y = event.xdata, event.ydata
                 x, y = np.round(x).astype(int), np.round(y).astype(int)
 
-                sc = colorWheel[y, x]
-                selectedColor = np.tile(sc, (2, 2, 1))
+                self.selectedColor = colorWheel[y, x]
+                selectedColor = np.tile(self.selectedColor, (2, 2, 1))
 
                 popup.chosenColorPLTWindow.imshow(selectedColor)
                 popup.chosenColorPLTWindow.axis("off")
