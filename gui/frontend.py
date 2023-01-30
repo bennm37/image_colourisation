@@ -26,65 +26,65 @@ class imageColoriser(ctk.CTk):
         self.labelColor = "#525252"
 
         # create sidebar and widgets
-        self.sidebar_frame = ctk.CTkFrame(self, width=150, corner_radius=0) # width doesn't do anything ?
-        self.sidebar_frame.grid(row=0, column=0, rowspan=4, columnspan =1,sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(15, weight=1)
+        self.sidebarFrame = ctk.CTkFrame(self, width=150, corner_radius=0) # width doesn't do anything ?
+        self.sidebarFrame.grid(row=0, column=0, rowspan=4, columnspan =1,sticky="nsew")
+        self.sidebarFrame.grid_rowconfigure(15, weight=1)
         # file section
         self.title_padx = 30 # padding for titles
-        self.file_label = ctk.CTkLabel(self.sidebar_frame, text="File", anchor="center",fg_color=self.labelColor)
-        self.file_label.grid(row=0, column=0, columnspan = 5, padx=(0,0), pady=(0, 0),sticky="ew")
-        self.loadImage = ctk.CTkButton(self.sidebar_frame, command=self.loadImage, text = "Load Image")
-        self.loadImage.grid(row=1, column=0, padx=5, pady=5)
-        self.loadImagePath = ctk.CTkEntry(self.sidebar_frame, placeholder_text = self.imagePath)
+        self.fileLabel = ctk.CTkLabel(self.sidebarFrame, text="File", anchor="center",fg_color=self.labelColor)
+        self.fileLabel.grid(row=0, column=0, columnspan = 5, padx=(0,0), pady=(0, 0),sticky="ew")
+        self.loadImageButton = ctk.CTkButton(self.sidebarFrame, command=self.loadImage, text = "Load Image")
+        self.loadImageButton.grid(row=1, column=0, padx=5, pady=5)
+        self.loadImagePath = ctk.CTkEntry(self.sidebarFrame, placeholder_text = self.imagePath)
         self.loadImagePath.grid(row=1, column=1, columnspan = 4, padx=10, pady=5)
-        self.saveImage = ctk.CTkButton(self.sidebar_frame, command=self.loadImage, text = "Save Image")
-        self.saveImage.grid(row=2, column=0, padx=20, pady=5)
-        self.saveImagePath = ctk.CTkEntry(self.sidebar_frame, placeholder_text = self.imagePath)
+        self.saveImageButton = ctk.CTkButton(self.sidebarFrame, command=self.saveImage, text = "Save Image")
+        self.saveImageButton.grid(row=2, column=0, padx=20, pady=5)
+        self.saveImagePath = ctk.CTkEntry(self.sidebarFrame, placeholder_text = self.imagePath)
         self.saveImagePath.grid(row=2, column=1, columnspan = 4, padx=10, pady=5)
-        self.loadState = ctk.CTkButton(self.sidebar_frame, command=self.loadImage, text = "Load State")
-        self.loadState.grid(row=3, column=0, padx=20, pady=5)
-        self.loadStatePath = ctk.CTkEntry(self.sidebar_frame, placeholder_text = self.statePath)
+        self.loadStateButton = ctk.CTkButton(self.sidebarFrame, command=self.loadState, text = "Load State")
+        self.loadStateButton.grid(row=3, column=0, padx=20, pady=5)
+        self.loadStatePath = ctk.CTkEntry(self.sidebarFrame, placeholder_text = self.statePath)
         self.loadStatePath.grid(row=3, column=1, columnspan = 4, padx=10, pady=5)
-        self.saveState = ctk.CTkButton(self.sidebar_frame, command=self.loadImage, text = "Save State")
-        self.saveState.grid(row=4, column=0, padx=20, pady=5)
-        self.saveStatePath = ctk.CTkEntry(self.sidebar_frame, placeholder_text = self.statePath)
+        self.saveStateButton = ctk.CTkButton(self.sidebarFrame, command=self.saveState, text = "Save State")
+        self.saveStateButton.grid(row=4, column=0, padx=20, pady=5)
+        self.saveStatePath = ctk.CTkEntry(self.sidebarFrame, placeholder_text = self.statePath)
         self.saveStatePath.grid(row=4, column=1, columnspan = 4, padx=10, pady=5)
         
         # edit section
-        self.edit_label = ctk.CTkLabel(self.sidebar_frame, text="Edit",anchor="center",fg_color=self.labelColor)
-        self.edit_label.grid(row=5, column=0, columnspan = 5, padx=(0,0), pady=(0, 0),sticky="ew")
-        self.colorByPixel = ctk.CTkRadioButton(self.sidebar_frame, text = "Color by Pixel", variable=self.colorMode, value=0)
+        self.editLabel = ctk.CTkLabel(self.sidebarFrame, text="Edit",anchor="center",fg_color=self.labelColor)
+        self.editLabel.grid(row=5, column=0, columnspan = 5, padx=(0,0), pady=(0, 0),sticky="ew")
+        self.colorByPixel = ctk.CTkRadioButton(self.sidebarFrame, text = "Color by Pixel", variable=self.colorMode, value=0)
         self.colorByPixel.grid(row=6, column=0, pady=10, padx=20, sticky="nw")
 
         
-        self.colorRandomPixels = ctk.CTkRadioButton(self.sidebar_frame, text = "Color Random Pixels", variable=self.colorMode, value=1)
+        self.colorRandomPixels = ctk.CTkRadioButton(self.sidebarFrame, text = "Color Random Pixels", variable=self.colorMode, value=1)
         self.colorRandomPixels.grid(row=9, column=0, pady=10, padx=20, sticky="nw")
-        self.NRandomPixelsSlider = ctk.CTkSlider(self.sidebar_frame, from_=0, to=1, number_of_steps=20)
+        self.NRandomPixelsSlider = ctk.CTkSlider(self.sidebarFrame, from_=0, to=1, number_of_steps=20)
         self.NRandomPixelsSlider.grid(row=10, column=0, columnspan = 5, padx=(100,5), pady=(5, 5),sticky="ew")
-        self.NRandomPixelEntry = ctk.CTkEntry(self.sidebar_frame,width = 50,placeholder_text="20")
+        self.NRandomPixelEntry = ctk.CTkEntry(self.sidebarFrame,width = 50,placeholder_text="20")
         self.NRandomPixelEntry.grid(row=10, column=0, padx=40, pady=(5, 5),sticky="w")
-        self.NRandomPixelLabel = ctk.CTkLabel(self.sidebar_frame, text = 'N')
+        self.NRandomPixelLabel = ctk.CTkLabel(self.sidebarFrame, text = 'N')
         self.NRandomPixelLabel.grid(row=10, column=0, padx=20, pady=(5, 5),sticky="w")
 
-        self.colorByGrid = ctk.CTkRadioButton(self.sidebar_frame, text = "Color by Grid", variable=self.colorMode, value=2)
+        self.colorByGrid = ctk.CTkRadioButton(self.sidebarFrame, text = "Color by Grid", variable=self.colorMode, value=2)
         self.colorByGrid.grid(row=11, column=0, pady=10, padx=20, sticky="nw")
 
         # parameter section
-        self.parameterLabel = ctk.CTkLabel(self.sidebar_frame, text="Parameters",anchor="center",fg_color=self.labelColor)
+        self.parameterLabel = ctk.CTkLabel(self.sidebarFrame, text="Parameters",anchor="center",fg_color=self.labelColor)
         self.parameterLabel.grid(row=12, column=0, columnspan = 5, padx=(0,0), pady=(0, 0),sticky="ew")
-        self.RhoSlider = ctk.CTkSlider(self.sidebar_frame, from_=0, to=1, number_of_steps=20)
+        self.RhoSlider = ctk.CTkSlider(self.sidebarFrame, from_=0, to=1, number_of_steps=20)
         self.RhoSlider.grid(row=13, column=0, columnspan = 5, padx=(100,5), pady=(5, 5),sticky="ew")
-        self.RhoLabel = ctk.CTkLabel(self.sidebar_frame, text = 'Rho')
+        self.RhoLabel = ctk.CTkLabel(self.sidebarFrame, text = 'Rho')
         self.RhoLabel.grid(row=13, column=0, padx=50, pady=(5, 5),sticky="w")
-        self.BetaSlider = ctk.CTkSlider(self.sidebar_frame, from_=0, to=1, number_of_steps=20)
+        self.BetaSlider = ctk.CTkSlider(self.sidebarFrame, from_=0, to=1, number_of_steps=20)
         self.BetaSlider.grid(row=14, column=0, columnspan = 5, padx=(100,5), pady=(5, 5),sticky="ew")
-        self.BetaLabel = ctk.CTkLabel(self.sidebar_frame, text = 'Beta')
+        self.BetaLabel = ctk.CTkLabel(self.sidebarFrame, text = 'Beta')
         self.BetaLabel.grid(row=14, column=0, padx=50, pady=(5, 5),sticky="w")
 
         # appearance section
-        self.appearanceLabel = ctk.CTkLabel(self.sidebar_frame, text="Appearance",anchor="center",fg_color=self.labelColor)
+        self.appearanceLabel = ctk.CTkLabel(self.sidebarFrame, text="Appearance",anchor="center",fg_color=self.labelColor)
         self.appearanceLabel.grid(row=15, column=0, columnspan = 5, padx=(0,0), pady=(0, 0),sticky="ew")
-        self.appearanceOptionMenu = ctk.CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"],
+        self.appearanceOptionMenu = ctk.CTkOptionMenu(self.sidebarFrame, values=["Light", "Dark", "System"],
                                                                        command=self.changeAppearanceEvent)
         self.appearanceOptionMenu.grid(row=16, column=0, columnspan = 1, padx=20, pady=(10, 10))
         self.appearanceOptionMenu.set("Dark")
@@ -110,11 +110,15 @@ class imageColoriser(ctk.CTk):
     
     def changeAppearanceEvent(self, new_appearance_mode: str):
         ctk.set_appearance_mode(new_appearance_mode)
-        if new_appearance_mode == "light" or "system":
+        if new_appearance_mode.lower() == "light" or "system":
             self.labelColor = "#B2B2B2"
-        if new_appearance_mode == "dark":
+        if new_appearance_mode.lower() == "dark":
             self.labelColor = "#525252"
-    
+        # TODO this is clunky, how can you do this more systematically
+        self.fileLabel.configure(fg_color=self.labelColor)
+        self.editLabel.configure(fg_color=self.labelColor)
+        self.parameterLabel.configure(fg_color=self.labelColor)
+        self.appearanceLabel.configure(fg_color=self.labelColor)
 
 if __name__ == "__main__":
     app = imageColoriser()
