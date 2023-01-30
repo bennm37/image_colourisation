@@ -213,10 +213,9 @@ class imageColoriser(tk.CTkFrame):
         grayImage = self.grayImage
         rawImage = self.rawImage
 
-        ySize, xSize, null = rawImage.shape
+        xSize, ySize, null = rawImage.shape
         yStart = np.random.randint(0, ySize - 50)
         xStart = np.random.randint(0, xSize - 50)
-
         grayImageWithBlockColor = self.dimensionalise(rawImage, grayImage)
 
         def addColorBox(xStart, xEnd, yStart, yEnd):
@@ -252,6 +251,13 @@ class imageColoriser(tk.CTkFrame):
         popupCanvas = FigureCanvasTkAgg(popupWindowFigure, popupCentreFrame)
         popupCanvas.get_tk_widget().pack(side="top", pady=4, padx=4)
         popupCanvas.draw()
+        manualColorImageExplanatoryTextLabel = tk.CTkLabel(
+            popupCentreFrame,
+            text="To use, first select a colour from the colour wheel with your mouse.\n"
+            "Next, click where you want to draw in the image on the left. \n "
+            "Save and exit when finished.",
+        )
+        manualColorImageExplanatoryTextLabel.pack(side="top", pady=4, padx=4)
 
         gs = GridSpec(2, 3)
 
@@ -277,7 +283,7 @@ class imageColoriser(tk.CTkFrame):
 
         def onClick(event):
             global sc
-            print("clicked")
+            # print("clicked")
             if event.inaxes == popup.mainPLTWindow:
                 x, y = event.xdata, event.ydata
                 x, y = np.round(x).astype(int), np.round(y).astype(int)
@@ -302,8 +308,8 @@ class imageColoriser(tk.CTkFrame):
                 popup.chosenColorPLTWindow.imshow(selectedColor)
                 popup.chosenColorPLTWindow.axis("off")
 
-                print("selected color is ", sc)
-                print(selectedColor.shape)
+                # print("selected color is ", sc)
+                # print(selectedColor.shape)
             popupWindowFigure.canvas.draw_idle()
 
         cid = popupWindowFigure.canvas.mpl_connect("button_press_event", onClick)
@@ -314,7 +320,7 @@ class imageColoriser(tk.CTkFrame):
             popupLeftFrame, text="Close Window", command=popup.destroy
         )
         saveImageButton = tk.CTkButton(
-            popupRightFrame, text="Write to Main", command=self.saveImage
+            popupRightFrame, text="Save", command=self.saveImage
         )
 
         popupCloseButton.pack(side="top", pady=4, padx=4)
