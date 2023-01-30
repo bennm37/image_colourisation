@@ -259,11 +259,11 @@ class imageColoriser(tk.CTkFrame):
         )
         manualColorImageExplanatoryTextLabel.pack(side="top", pady=4, padx=4)
 
-        gs = GridSpec(2, 3)
+        gridSpaces = GridSpec(2, 3)
 
-        popup.mainPLTWindow = popupWindowFigure.add_subplot(gs[0:2, 0:2])
-        popup.colorWheelPLTWindow = popupWindowFigure.add_subplot(gs[0, 2])
-        popup.chosenColorPLTWindow = popupWindowFigure.add_subplot(gs[1, 2])
+        popup.mainPLTWindow = popupWindowFigure.add_subplot(gridSpaces[0:2, 0:2])
+        popup.colorWheelPLTWindow = popupWindowFigure.add_subplot(gridSpaces[0, 2])
+        popup.chosenColorPLTWindow = popupWindowFigure.add_subplot(gridSpaces[1, 2])
 
         popup.mainPLTWindow.axis("off")
         popup.colorWheelPLTWindow.axis("off")
