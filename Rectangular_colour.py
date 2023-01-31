@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.gridspec import GridSpec
 
 # Reading image using imread
 image=plt.imread("images/image2.jpg")
