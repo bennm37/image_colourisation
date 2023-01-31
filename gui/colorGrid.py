@@ -21,6 +21,6 @@ grayscale = grayscale.astype(np.uint16)
 # colorGrid = colorscale[:,np.newaxis,:]*t[np.newaxis,:,np.newaxis]
 # plt.imshow(grayscale[::-1,:,:])
 fig,ax = plt.subplots()
-ax.imshow(grayscale[:,::-1]+colorscale[:,::-1])
+ax.imshow(grayscale[:,::-1]+colorscale[:,::-1],interpolation='bilinear')
 ax.invert_yaxis()
 plt.show()
