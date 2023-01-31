@@ -1,20 +1,24 @@
 import tkinter as tk
 import tkinter.messagebox
 import customtkinter as ctk
+from PIL import Image,ImageTk
+import matplotlib.pyplot as plt
+from matplotlib import colormaps as cm
+import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 # TODO work out what's happening with the columns in sidebarframe and get "edit" "file" and "appearance" labels to center better
 # TODO make label backgrounds less chunky
 # TODO make sliders line up and longer 
-# TODO make label background color change with appearance mode
 class imageColoriser(ctk.CTk):
     def __init__(self):
         super().__init__()
 
         # configure window
         self.title("MMSC Image Colouriser")
-        self.geometry(f"{1000}x{580}")
+        self.geometry(f"{1000}x{680}")
         self.grid_columnconfigure((1,2,3), weight=1)
         self.grid_columnconfigure((4,5,6,7,8), weight=1)
         self.grid_rowconfigure((0, 1, 2), weight=1)
@@ -23,7 +27,7 @@ class imageColoriser(ctk.CTk):
         self.imagePath = "../images/apple.jpeg"
         self.statePath = "../states/apple.pkl"
         self.colorMode = tk.IntVar(value=0)
-        self.labelColor = "#525252"
+        self.labelColor = ("#B2B2B2","#525252")
 
         # create sidebar and widgets
         self.sidebarFrame = ctk.CTkFrame(self, width=150, corner_radius=0) # width doesn't do anything ?
@@ -53,9 +57,54 @@ class imageColoriser(ctk.CTk):
         # edit section
         self.editLabel = ctk.CTkLabel(self.sidebarFrame, text="Edit",anchor="center",fg_color=self.labelColor)
         self.editLabel.grid(row=5, column=0, columnspan = 5, padx=(0,0), pady=(0, 0),sticky="ew")
+        
+        # colorbypixel tools
         self.colorByPixel = ctk.CTkRadioButton(self.sidebarFrame, text = "Color by Pixel", variable=self.colorMode, value=0)
         self.colorByPixel.grid(row=6, column=0, pady=10, padx=20, sticky="nw")
+        self.colorByPixelFrame = ctk.CTkFrame(self.sidebarFrame, width=150,height=100, corner_radius=0) # width doesn't do anything ?
+        self.colorByPixelFrame.grid(row=7, column=0, rowspan=1, columnspan =5,sticky="ew")
+        self.colorByPixelFrame.grid_rowconfigure(3, weight=1)
+        self.colorByPixelFrame.grid_columnconfigure(6, weight=1)
+        self.brushSizeLabel = ctk.CTkLabel(self.colorByPixelFrame, text="Brush size",anchor="w")
+        self.brushSizeLabel.grid(row = 0,column=0,columnspan=3,padx = (20,0),sticky="w")
+        self.brushSizeEntry = ctk.CTkEntry(self.colorByPixelFrame,width = 50,placeholder_text="20")
+        self.brushSizeEntry.grid(row=0, column=2, padx=0, pady=(5, 5),sticky="w")
+        self.brushSizeSlider = ctk.CTkSlider(self.colorByPixelFrame,from_=0,to=20,number_of_steps=20)
+        self.brushSizeSlider.grid(row=1,column =0,columnspan=3,padx=(0,0),pady=(5,20),sticky="ew")
+        self.selectedColorButton1 = ctk.CTkButton(self.colorByPixelFrame,command=self.selectedColor1,text="",corner_radius=0,width=30,anchor="CENTER")
+        self.selectedColorButton1.grid(row=2,column=0,padx=(20,5),pady=(5,20))
+        self.selectedColorButton2 = ctk.CTkButton(self.colorByPixelFrame,command=self.selectedColor2,text="",corner_radius=0,width=30,anchor="CENTER",fg_color='white')
+        self.selectedColorButton2.grid(row=2,column=1,padx=(5,5),pady=(5,20))
+        self.selectedColorButton3 = ctk.CTkButton(self.colorByPixelFrame,command=self.selectedColor3,text="",corner_radius=0,width=30,anchor="CENTER",fg_color='black')
+        self.selectedColorButton3.grid(row=2,column=2,padx=(5,5),pady=(5,20))
 
+        self.colorRangeSlider  = ctk.CTkSlider(self.colorByPixelFrame,from_=0,to=1,command=self.setColorRange)
+        self.colorRangeSlider.grid(row=2,column=3,columnspan=3)
+        self.colorSelectorFigure = plt.figure(figsize=(0.5,0.5))
+        self.colorSelectorFigure.subplots_adjust(left=0,right=1,top=1,bottom=0)
+        self.colorSelectorFigure.subplots_adjust(wspace=0.0,hspace=0.0)
+        self.colorSelectorAx = self.colorSelectorFigure.add_subplot()
+        self.colorSelectorAx.axis('off')
+        # for item in [self.colorSelectorFigure, self.colorSelectorAx]:
+        #     item.patch.set_visible(False)
+        # self.colorSelectorAx.spines['top'].set_visible(False)
+        # self.colorSelectorAx.spines['right'].set_visible(False)
+        # self.colorSelectorAx.spines['bottom'].set_visible(False)
+        # self.colorSelectorAx.spines['left'].set_visible(False)
+        self.rainbow = cm['gist_rainbow']
+        self.colorSelectorCanvas = FigureCanvasTkAgg(self.colorSelectorFigure, self.colorByPixelFrame)
+        self.colorSelectorCanvas.get_tk_widget().grid(row=0,column=4,rowspan=2,columnspan=2,pady=(5,0),sticky="nsw")
+        self.setColorRange(0.5)
+
+
+        # TODO sort out color dropper button
+        # # colorDropperImage = tk.PhotoImage('button_images/color_dropper.png')
+        # self.colorDropperButton = tk.Button(self.sidebarFrame,width = 1,height=1,command=self.colorDropper)
+        # # for making transparency work
+        # colorDropperLoad = Image.open('button_images/color_dropper.png')
+        # self.colorDropperImage = ImageTk.PhotoImage(colorDropperLoad)
+        # # self.colorDropperButton.config(image=colorDropperLoad)
+        # self.colorDropperButton.grid(row = 7,column = 4, columnspan =1,padx=0,pady=0)
         
         self.colorRandomPixels = ctk.CTkRadioButton(self.sidebarFrame, text = "Color Random Pixels", variable=self.colorMode, value=1)
         self.colorRandomPixels.grid(row=9, column=0, pady=10, padx=20, sticky="nw")
@@ -93,7 +142,25 @@ class imageColoriser(ctk.CTk):
         self.imagePath = "../images/apple.jpeg"
         self.statePath = "../states/apple.pkl"
         self.colorMode = tk.IntVar(value=0)
-        
+    
+    def setColorRange(self,sliderVal,size=40):
+        # np.array([[color[0:3]]],dtype=np.uint16)
+        size = 30
+        cmap = cm['gist_rainbow']
+        color = np.array(self.rainbow(sliderVal)[:3])*255
+        color = color.astype(np.uint16)
+        t = np.linspace(0,1,size)
+        colorscale = color[np.newaxis,:]*t[:,np.newaxis]
+        colorscale = colorscale[:,np.newaxis,:]*t[np.newaxis,:,np.newaxis]
+        colorscale = colorscale.astype(np.uint16)
+        white = np.array([255,255,255])
+        grayscale = white[np.newaxis,:]*t[:,np.newaxis]
+        grayscale = grayscale[:,np.newaxis,:]-grayscale[:,np.newaxis,:]*t[np.newaxis,:,np.newaxis]
+        grayscale = grayscale.astype(np.uint16)
+        colorGrid = grayscale+colorscale
+        self.colorSelectorAx.imshow(colorGrid[::-1])
+        self.colorSelectorCanvas.draw_idle()
+        self.colorRangeSlider.configure(fg_color='#{:02x}{:02x}{:02x}'.format(color[0],color[1],color[2])) # convert to hex
 
     def loadImage(self):
         print("Load Image")
@@ -106,19 +173,25 @@ class imageColoriser(ctk.CTk):
     
     def saveState(self):
         print("Save State")
+    
+    def colorDropper(self):
+        if self.colorDropperVar == 0:
+            print("Color Dropper Activated")
+            self.colorDropperVar = 1
+        else:
+            print("Color Dropper Activated")
+            self.colorDropperVar = 0
+    def selectedColor1(self):
+        print('Selected Color 1')
 
+    def selectedColor2(self):
+        print('Selected Color 2')
+
+    def selectedColor3(self):
+        print('Selected Color 3')
     
     def changeAppearanceEvent(self, new_appearance_mode: str):
         ctk.set_appearance_mode(new_appearance_mode)
-        if new_appearance_mode.lower() == "light" or "system":
-            self.labelColor = "#B2B2B2"
-        if new_appearance_mode.lower() == "dark":
-            self.labelColor = "#525252"
-        # TODO this is clunky, how can you do this more systematically
-        self.fileLabel.configure(fg_color=self.labelColor)
-        self.editLabel.configure(fg_color=self.labelColor)
-        self.parameterLabel.configure(fg_color=self.labelColor)
-        self.appearanceLabel.configure(fg_color=self.labelColor)
 
 if __name__ == "__main__":
     app = imageColoriser()
