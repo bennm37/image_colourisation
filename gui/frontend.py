@@ -30,6 +30,8 @@ class imageColoriser(ctk.CTk):
         self.labelColor = ("#B2B2B2","#525252")
         self.brushSizeMin = 0
         self.brushSizeMax = 20
+        self.selectedColors = ["blue","white","black"]
+        self.selectedColorButtonVar = 2
 
         # create sidebar and widgets
         self.sidebarFrame = ctk.CTkFrame(self, width=150, corner_radius=0) # width doesn't do anything ?
@@ -76,15 +78,15 @@ class imageColoriser(ctk.CTk):
         # selected color buttons and borders
         self.selectedColorButtonBorder1 = tk.Frame(self.colorByPixelFrame, highlightbackground = "black", highlightthickness = 2,width=10,height=10)
         self.selectedColorButtonBorder1.grid(row=2,column=0,padx=(20,5),pady=(5,20))
-        self.selectedColorButton1 = ctk.CTkButton(self.selectedColorButtonBorder1,command=self.selectedColor1,text="",corner_radius=0,width=30,anchor="CENTER")
+        self.selectedColorButton1 = ctk.CTkButton(self.selectedColorButtonBorder1,command=self.selectedColor1,text="",corner_radius=0,width=30,anchor="CENTER",fg_color = self.selectedColors[0])
         self.selectedColorButton1.grid(row=2,column=0,padx=(0,0),pady=(0,0))
         self.selectedColorButtonBorder2 = tk.Frame(self.colorByPixelFrame, highlightbackground = "red", highlightthickness = 2,width=10,height=10)
         self.selectedColorButtonBorder2.grid(row=2,column=1,padx=(20,5),pady=(5,20))
-        self.selectedColorButton2 = ctk.CTkButton(self.selectedColorButtonBorder2,command=self.selectedColor2,text="",corner_radius=0,width=30,anchor="CENTER",fg_color='white')
+        self.selectedColorButton2 = ctk.CTkButton(self.selectedColorButtonBorder2,command=self.selectedColor2,text="",corner_radius=0,width=30,anchor="CENTER",fg_color=self.selectedColors[1])
         self.selectedColorButton2.grid(row=0,column=0,padx=(0,0),pady=(0,0))
         self.selectedColorButtonBorder3 = tk.Frame(self.colorByPixelFrame, highlightbackground = "black", highlightthickness = 2,width=10,height=10)
         self.selectedColorButtonBorder3.grid(row=2,column=2,padx=(20,5),pady=(5,20))
-        self.selectedColorButton3 = ctk.CTkButton(self.selectedColorButtonBorder3,command=self.selectedColor3,text="",corner_radius=0,width=30,anchor="CENTER",fg_color='black')
+        self.selectedColorButton3 = ctk.CTkButton(self.selectedColorButtonBorder3,command=self.selectedColor3,text="",corner_radius=0,width=30,anchor="CENTER",fg_color=self.selectedColors[2])
         self.selectedColorButton3.grid(row=0,column=0,padx=(0,0),pady=(0,0))
 
         self.colorRangeSlider  = ctk.CTkSlider(self.colorByPixelFrame,from_=0,to=1,command=self.setColorRange)
@@ -103,7 +105,9 @@ class imageColoriser(ctk.CTk):
         self.rainbow = cm['gist_rainbow']
         self.colorSelectorCanvas = FigureCanvasTkAgg(self.colorSelectorFigure, self.colorByPixelFrame)
         self.colorSelectorCanvas.get_tk_widget().grid(row=0,column=4,rowspan=2,columnspan=2,pady=(5,0),sticky="nsw")
+        self.colorSelectorCanvas.callbacks.connect('button_press_event', self.colorSelected)
         self.setColorRange(0.5)
+
 
 
         # TODO sort out color dropper button
@@ -155,6 +159,7 @@ class imageColoriser(ctk.CTk):
         self.brushSizeMax = 30
         self.brushSizeMin = 1
         self.burshSize = 15
+
     
     def setColorRange(self,sliderVal,size=40):
         # np.array([[color[0:3]]],dtype=np.uint16)
@@ -170,8 +175,9 @@ class imageColoriser(ctk.CTk):
         grayscale = white[np.newaxis,:]*t[:,np.newaxis]
         grayscale = grayscale[:,np.newaxis,:]-grayscale[:,np.newaxis,:]*t[np.newaxis,:,np.newaxis]
         grayscale = grayscale.astype(np.uint16)
-        colorGrid = grayscale+colorscale
-        self.colorSelectorAx.imshow(colorGrid[::-1],interpolation='bilinear')
+        self.colorGrid = grayscale+colorscale
+        self.colorGrid = self.colorGrid[::-1]
+        self.colorSelectorAx.imshow(self.colorGrid,interpolation='bilinear')
         self.colorSelectorCanvas.draw_idle()
         # TODO work out how to set slider blob colour to change not slider background
         # self.colorRangeSlider.configure(fg_color='#{:02x}{:02x}{:02x}'.format(color[0],color[1],color[2])) # convert to hex
@@ -217,6 +223,18 @@ class imageColoriser(ctk.CTk):
         self.selectedColorButtonBorder1.configure(highlightbackground='black')
         self.selectedColorButtonBorder2.configure(highlightbackground='black')
         self.selectedColorButtonBorder3.configure(highlightbackground='red')
+
+    def colorSelected(self,event):
+        print('Color Selected')
+        print(f"{self.selectedColorButtonVar = }")
+        print(f"{self.selectedColors = }")
+        x,y = int(event.xdata),int(event.ydata)
+        self.currentColor = self.colorGrid[y,x]
+        self.currentColor = '#{:02x}{:02x}{:02x}'.format(self.currentColor[0],self.currentColor[1],self.currentColor[2])
+        self.selectedColors[self.selectedColorButtonVar-1] = self.currentColor
+        self.selectedColorButton1.configure(fg_color=self.selectedColors[0])
+        self.selectedColorButton2.configure(fg_color=self.selectedColors[1])
+        self.selectedColorButton3.configure(fg_color=self.selectedColors[2])
     
     def setBrushSize(self,event):
         size = int(event)
