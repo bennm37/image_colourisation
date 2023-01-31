@@ -18,12 +18,13 @@ class imageColoriser(ctk.CTk):
 
         # configure window
         self.title("MMSC Image Colouriser")
-        self.geometry(f"{1000}x{680}")
+        self.geometry(f"{1000}x{720}")
         self.grid_columnconfigure((1,2,3), weight=1)
         self.grid_columnconfigure((4,5,6,7,8), weight=1)
         self.grid_rowconfigure((0, 1, 2), weight=1)
 
         # initial default values
+        # TODO in setdefaults or similar ?
         self.imagePath = "../images/apple.jpeg"
         self.statePath = "../states/apple.pkl"
         self.colorMode = tk.IntVar(value=0)
@@ -32,6 +33,7 @@ class imageColoriser(ctk.CTk):
         self.brushSizeMax = 20
         self.selectedColors = ["blue","white","black"]
         self.selectedColorButtonVar = 2
+        self.NRandomPixels = 10
 
         # create sidebar and widgets
         self.sidebarFrame = ctk.CTkFrame(self, width=150, corner_radius=0) # width doesn't do anything ?
@@ -121,9 +123,9 @@ class imageColoriser(ctk.CTk):
         
         self.colorRandomPixels = ctk.CTkRadioButton(self.sidebarFrame, text = "Color Random Pixels", variable=self.colorMode, value=1)
         self.colorRandomPixels.grid(row=9, column=0, pady=10, padx=20, sticky="nw")
-        self.NRandomPixelsSlider = ctk.CTkSlider(self.sidebarFrame, from_=0, to=1, number_of_steps=20)
+        self.NRandomPixelsSlider = ctk.CTkSlider(self.sidebarFrame, from_=0, to=20, number_of_steps=20,command=self.setNRandomPixels)
         self.NRandomPixelsSlider.grid(row=10, column=0, columnspan = 5, padx=(100,5), pady=(5, 5),sticky="ew")
-        self.NRandomPixelEntry = ctk.CTkEntry(self.sidebarFrame,width = 50,placeholder_text="20")
+        self.NRandomPixelEntry = ctk.CTkEntry(self.sidebarFrame,width = 50,placeholder_text=int(self.NRandomPixels))
         self.NRandomPixelEntry.grid(row=10, column=0, padx=40, pady=(5, 5),sticky="w")
         self.NRandomPixelLabel = ctk.CTkLabel(self.sidebarFrame, text = 'N')
         self.NRandomPixelLabel.grid(row=10, column=0, padx=20, pady=(5, 5),sticky="w")
@@ -159,12 +161,12 @@ class imageColoriser(ctk.CTk):
         self.brushSizeMax = 30
         self.brushSizeMin = 1
         self.burshSize = 15
+        self.NRandomPixelsSlider.set(self.NRandomPixels)
 
     
     def setColorRange(self,sliderVal,size=40):
         # np.array([[color[0:3]]],dtype=np.uint16)
         size = 30
-        cmap = cm['gist_rainbow']
         color = np.array(self.rainbow(sliderVal)[:3])*255
         color = color.astype(np.uint16)
         t = np.linspace(0,1,size)
@@ -180,7 +182,8 @@ class imageColoriser(ctk.CTk):
         self.colorSelectorAx.imshow(self.colorGrid,interpolation='bilinear')
         self.colorSelectorCanvas.draw_idle()
         # TODO work out how to set slider blob colour to change not slider background
-        # self.colorRangeSlider.configure(fg_color='#{:02x}{:02x}{:02x}'.format(color[0],color[1],color[2])) # convert to hex
+        self.colorRangeSlider.configure(button_color='#{:02x}{:02x}{:02x}'.format(color[0],color[1],color[2])) # convert to hex
+        self.colorRangeSlider.configure(button_hover_color='#{:02x}{:02x}{:02x}'.format(color[0],color[1],color[2])) # convert to hex
 
     def loadImage(self):
         print("Load Image")
@@ -245,6 +248,10 @@ class imageColoriser(ctk.CTk):
         else:
             self.brushSize = self.brushSizeMin
         self.brushSizeEntry.configure(placeholder_text=str(size))
+    
+    def setNRandomPixels(self,event):
+        self.NRandomPixels = event
+        self.NRandomPixelEntry.configure(placeholder_text=int(self.NRandomPixels))
     
     def changeAppearanceEvent(self, new_appearance_mode: str):
         ctk.set_appearance_mode(new_appearance_mode)
