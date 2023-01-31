@@ -123,6 +123,7 @@ class imageColoriser(tk.CTkFrame):
             title="Select A File",
             filetypes=(
                 ("jpg files", "*.jpg"),
+                ("png files", "*.png"),
                 ("jpeg files", "*.jpeg"),
                 ("all files", "*.*"),
             ),
