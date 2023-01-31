@@ -6,6 +6,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 from pathlib import Path
 
+plt.rcParams["axes.xmargin"] = 0
+plt.rcParams["axes.ymargin"] = 0
+
 # TODO: make stuff look good
 # TODO: the block colorisation: make it random? or are we using user input
 # dark theme
@@ -36,6 +39,8 @@ class imageColoriser(tk.CTkFrame):
         mainWindowRightFrame.grid(row=0, column=2)
 
         mainWindowFigure = plt.figure(figsize=(6, 4))  # TODO: what size?
+        plt.subplots_adjust(wspace=0, hspace=0)
+
         self.mainPLTWindowTopLeft = mainWindowFigure.add_subplot(221)
         self.mainPLTWindowTopRight = mainWindowFigure.add_subplot(222)
         self.mainPLTWindowBottomLeft = mainWindowFigure.add_subplot(223)
@@ -227,7 +232,18 @@ class imageColoriser(tk.CTkFrame):
                 for j in range(yStart, yEnd):
                     grayImageWithBlockColor[i, j, :] = rawImage[i, j, 0:3]
 
-        addColorBox(xStart, xStart + 50, yStart, yStart + 50)
+        # addColorBox(xStart, xStart + 50, yStart, yStart + 50)
+        def onclick(event):
+            if event.inaxes == blockColorPLTWindow:
+                x, y = event.xdata, event.ydata
+                x, y = np.round(x).astype(int), np.round(y).astype(int)
+                addColorBox(y, y + 20, x, x + 20)
+                blockColorPLTWindow.imshow(grayImageWithBlockColor)
+                # print("clicked image")
+                # print("x,y is ", x, y)
+            self.canvas.draw_idle()
+
+        cid = self.canvas.mpl_connect("button_press_event", onclick)
         self.grayImageWithSomeColorExists = 1
 
         blockColorPLTWindow.axis("off")
