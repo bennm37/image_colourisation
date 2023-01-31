@@ -13,8 +13,8 @@ img_gray = np.round(img_gray).astype(np.uint8)
 img_gray_3d = np.stack((img_gray,)*3,axis=-1)
 
 # show grayscale image
-plt.imshow(img_gray_3d, cmap='gray')
-plt.show()
+#plt.imshow(img_gray_3d, cmap='gray')
+#plt.show()
 
 grayimg=img_gray_3d
 # Function to have a coloured rectangle on
