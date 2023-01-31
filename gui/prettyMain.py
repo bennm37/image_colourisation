@@ -139,7 +139,7 @@ class imageColoriser(ctk.CTkFrame):
         grayImage = np.dot(self.rawImage[..., :3], [0.299, 0.587, 0.114])
 
         # round to integers
-        grayImage = np.round(grayImage).astype(np.uint8)
+        grayImage = np.round(grayImage).astype(np.uint16)  # 16 or 8?
         self.grayImage = grayImage
         self.grayImageExists = 1
 
@@ -230,11 +230,12 @@ class imageColoriser(ctk.CTkFrame):
                         x, y = np.round(x).astype(int), np.round(y).astype(int)
                         addColorBox(y, y + 20, x, x + 20)
                         blockColorPLTWindow.imshow(grayImageWithBlockColor)
+                        self.blockColorPLTWindow = blockColorPLTWindow
                         # print("clicked image")
                         # print("x,y is ", x, y)
                     self.canvas.draw_idle()
 
-            cid = self.canvas.mpl_connect("button_press_event", onclick)
+            cid2 = self.canvas.mpl_connect("button_press_event", onclick)
             self.grayImageWithSomeColorExists = 1
 
             blockColorPLTWindow.axis("off")
@@ -243,7 +244,107 @@ class imageColoriser(ctk.CTkFrame):
             self.canvas.draw()
 
     def addManualColor(self):
-        print("hello")
+        if self.rawImageExists == 0:
+            pass
+        else:
+            self.grayImageWithSomeColorExists = 0
+
+            manualColorPLTWindow = self.mainPLTWindowBottomLeft
+            manualColorPLTWindow.clear()
+
+            grayImage = self.grayImage
+            rawImage = self.rawImage
+
+            xSize, ySize, null = rawImage.shape
+            # yStart = np.random.randint(0, ySize - 50)
+            # xStart = np.random.randint(0, xSize - 50)
+            grayImageWithManualColor = self.dimensionalise(rawImage, grayImage)
+
+            def addColorBox(xStart, xEnd, yStart, yEnd):
+                for i in range(xStart, xEnd):
+                    for j in range(yStart, yEnd):
+                        grayImageWithManualColor[i, j, :] = rawImage[i, j, 0:3]
+
+            self.selectedColor = [40, 40, 100]
+
+            def onclick(event):
+                if self.colorMode.get() == 0:
+                    if event.inaxes == manualColorPLTWindow:
+                        x, y = event.xdata, event.ydata
+                        x, y = np.round(x).astype(int), np.round(y).astype(int)
+                        # addColorBox(y, y + 20, x, x + 20)
+
+                        grayImageWithManualColor[
+                            y : y + 5, x : x + 5, :
+                        ] = self.selectedColor
+
+                        manualColorPLTWindow.imshow(grayImageWithManualColor)
+                        self.blockColorPLTWindow = manualColorPLTWindow
+                        # print("clicked image")
+                        # print("x,y is ", x, y)
+                    self.canvas.draw_idle()
+
+            cid2 = self.canvas.mpl_connect("button_press_event", onclick)
+            self.grayImageWithSomeColorExists = 1
+
+            manualColorPLTWindow.axis("off")
+            manualColorPLTWindow.imshow(grayImageWithManualColor)
+            manualColorPLTWindow.set_title("Image with Manual Color")
+            self.canvas.draw()
+
+    def manuak2(self):
+        self.grayImageWithSomeColorExists = 0
+
+        manualColorWindow = self.mainPLTWindowBottomLeft
+        self.mainPLTWindowBottomLeft.clear()
+        grayImageWithManualColor = self.dimensionalise(self.rawImage, self.grayImage)
+
+        colorWheel = plt.imread(str(Path("..", "images", "color_wheel.jpeg")))
+        selectedColor = np.ones([2, 2, 3]) * 0
+
+        # nx, ny, d = grayImageWithManualColor.shape
+
+        # preset color to have on the color wheel
+        self.selectedColor = [40, 40, 100]
+
+        def onClick(event):
+            # global sc
+            # print("clicked")
+            if self.colorMode.get() == 0:
+                if event.inaxes == manualColorWindow:
+                    x, y = event.xdata, event.ydata
+                    x, y = np.round(x).astype(int), np.round(y).astype(int)
+
+                    grayImageWithManualColor[
+                        y : y + 5, x : x + 5, :
+                    ] = self.selectedColor
+
+                    # manualColorWindow.clear()
+                    manualColorWindow.imshow(grayImageWithManualColor)
+                    # manualColorWindow.axis("off")
+                    #
+                    self.grayImageWithSomeColor = grayImageWithManualColor
+                    self.grayImageWithSomeColorExists = 1
+                # if event.inaxes == popup.colorWheelPLTWindow:
+                #     x, y = event.xdata, event.ydata
+                #     x, y = np.round(x).astype(int), np.round(y).astype(int)
+                #
+                #     self.selectedColor = colorWheel[y, x]
+                #     selectedColor = np.tile(self.selectedColor, (2, 2, 1))
+                #
+                #     popup.chosenColorPLTWindow.imshow(selectedColor)
+                #     popup.chosenColorPLTWindow.axis("off")
+
+                # print("selected color is ", sc)
+                # print(selectedColor.shape)
+                self.canvas.draw_idle()
+
+        cid = self.canvas.mpl_connect("button_press_event", onClick)
+
+        manualColorWindow.axis("off")
+        manualColorWindow.imshow(grayImageWithManualColor)
+        self.mainPLTWindowBottomLeft.set_title("Image with Manual Color")
+        self.canvas.draw()
 
     def saveImage(self):
         print("Save Image")
@@ -372,7 +473,11 @@ class imageColoriser(ctk.CTkFrame):
 
         # colorbypixel tools #TODO
         self.colorByPixel = ctk.CTkRadioButton(
-            self.sidebarFrame, text="Color by Pixel", variable=self.colorMode, value=0
+            self.sidebarFrame,
+            text="Color by Pixel",
+            command=self.addManualColor,
+            variable=self.colorMode,
+            value=0,
         )
         self.colorByPixel.grid(row=6, column=0, pady=10, padx=20, sticky="nw")
         self.colorByPixelFrame = ctk.CTkFrame(
