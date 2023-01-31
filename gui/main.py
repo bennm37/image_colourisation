@@ -133,6 +133,9 @@ class imageColoriser(tk.CTkFrame):
 
         if fileName:
             rawImage = mpimg.imread(fileName)
+            if fileName.endswith(".png"):
+                rawImage = rawImage.astype(np.uint16)
+                rawImage = rawImage[:, :, :3] * 255
             self.rawImage = rawImage
             self.rawImageExists = 1
             self.toggleButtons()
