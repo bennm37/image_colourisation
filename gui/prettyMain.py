@@ -47,13 +47,13 @@ class imageColoriser(ctk.CTkFrame):
 
         self.generateFrames()
 
-        self.fileSection()
+        self.generateFileSection()
 
-        self.editSection()
+        self.generateEditSection()
 
-        self.parameterSection()
+        self.generateParameterSection()
 
-        self.appearanceSection()
+        self.generateAppearanceSection()
 
     def setDefaults(self):
         self.imagePath = "../images/apple.jpeg"
@@ -198,14 +198,23 @@ class imageColoriser(ctk.CTkFrame):
             )
 
             # grid colorization
-            I = 100
-            J = 100
-
+            # TODO: fix this: scale by proportion of size, make same pixels
             xSize, ySize = self.grayImage.shape
+            I = np.random.default_rng().choice(
+                xSize, size=int(self.NRandomPixels), replace=False
+            )
+            J = np.random.default_rng().choice(
+                ySize, size=int(self.NRandomPixels), replace=False
+            )
+            # J = int(self.NRandomPixels)
+            # I = 100
+            # J = 100
 
-            for x in np.linspace(0, xSize, I, dtype=int, endpoint=False):
-                for y in np.linspace(0, ySize, J, dtype=int, endpoint=False):
-                    grayImageWithRandomColor[x, y, :] = self.rawImage[x, y, :]
+            for x in I:
+                for y in J:  # np.linspace(0, ySize, J, dtype=int, endpoint=False):
+                    grayImageWithRandomColor[int(x), int(y), :] = self.rawImage[
+                        int(x), int(y), :
+                    ]
 
             self.grayImageWithSomeColorExists = 1
 
@@ -313,7 +322,6 @@ class imageColoriser(ctk.CTkFrame):
             self.canvas.draw()
 
     def saveImage(self):
-        print("Save Image")
         self.mainWindowFigure.savefig("./image.png")
 
     def loadState(self):
@@ -379,11 +387,48 @@ class imageColoriser(ctk.CTkFrame):
     def setNRandomPixels(self, event):
         self.NRandomPixels = event
         self.NRandomPixelEntry.configure(placeholder_text=int(self.NRandomPixels))
+        if self.colorMode.get() == 1:
+            self.addRandomisedColor()
 
     def changeAppearanceEvent(self, new_appearance_mode: str):
         ctk.set_appearance_mode(new_appearance_mode)
 
-    def fileSection(self):
+    def generateFrames(self):
+        self.imageFrame = ctk.CTkFrame(root, width=150, corner_radius=0)
+        self.imageFrame.grid(row=0, column=1, rowspan=4, columnspan=1, sticky="nsew")
+        self.imageFrame.grid_rowconfigure(16, weight=1)
+
+        self.mainWindowFigure = plt.figure(figsize=(7, 8))  # TODO: what size?
+        self.mainWindowFigure.subplots_adjust(
+            left=0.01, right=0.99, top=0.99, bottom=0.01, hspace=0, wspace=0
+        )
+        self.mainPLTWindowTopLeft = self.mainWindowFigure.add_subplot(221)
+        self.mainPLTWindowTopRight = self.mainWindowFigure.add_subplot(222)
+        self.mainPLTWindowBottomLeft = self.mainWindowFigure.add_subplot(223)
+        self.mainPLTWindowBottomRight = self.mainWindowFigure.add_subplot(224)
+        self.mainPLTWindowAxes = [
+            self.mainPLTWindowTopLeft,
+            self.mainPLTWindowTopRight,
+            self.mainPLTWindowBottomLeft,
+            self.mainPLTWindowBottomRight,
+        ]
+
+        for axis in self.mainPLTWindowAxes:
+            axis.axis("off")
+
+        # define the canvas upon which we place the images
+        self.canvas = FigureCanvasTkAgg(self.mainWindowFigure, self.imageFrame)
+        self.canvas.get_tk_widget().pack(side="top", padx=4, pady=4)
+        self.canvas.draw()
+
+        # create sidebar and widgets after defining frame
+        self.sidebarFrame = ctk.CTkFrame(
+            root, width=150, corner_radius=0
+        )  # width doesn't do anything ?
+        self.sidebarFrame.grid(row=0, column=0, rowspan=4, columnspan=1, sticky="nsew")
+        self.sidebarFrame.grid_rowconfigure(15, weight=1)
+
+    def generateFileSection(self):
         # file section
         self.title_padx = 30  # padding for titles
         self.fileLabel = ctk.CTkLabel(
@@ -429,7 +474,7 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.saveStatePath.grid(row=4, column=1, columnspan=4, padx=10, pady=5)
 
-    def editSection(self):
+    def generateEditSection(self):
         # edit section
         self.editLabel = ctk.CTkLabel(
             self.sidebarFrame, text="Edit", anchor="center", fg_color=self.labelColor
@@ -592,7 +637,7 @@ class imageColoriser(ctk.CTkFrame):
         self.NRandomPixelsSlider = ctk.CTkSlider(
             self.sidebarFrame,
             from_=0,
-            to=20,
+            to=100,
             number_of_steps=20,
             command=self.setNRandomPixels,
         )
@@ -615,7 +660,7 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.colorByBlockButton.grid(row=11, column=0, pady=10, padx=20, sticky="nw")
 
-    def parameterSection(self):
+    def generateParameterSection(self):
         self.parameterLabel = ctk.CTkLabel(
             self.sidebarFrame,
             text="Parameters",
@@ -642,42 +687,7 @@ class imageColoriser(ctk.CTkFrame):
         self.BetaLabel = ctk.CTkLabel(self.sidebarFrame, text="Beta")
         self.BetaLabel.grid(row=14, column=0, padx=50, pady=(5, 5), sticky="w")
 
-    def generateFrames(self):
-        self.imageFrame = ctk.CTkFrame(root, width=150, corner_radius=0)
-        self.imageFrame.grid(row=0, column=1, rowspan=4, columnspan=1, sticky="nsew")
-        self.imageFrame.grid_rowconfigure(16, weight=1)
-
-        self.mainWindowFigure = plt.figure(figsize=(7, 8))  # TODO: what size?
-        self.mainWindowFigure.subplots_adjust(
-            left=0.01, right=0.99, top=0.99, bottom=0.01, hspace=0, wspace=0
-        )
-        self.mainPLTWindowTopLeft = self.mainWindowFigure.add_subplot(221)
-        self.mainPLTWindowTopRight = self.mainWindowFigure.add_subplot(222)
-        self.mainPLTWindowBottomLeft = self.mainWindowFigure.add_subplot(223)
-        self.mainPLTWindowBottomRight = self.mainWindowFigure.add_subplot(224)
-        self.mainPLTWindowAxes = [
-            self.mainPLTWindowTopLeft,
-            self.mainPLTWindowTopRight,
-            self.mainPLTWindowBottomLeft,
-            self.mainPLTWindowBottomRight,
-        ]
-
-        for axis in self.mainPLTWindowAxes:
-            axis.axis("off")
-
-        # define the canvas upon which we place the images
-        self.canvas = FigureCanvasTkAgg(self.mainWindowFigure, self.imageFrame)
-        self.canvas.get_tk_widget().pack(side="top", padx=4, pady=4)
-        self.canvas.draw()
-
-        # create sidebar and widgets after defining frame
-        self.sidebarFrame = ctk.CTkFrame(
-            root, width=150, corner_radius=0
-        )  # width doesn't do anything ?
-        self.sidebarFrame.grid(row=0, column=0, rowspan=4, columnspan=1, sticky="nsew")
-        self.sidebarFrame.grid_rowconfigure(15, weight=1)
-
-    def appearanceSection(self):
+    def generateAppearanceSection(self):
         # appearance section
         self.appearanceLabel = ctk.CTkLabel(
             self.sidebarFrame,
@@ -707,7 +717,6 @@ class imageColoriser(ctk.CTkFrame):
 
 
 if __name__ == "__main__":
-
     root = ctk.CTk()
     root.title("MMSC Image Colouriser")
     root.geometry(f"{1000}x{720}")
