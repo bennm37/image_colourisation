@@ -41,8 +41,9 @@ class imageColoriser(ctk.CTkFrame):
         self.brushSizeMax = 20
         self.selectedColors = ["#FF0000", "#00FF00", "#0000FF"]
         self.selectedColorButtonVar = 2
-        self.NRandomPixels = 10
-        self.NRandomPixelsMax = 100
+        # TODO: set these next values??
+        self.NRandomPixels = 1000
+        self.NRandomPixelsMax = 10000
 
         # define image frame
 
@@ -162,12 +163,17 @@ class imageColoriser(ctk.CTkFrame):
 
             xSize, ySize = self.grayImage.shape
 
-            self.listOfRandomXCoords = np.random.default_rng().choice(
-                xSize, size=int(self.NRandomPixelsMax), replace=False
+            # get random indices to eventually color in
+            randomIndices = np.random.default_rng().choice(
+                xSize * ySize, size=int(self.NRandomPixelsMax), replace=False
             )
-            self.listOfRandomYCoords = np.random.default_rng().choice(
-                ySize, size=int(self.NRandomPixelsMax), replace=False
-            )
+
+            # define the coordinate pairs which we will color;
+            # returns an array formatted as [[x0,y0],[x1,y1]...]
+            self.randomCoordinates = [
+                [index % len(self.rawImage[0]), index // len(self.rawImage[0])]
+                for index in randomIndices
+            ]
 
             self.loadColorChoice()
         return
@@ -208,14 +214,18 @@ class imageColoriser(ctk.CTkFrame):
                 self.rawImage, self.grayImage
             )
 
-            # grid colorization
-            for x in self.listOfRandomXCoords[0 : int(self.NRandomPixels)]:
-                for y in self.listOfRandomYCoords[
-                    0 : int(self.NRandomPixels)
-                ]:  # np.linspace(0, ySize, J, dtype=int, endpoint=False):
-                    grayImageWithRandomColor[int(x), int(y), :] = self.rawImage[
-                        int(x), int(y), :
-                    ]
+            # go over random coordinates,
+            # replacing as many pairs as necessary with their colored equivalents
+            for index in range(0, int(self.NRandomPixels)):
+                grayImageWithRandomColor[
+                    self.randomCoordinates[index][0],
+                    self.randomCoordinates[index][1],
+                    :,
+                ] = self.rawImage[
+                    self.randomCoordinates[index][0],
+                    self.randomCoordinates[index][1],
+                    :,
+                ]
 
             self.grayImageWithSomeColorExists = 1
 
