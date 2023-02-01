@@ -42,6 +42,7 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColors = ["#FF0000", "#00FF00", "#0000FF"]
         self.selectedColorButtonVar = 2
         self.NRandomPixels = 10
+        self.NRandomPixelsMax = 100
 
         # define image frame
 
@@ -158,6 +159,16 @@ class imageColoriser(ctk.CTkFrame):
             self.dimensionalisedGrayImage = self.dimensionalise(
                 self.rawImage, self.grayImage
             )
+
+            xSize, ySize = self.grayImage.shape
+
+            self.listOfRandomXCoords = np.random.default_rng().choice(
+                xSize, size=int(self.NRandomPixelsMax), replace=False
+            )
+            self.listOfRandomYCoords = np.random.default_rng().choice(
+                ySize, size=int(self.NRandomPixelsMax), replace=False
+            )
+
             self.loadColorChoice()
         return
 
@@ -198,20 +209,10 @@ class imageColoriser(ctk.CTkFrame):
             )
 
             # grid colorization
-            # TODO: fix this: scale by proportion of size, make same pixels
-            xSize, ySize = self.grayImage.shape
-            I = np.random.default_rng().choice(
-                xSize, size=int(self.NRandomPixels), replace=False
-            )
-            J = np.random.default_rng().choice(
-                ySize, size=int(self.NRandomPixels), replace=False
-            )
-            # J = int(self.NRandomPixels)
-            # I = 100
-            # J = 100
-
-            for x in I:
-                for y in J:  # np.linspace(0, ySize, J, dtype=int, endpoint=False):
+            for x in self.listOfRandomXCoords[0 : int(self.NRandomPixels)]:
+                for y in self.listOfRandomYCoords[
+                    0 : int(self.NRandomPixels)
+                ]:  # np.linspace(0, ySize, J, dtype=int, endpoint=False):
                     grayImageWithRandomColor[int(x), int(y), :] = self.rawImage[
                         int(x), int(y), :
                     ]
@@ -637,7 +638,7 @@ class imageColoriser(ctk.CTkFrame):
         self.NRandomPixelsSlider = ctk.CTkSlider(
             self.sidebarFrame,
             from_=0,
-            to=100,
+            to=self.NRandomPixelsMax,
             number_of_steps=20,
             command=self.setNRandomPixels,
         )
