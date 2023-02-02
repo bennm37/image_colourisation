@@ -1,10 +1,7 @@
 import tkinter as tk
-import tkinter.messagebox
 import customtkinter as ctk
-from pathlib import Path
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
-from matplotlib import colormaps as cm
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from pathlib import Path
@@ -16,7 +13,6 @@ ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark
 # TODO work out what's happening with the columns in sidebarframe and get "edit" "file" and "appearance" labels to center better
 # TODO make label backgrounds less chunky
 # TODO make sliders line up and longer
-
 # TODO: fix all the default stuff
 class imageColoriser(ctk.CTkFrame):
     def __init__(self, master=None):
@@ -459,19 +455,13 @@ class imageColoriser(ctk.CTkFrame):
 
     def setColorChoiceBackground(self, color):
         if color == "dark":
-            for i in [
-                self.selectedColorButtonBorder1,
-                self.selectedColorButtonBorder2,
-                self.selectedColorButtonBorder3,
-            ]:
-                i.configure(bg=self.colorByPixelFrame._bg_color[1])
+            self.selectedColorButtonBorder1.configure(
+                bg=self.colorByPixelFrame._bg_color[1]
+            )
         else:
-            for i in [
-                self.selectedColorButtonBorder1,
-                self.selectedColorButtonBorder2,
-                self.selectedColorButtonBorder3,
-            ]:
-                i.configure(bg=self.colorByPixelFrame._bg_color[0])
+            self.selectedColorButtonBorder1.configure(
+                bg=self.colorByPixelFrame._bg_color[0]
+            )
 
     def changeAppearanceEvent(self, new_appearance_mode: str):
         ctk.set_appearance_mode(new_appearance_mode)
@@ -665,7 +655,7 @@ class imageColoriser(ctk.CTkFrame):
             height=10,
         )
         self.selectedColorButtonBorder1.grid(
-            row=2, column=0, padx=(20, 5), pady=(5, 20)
+            row=2, column=0, padx=(20, 5), pady=(5, 20), columnspan=3
         )
 
         self.selectedColorButton1 = ctk.CTkButton(
@@ -684,17 +674,17 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColorButton1.grid(row=7, column=0, padx=(0, 0), pady=(0, 0))
         #
 
-        self.selectedColorButtonBorder2 = tk.Frame(
-            self.colorByPixelFrame,
-            # highlightbackground=self.colorFrameColor,
-            highlightthickness=0,
-            bg=self.colorFrameColor,
-            width=10,
-            height=10,
-        )
-        self.selectedColorButtonBorder2.grid(
-            row=2, column=1, padx=(20, 5), pady=(5, 20)
-        )
+        # self.selectedColorButtonBorder2 = tk.Frame(
+        #     self.colorByPixelFrame,
+        #     # highlightbackground=self.colorFrameColor,
+        #     highlightthickness=0,
+        #     bg=self.colorFrameColor,
+        #     width=10,
+        #     height=10,
+        # )
+        # self.selectedColorButtonBorder2.grid(
+        #     row=2, column=1, padx=(20, 5), pady=(5, 20)
+        # )
         self.selectedColorButton2 = ctk.CTkButton(
             # self.selectedColorButtonBorder2,
             self.selectedColorButtonBorder1,
@@ -709,17 +699,17 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.selectedColorButton2.grid(row=7, column=1, padx=(5, 5), pady=(0, 0))
 
-        self.selectedColorButtonBorder3 = tk.Frame(
-            self.colorByPixelFrame,
-            # highlightbackground=self.colorFrameColor,
-            highlightthickness=0,
-            bg=self.colorFrameColor,
-            width=10,
-            height=10,
-        )
-        self.selectedColorButtonBorder3.grid(
-            row=2, column=2, padx=(20, 5), pady=(5, 20)
-        )
+        # self.selectedColorButtonBorder3 = tk.Frame(
+        #     self.colorByPixelFrame,
+        #     # highlightbackground=self.colorFrameColor,
+        #     highlightthickness=0,
+        #     bg=self.colorFrameColor,
+        #     width=10,
+        #     height=10,
+        # )
+        # self.selectedColorButtonBorder3.grid(
+        #     row=2, column=2, padx=(20, 5), pady=(5, 20)
+        # )
         self.selectedColorButton3 = ctk.CTkButton(
             self.selectedColorButtonBorder1,
             # self.sidebarFrame,
@@ -737,8 +727,8 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColorButton3 = ctk.CTkButton(
             self.selectedColorButtonBorder1,
             # self.sidebarFrame,
-            command=print("hello"),
-            text="placehold",
+            # command=print("hello"),
+            text="test",
             border_width=1,
             border_color="gray16",
             corner_radius=15,
@@ -767,7 +757,7 @@ class imageColoriser(ctk.CTkFrame):
         # self.colorSelectorAx.spines['bottom'].set_visible(False)
         # self.colorSelectorAx.spines['left'].set_visible(False)
 
-        self.rainbow = cm["gist_rainbow"]
+        self.rainbow = mpl.colormaps["gist_rainbow"]
 
         self.colorSelectorCanvas = FigureCanvasTkAgg(
             self.colorSelectorFigure, self.colorByPixelFrame
