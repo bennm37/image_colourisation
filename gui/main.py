@@ -151,7 +151,7 @@ class imageColoriser(ctk.CTkFrame):
             # self.mainPLTWindowBottomRight.imshow(rawImage)
             # self.mainPLTWindowTopRight.imshow(rawImage)
             rawImagePLTWindow.axis("off")
-            rawImagePLTWindow.set_title("Colored Image")
+            # rawImagePLTWindow.set_title("Colored Image")
             self.canvas.draw()
 
             self.grayImageWithSomeColorExists = 0
@@ -603,10 +603,10 @@ class imageColoriser(ctk.CTkFrame):
             value=0,
         )
         self.colorByPixel.grid(
-            row=0, column=0, columnspan=3, pady=(10, 20), padx=20, sticky="nw"
+            row=0, column=0, columnspan=3, pady=(10, 0), padx=20, sticky="nw"
         )
 
-        brushSizePady = 35
+        brushSizePady = 0
         self.brushSizeLabel = ctk.CTkLabel(
             # self.colorByPixelFrame, text="Brush size", anchor="w"
             self.colorByPixelFrame,
@@ -615,7 +615,7 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.brushSizeLabel.grid(
             # row=0, column=0, columnspan=3, padx=(20, 0), sticky="w"
-            row=0,
+            row=1,
             column=1,
             columnspan=1,
             padx=(0, 0),
@@ -626,7 +626,7 @@ class imageColoriser(ctk.CTkFrame):
             self.colorByPixelFrame, width=50, placeholder_text=self.brushSizeMax // 2
         )  # work out how to update when changed
         self.brushSizeEntry.grid(
-            row=0, column=0, padx=10, pady=(brushSizePady, 5), sticky="w"
+            row=1, column=0, padx=10, pady=(brushSizePady, 5), sticky="w"
         )
         # self.brushSizeEntry.grid(row=0, column=2, padx=0, pady=(5, 5), sticky="w")
         self.brushSizeSlider = ctk.CTkSlider(
@@ -638,7 +638,7 @@ class imageColoriser(ctk.CTkFrame):
             width=100,
         )
         self.brushSizeSlider.grid(
-            row=0,
+            row=1,
             column=1,
             columnspan=2,
             padx=(25, 0),
@@ -671,7 +671,7 @@ class imageColoriser(ctk.CTkFrame):
             # border_color="green",
             fg_color=self.selectedColors[0],
         )
-        self.selectedColorButton1.grid(row=7, column=0, padx=(0, 0), pady=(0, 0))
+        self.selectedColorButton1.grid(row=7, column=0, padx=(0, 5), pady=(0, 0))
         #
 
         # self.selectedColorButtonBorder2 = tk.Frame(
@@ -728,7 +728,7 @@ class imageColoriser(ctk.CTkFrame):
             self.selectedColorButtonBorder1,
             # self.sidebarFrame,
             # command=print("hello"),
-            text="test",
+            text="Undo",
             border_width=1,
             border_color="gray16",
             corner_radius=15,
