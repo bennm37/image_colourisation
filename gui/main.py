@@ -738,12 +738,12 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColorButton3.grid(row=7, column=3, padx=(5, 5), pady=(0, 0))
 
         self.colorRangeSlider = ctk.CTkSlider(
-            self.colorByPixelFrame, from_=0, to=1, command=self.setColorRange
+            self.colorByPixelFrame, from_=0, to=1, command=self.setColorRange,width=150
         )
         # self.colorRangeSlider.grid(row=2, column=3, columnspan=3)
-        self.colorRangeSlider.grid(row=3, column=3, pady=(0, 5), columnspan=3)
+        self.colorRangeSlider.grid(row=4, column=4, padx = (0,0),pady=(5, 5), columnspan=2,sticky="w")
 
-        self.colorSelectorFigure = plt.figure(figsize=(1, 1))
+        self.colorSelectorFigure = plt.figure(figsize=(0.7,0.7))
         # self.colorSelectorFigure = plt.figure(figsize=(0.5, 0.5))
         self.colorSelectorFigure.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.colorSelectorFigure.subplots_adjust(wspace=0.0, hspace=0.0)
