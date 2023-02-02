@@ -3,6 +3,7 @@ import tkinter.messagebox
 import customtkinter as ctk
 from pathlib import Path
 from PIL import Image, ImageTk
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import colormaps as cm
 import numpy as np
@@ -43,6 +44,18 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColorButtonVar = 2
         self.NRandomPixels = 10
         self.NRandomPixelsMax = 100
+
+        # styling 
+        fpath = Path(mpl.get_data_path(), "/Users/benn-m/Documents/image_colourisation/gui/fonts/Roboto-Medium.ttf")
+        self.captionFont = fpath
+        self.captionFontDict = {'family': fpath,
+        'color':  'white',
+        'weight': 'normal',
+        'size': 5,
+        } 
+        self.frameDark3 = "#323333"
+        self.frameLight3 = "#CFD0CF"
+
 
         # define image frame
 
@@ -135,7 +148,8 @@ class imageColoriser(ctk.CTkFrame):
             # self.mainPLTWindowBottomRight.imshow(rawImage)
             # self.mainPLTWindowTopRight.imshow(rawImage)
             rawImagePLTWindow.axis("off")
-            rawImagePLTWindow.set_title("Colored Image")
+            rawImagePLTWindow.set_title("Colored Image",font=self.captionFont,fontdict=self.captionFontDict)
+            # rawImagePLTWindow.set
             self.canvas.draw()
 
             self.grayImageWithSomeColorExists = 0
@@ -153,7 +167,7 @@ class imageColoriser(ctk.CTkFrame):
             # show grayscale image
             grayImagePLTWindow.imshow(grayImage, cmap="gray")
             grayImagePLTWindow.axis("off")
-            grayImagePLTWindow.set_title("Gray Image")
+            grayImagePLTWindow.set_title("Gray Image",font=self.captionFont,fontdict=self.captionFontDict)
             self.canvas.draw()
 
             self.dimensionalisedGrayImage = self.dimensionalise(
@@ -222,7 +236,7 @@ class imageColoriser(ctk.CTkFrame):
             self.grayImageWithColorTemplate.set_data(grayImageWithRandomColor)
             self.grayImageWithColorTemplate.autoscale()
             randomisedColorPLTWindow.axis("off")
-            randomisedColorPLTWindow.set_title("Image with Some Color")
+            randomisedColorPLTWindow.set_xlabel("Image with Some Color",font=self.captionFont,fontdict=self.captionFontDict)
             self.canvas.draw()
 
     def addBlockColor(self):
@@ -266,7 +280,7 @@ class imageColoriser(ctk.CTkFrame):
             self.grayImageWithSomeColorExists = 1
 
             blockColorPLTWindow.axis("off")
-            blockColorPLTWindow.set_title("Image with Block Color")
+            blockColorPLTWindow.set_title("Image with Block Color",font=self.captionFont,fontdict=self.captionFontDict)
             self.canvas.draw()
 
     def addManualColor(self):
@@ -319,7 +333,7 @@ class imageColoriser(ctk.CTkFrame):
             self.grayImageWithSomeColorExists = 1
 
             manualColorPLTWindow.axis("off")
-            manualColorPLTWindow.set_title("Image with Manual Color")
+            manualColorPLTWindow.set_title("Image with Manual Color",font=self.captionFont,fontdict=self.captionFontDict)
             self.canvas.draw()
 
     def saveImage(self):
@@ -393,6 +407,13 @@ class imageColoriser(ctk.CTkFrame):
 
     def changeAppearanceEvent(self, new_appearance_mode: str):
         ctk.set_appearance_mode(new_appearance_mode)
+        if new_appearance_mode.lower() == "dark":
+            self.mainWindowFigure.patch.set_facecolor(self.frameDark3)
+            self.mainWindowFigure.canvas.draw_idle()
+
+        if new_appearance_mode.lower()== "light":
+            self.mainWindowFigure.patch.set_facecolor(self.frameLight3)
+            self.mainWindowFigure.canvas.draw_idle()
 
     def generateFrames(self):
         self.imageFrame = ctk.CTkFrame(root, width=150, corner_radius=0)
@@ -400,7 +421,7 @@ class imageColoriser(ctk.CTkFrame):
         self.imageFrame.grid_rowconfigure(16, weight=1)
 
         self.mainWindowFigure = plt.figure(figsize=(7, 8))  # TODO: what size?
-        self.mainWindowFigure.patch.set_facecolor("#323333")
+        self.mainWindowFigure.patch.set_facecolor(self.frameDark3)
         self.mainWindowFigure.subplots_adjust(
             left=0.05, right=0.95, top=0.95, bottom=0.05, hspace=0.1, wspace=0.1
         )
@@ -495,7 +516,7 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.colorByPixel.grid(row=6, column=0, pady=10, padx=20, sticky="nw")
         self.colorByPixelFrame = ctk.CTkFrame(
-            self.sidebarFrame, width=150, height=100, corner_radius=0
+            self.sidebarFrame, width=150, height=100, corner_radius=0,fg_color=("#DBDBDA","#2B2A2B")
         )  # width doesn't do anything ?
         self.colorByPixelFrame.grid(
             row=7, column=0, rowspan=1, columnspan=5, sticky="ew"
