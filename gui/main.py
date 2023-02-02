@@ -353,18 +353,22 @@ class imageColoriser(ctk.CTkFrame):
         # TODO this is clunky, could refactor as radio buttons.
         # print('Selected Color 1')
         self.selectedColorButtonVar = 1
-        self.selectedColorButton1.configure(border_width=3, border_color="green")
-        self.selectedColorButton2.configure(border_width=0)
-        self.selectedColorButton3.configure(border_width=0)
+        # self.selectedColorButton1.configure(border_width=3, border_color="green")
+        # self.selectedColorButton2.configure(border_width=0)
+        # self.selectedColorButton3.configure(border_width=0)
+
+        self.selectedColorButton1.configure(border_width=2, border_color="#b2b2b2")
+        self.selectedColorButton2.configure(border_width=1, border_color="black")
+        self.selectedColorButton3.configure(border_width=1, border_color="black")
         # self.selectedColorButtonBorder2.configure(highlightbackground="black")
         # self.selectedColorButtonBorder3.configure(highlightbackground="black")
 
     def selectedColor2(self):
         # print('Selected Color 2')
         self.selectedColorButtonVar = 2
-        self.selectedColorButton1.configure(border_width=0)
-        self.selectedColorButton2.configure(border_width=3, border_color="green")
-        self.selectedColorButton3.configure(border_width=0)
+        self.selectedColorButton1.configure(border_width=1, border_color="black")
+        self.selectedColorButton2.configure(border_width=2, border_color="#b2b2b2")
+        self.selectedColorButton3.configure(border_width=1, border_color="black")
         # self.selectedColorButtonBorder1.configure(highlightbackground="black")
         # self.selectedColorButtonBorder2.configure(highlightbackground="red")
         # self.selectedColorButtonBorder3.configure(highlightbackground="black")
@@ -372,9 +376,13 @@ class imageColoriser(ctk.CTkFrame):
     def selectedColor3(self):
         # print('Selected Color 3')
         self.selectedColorButtonVar = 3
-        self.selectedColorButton1.configure(border_width=0)
-        self.selectedColorButton2.configure(border_width=0)
-        self.selectedColorButton3.configure(border_width=3, border_color="green")
+        # self.selectedColorButton1.configure(border_width=0)
+        # self.selectedColorButton2.configure(border_width=0)
+        # self.selectedColorButton3.configure(border_width=3, border_color="green")
+        #
+        self.selectedColorButton1.configure(border_width=1, border_color="black")
+        self.selectedColorButton2.configure(border_width=1, border_color="black")
+        self.selectedColorButton3.configure(border_width=2, border_color="#b2b2b2")
         # self.selectedColorButtonBorder1.configure(highlightbackground="black")
         # self.selectedColorButtonBorder2.configure(highlightbackground="black")
         # self.selectedColorButtonBorder3.configure(highlightbackground="red")
@@ -543,8 +551,9 @@ class imageColoriser(ctk.CTkFrame):
         # selected color buttons and borders
         self.selectedColorButtonBorder1 = tk.Frame(
             self.colorByPixelFrame,
-            highlightbackground="black",
+            highlightbackground="gray20",
             highlightthickness=2,
+            bg="gray20",
             width=10,
             height=10,
         )
@@ -556,7 +565,9 @@ class imageColoriser(ctk.CTkFrame):
             self.selectedColorButtonBorder1,
             command=self.selectedColor1,
             text="",
-            corner_radius=0,
+            border_width=1,
+            border_color="black",
+            corner_radius=15,
             width=30,
             anchor="CENTER",
             # border_color="green",
@@ -566,8 +577,9 @@ class imageColoriser(ctk.CTkFrame):
 
         self.selectedColorButtonBorder2 = tk.Frame(
             self.colorByPixelFrame,
-            highlightbackground="black",
+            highlightbackground="gray20",
             highlightthickness=2,
+            bg="gray20",
             width=10,
             height=10,
         )
@@ -578,9 +590,9 @@ class imageColoriser(ctk.CTkFrame):
             self.selectedColorButtonBorder2,
             command=self.selectedColor2,
             text="",
-            border_width=3,
-            border_color="green",
-            corner_radius=0,
+            border_width=2,
+            border_color="#b2b2b2",
+            corner_radius=15,
             width=30,
             anchor="CENTER",
             fg_color=self.selectedColors[1],
@@ -589,8 +601,9 @@ class imageColoriser(ctk.CTkFrame):
 
         self.selectedColorButtonBorder3 = tk.Frame(
             self.colorByPixelFrame,
-            highlightbackground="black",
+            highlightbackground="gray20",
             highlightthickness=2,
+            bg="gray20",
             width=10,
             height=10,
         )
@@ -601,7 +614,9 @@ class imageColoriser(ctk.CTkFrame):
             self.selectedColorButtonBorder3,
             command=self.selectedColor3,
             text="",
-            corner_radius=0,
+            border_width=1,
+            border_color="black",
+            corner_radius=15,
             width=30,
             anchor="CENTER",
             fg_color=self.selectedColors[2],
