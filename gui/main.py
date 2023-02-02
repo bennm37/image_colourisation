@@ -724,7 +724,7 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.selectedColorButton3.grid(row=7, column=2, padx=(5, 5), pady=(0, 0))
 
-        self.selectedColorButton3 = ctk.CTkButton(
+        self.placeholderButton = ctk.CTkButton(
             self.selectedColorButtonBorder1,
             # self.sidebarFrame,
             # command=print("hello"),
@@ -735,7 +735,7 @@ class imageColoriser(ctk.CTkFrame):
             width=30,
             anchor="CENTER",
         )
-        self.selectedColorButton3.grid(row=7, column=3, padx=(5, 5), pady=(0, 0))
+        self.placeholderButton.grid(row=7, column=3, padx=(5, 5), pady=(0, 0))
 
         self.colorRangeSlider = ctk.CTkSlider(
             self.colorByPixelFrame, from_=0, to=1, command=self.setColorRange,width=150
