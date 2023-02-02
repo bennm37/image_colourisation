@@ -400,8 +400,9 @@ class imageColoriser(ctk.CTkFrame):
         self.imageFrame.grid_rowconfigure(16, weight=1)
 
         self.mainWindowFigure = plt.figure(figsize=(7, 8))  # TODO: what size?
+        self.mainWindowFigure.patch.set_facecolor("#323333")
         self.mainWindowFigure.subplots_adjust(
-            left=0.01, right=0.99, top=0.99, bottom=0.01, hspace=0, wspace=0
+            left=0.05, right=0.95, top=0.95, bottom=0.05, hspace=0.1, wspace=0.1
         )
         self.mainPLTWindowTopLeft = self.mainWindowFigure.add_subplot(221)
         self.mainPLTWindowTopRight = self.mainWindowFigure.add_subplot(222)
@@ -419,7 +420,7 @@ class imageColoriser(ctk.CTkFrame):
 
         # define the canvas upon which we place the images
         self.canvas = FigureCanvasTkAgg(self.mainWindowFigure, self.imageFrame)
-        self.canvas.get_tk_widget().pack(side="top", padx=4, pady=4)
+        self.canvas.get_tk_widget().pack(side="top", padx=0, pady=0)
         self.canvas.draw()
 
         # create sidebar and widgets after defining frame
@@ -720,6 +721,6 @@ class imageColoriser(ctk.CTkFrame):
 if __name__ == "__main__":
     root = ctk.CTk()
     root.title("MMSC Image Colouriser")
-    root.geometry(f"{1000}x{720}")
+    root.geometry(f"{1300}x{720}")
     app = imageColoriser(master=root)
     app.mainloop()
