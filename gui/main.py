@@ -9,6 +9,7 @@ import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from pathlib import Path
 import matplotlib.image as mpimg
+import matplotlib as mpl
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -45,6 +46,23 @@ class imageColoriser(ctk.CTkFrame):
         self.NRandomPixels = 1000
         self.NRandomPixelsMax = 10000
 
+        self.Rho = 0.5
+        self.Beta = 0.5
+
+        # styling
+        fpath = Path(
+            mpl.get_data_path(),
+            "/Users/benn-m/Documents/image_colourisation/gui/fonts/Roboto-Medium.ttf",
+        )
+        self.captionFont = fpath
+        self.captionFontDict = {
+            "family": fpath,
+            "color": "white",
+            "weight": "normal",
+            "size": 5,
+        }
+        self.frameDark3 = "#323333"
+        self.frameLight3 = "#CFD0CF"
         # define image frame
 
         self.generateFrames()
@@ -154,7 +172,10 @@ class imageColoriser(ctk.CTkFrame):
             # show grayscale image
             grayImagePLTWindow.imshow(grayImage, cmap="gray")
             grayImagePLTWindow.axis("off")
-            grayImagePLTWindow.set_title("Gray Image")
+            # grayImagePLTWindow.set_title("Gray Image")
+            # grayImagePLTWindow.set_title(
+            #     "Gray Image", font=self.captionFont, fontdict=self.captionFontDict
+            # )
             self.canvas.draw()
 
             self.dimensionalisedGrayImage = self.dimensionalise(
@@ -232,7 +253,7 @@ class imageColoriser(ctk.CTkFrame):
             self.grayImageWithColorTemplate.set_data(grayImageWithRandomColor)
             self.grayImageWithColorTemplate.autoscale()
             randomisedColorPLTWindow.axis("off")
-            randomisedColorPLTWindow.set_title("Image with Some Color")
+            # randomisedColorPLTWindow.set_title("Image with Some Color")
             self.canvas.draw()
 
     def addBlockColor(self):
@@ -276,7 +297,12 @@ class imageColoriser(ctk.CTkFrame):
             self.grayImageWithSomeColorExists = 1
 
             blockColorPLTWindow.axis("off")
-            blockColorPLTWindow.set_title("Image with Block Color")
+            # blockColorPLTWindow.set_title("Image with Block Color")
+            # blockColorPLTWindow.set_title(
+            #     "Image with Block Color",
+            #     font=self.captionFont,
+            #     fontdict=self.captionFontDict,
+            # )
             self.canvas.draw()
 
     def addManualColor(self):
@@ -329,7 +355,12 @@ class imageColoriser(ctk.CTkFrame):
             self.grayImageWithSomeColorExists = 1
 
             manualColorPLTWindow.axis("off")
-            manualColorPLTWindow.set_title("Image with Manual Color")
+            # manualColorPLTWindow.set_title("Image with Manual Color")
+            # manualColorPLTWindow.set_title(
+            #     "Image with Manual Color",
+            #     font=self.captionFont,
+            #     fontdict=self.captionFontDict,
+            # )
             self.canvas.draw()
 
     def saveImage(self):
@@ -417,8 +448,23 @@ class imageColoriser(ctk.CTkFrame):
         if self.colorMode.get() == 1:
             self.addRandomisedColor()
 
+    def setRho(self, event):
+        self.Rho = event
+        self.RhoEntry.configure(placeholder_text=np.round(self.Rho, 2))
+
+    def setBeta(self, event):
+        self.Beta = event
+        self.BetaEntry.configure(placeholder_text=np.round(self.Beta, 2))
+
     def changeAppearanceEvent(self, new_appearance_mode: str):
         ctk.set_appearance_mode(new_appearance_mode)
+        if new_appearance_mode.lower() == "dark":
+            self.mainWindowFigure.patch.set_facecolor(self.frameDark3)
+            self.mainWindowFigure.canvas.draw_idle()
+
+        if new_appearance_mode.lower() == "light":
+            self.mainWindowFigure.patch.set_facecolor(self.frameLight3)
+            self.mainWindowFigure.canvas.draw_idle()
 
     def generateFrames(self):
         self.imageFrame = ctk.CTkFrame(root, width=150, corner_radius=0)
@@ -426,8 +472,15 @@ class imageColoriser(ctk.CTkFrame):
         self.imageFrame.grid_rowconfigure(16, weight=1)
 
         self.mainWindowFigure = plt.figure(figsize=(7, 8))  # TODO: what size?
+        self.mainWindowFigure.patch.set_facecolor(self.frameDark3)
         self.mainWindowFigure.subplots_adjust(
-            left=0.01, right=0.99, top=0.99, bottom=0.01, hspace=0, wspace=0
+            # left=0.01, right=0.99, top=0.99, bottom=0.01, hspace=0, wspace=0
+            left=0.05,
+            right=0.95,
+            top=0.95,
+            bottom=0.05,
+            hspace=0.1,
+            wspace=0.1,
         )
         self.mainPLTWindowTopLeft = self.mainWindowFigure.add_subplot(221)
         self.mainPLTWindowTopRight = self.mainWindowFigure.add_subplot(222)
@@ -445,7 +498,8 @@ class imageColoriser(ctk.CTkFrame):
 
         # define the canvas upon which we place the images
         self.canvas = FigureCanvasTkAgg(self.mainWindowFigure, self.imageFrame)
-        self.canvas.get_tk_widget().pack(side="top", padx=4, pady=4)
+        # self.canvas.get_tk_widget().pack(side="top", padx=4, pady=4)
+        self.canvas.get_tk_widget().pack(side="top", padx=0, pady=0)
         self.canvas.draw()
 
         # create sidebar and widgets after defining frame
@@ -511,44 +565,78 @@ class imageColoriser(ctk.CTkFrame):
         )
 
         # colorbypixel tools #TODO
-        self.colorByPixel = ctk.CTkRadioButton(
+        # self.colorByPixel = ctk.CTkRadioButton(
+        #     self.sidebarFrame,
+        #     text="Color by Pixel",
+        #     command=self.addManualColor,
+        #     variable=self.colorMode,
+        #     value=0,
+        # )
+        # self.colorByPixel.grid(row=6, column=0, pady=10, padx=20, sticky="nw")
+
+        self.colorByPixelFrame = ctk.CTkFrame(
             self.sidebarFrame,
+            width=150,
+            height=100,
+            corner_radius=0,
+            fg_color=("#DBDBDA", "#2B2A2B"),
+        )  # width doesn't do anything ?
+        self.colorByPixelFrame.grid(
+            row=7, column=0, rowspan=1, columnspan=5, sticky="ew"
+        )
+        self.colorByPixelFrame.grid_rowconfigure(4, weight=1)
+        self.colorByPixelFrame.grid_columnconfigure(6, weight=1)
+        self.colorByPixel = ctk.CTkRadioButton(
+            self.colorByPixelFrame,
             text="Color by Pixel",
             command=self.addManualColor,
             variable=self.colorMode,
             value=0,
         )
-        self.colorByPixel.grid(row=6, column=0, pady=10, padx=20, sticky="nw")
-        self.colorByPixelFrame = ctk.CTkFrame(
-            self.sidebarFrame, width=150, height=100, corner_radius=0
-        )  # width doesn't do anything ?
-        self.colorByPixelFrame.grid(
-            row=7, column=0, rowspan=1, columnspan=5, sticky="ew"
+        self.colorByPixel.grid(
+            row=0, column=0, columnspan=3, pady=(10, 20), padx=20, sticky="nw"
         )
-        self.colorByPixelFrame.grid_rowconfigure(3, weight=1)
-        self.colorByPixelFrame.grid_columnconfigure(6, weight=1)
 
+        brushSizePady = 35
         self.brushSizeLabel = ctk.CTkLabel(
-            self.colorByPixelFrame, text="Brush size", anchor="w"
+            # self.colorByPixelFrame, text="Brush size", anchor="w"
+            self.colorByPixelFrame,
+            text="Size",
+            anchor="nw",
         )
         self.brushSizeLabel.grid(
-            row=0, column=0, columnspan=3, padx=(20, 0), sticky="w"
+            # row=0, column=0, columnspan=3, padx=(20, 0), sticky="w"
+            row=0,
+            column=1,
+            columnspan=1,
+            padx=(0, 0),
+            pady=(brushSizePady + 7.5, 5),
+            sticky="w",
         )
         self.brushSizeEntry = ctk.CTkEntry(
             self.colorByPixelFrame, width=50, placeholder_text=self.brushSizeMax // 2
         )  # work out how to update when changed
-        self.brushSizeEntry.grid(row=0, column=2, padx=0, pady=(5, 5), sticky="w")
+        self.brushSizeEntry.grid(
+            row=0, column=0, padx=10, pady=(brushSizePady, 5), sticky="w"
+        )
+        # self.brushSizeEntry.grid(row=0, column=2, padx=0, pady=(5, 5), sticky="w")
         self.brushSizeSlider = ctk.CTkSlider(
             self.colorByPixelFrame,
             from_=self.brushSizeMin,
             to=self.brushSizeMax,
             number_of_steps=20,
             command=self.setBrushSize,
+            width=100,
         )
         self.brushSizeSlider.grid(
-            row=1, column=0, columnspan=3, padx=(0, 0), pady=(5, 20), sticky="ew"
+            row=0,
+            column=1,
+            columnspan=2,
+            padx=(25, 0),
+            pady=(brushSizePady, 5)
+            # row=1, column=0, columnspan=3, padx=(0, 0), pady=(5, 20), sticky="ew"
         )
-        # selected color buttons and borders
+        # selected color buttons and borders #TODO: get rid of frame
         self.selectedColorButtonBorder1 = tk.Frame(
             self.colorByPixelFrame,
             highlightbackground="gray20",
@@ -626,9 +714,11 @@ class imageColoriser(ctk.CTkFrame):
         self.colorRangeSlider = ctk.CTkSlider(
             self.colorByPixelFrame, from_=0, to=1, command=self.setColorRange
         )
-        self.colorRangeSlider.grid(row=2, column=3, columnspan=3)
+        # self.colorRangeSlider.grid(row=2, column=3, columnspan=3)
+        self.colorRangeSlider.grid(row=3, column=3, pady=(0, 5), columnspan=3)
 
-        self.colorSelectorFigure = plt.figure(figsize=(0.5, 0.5))
+        self.colorSelectorFigure = plt.figure(figsize=(1.25, 0.6))
+        # self.colorSelectorFigure = plt.figure(figsize=(0.5, 0.5))
         self.colorSelectorFigure.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.colorSelectorFigure.subplots_adjust(wspace=0.0, hspace=0.0)
 
@@ -647,7 +737,14 @@ class imageColoriser(ctk.CTkFrame):
             self.colorSelectorFigure, self.colorByPixelFrame
         )
         self.colorSelectorCanvas.get_tk_widget().grid(
-            row=0, column=4, rowspan=2, columnspan=2, pady=(5, 0), sticky="nsw"
+            row=0,
+            column=3,
+            rowspan=3,
+            columnspan=3,
+            padx=(5, 5),
+            pady=(15, 0),
+            sticky="ns"
+            # row=0, column=4, rowspan=2, columnspan=2, pady=(5, 0), sticky="nsw"
         )
         self.colorSelectorCanvas.callbacks.connect(
             "button_press_event", self.colorSelected
@@ -684,9 +781,14 @@ class imageColoriser(ctk.CTkFrame):
         self.NRandomPixelEntry = ctk.CTkEntry(
             self.sidebarFrame, width=50, placeholder_text=int(self.NRandomPixels)
         )
-        self.NRandomPixelEntry.grid(row=10, column=0, padx=40, pady=(5, 5), sticky="w")
-        self.NRandomPixelLabel = ctk.CTkLabel(self.sidebarFrame, text="N")
-        self.NRandomPixelLabel.grid(row=10, column=0, padx=20, pady=(5, 5), sticky="w")
+        # self.NRandomPixelEntry.grid(row=10, column=0, padx=40, pady=(5, 5), sticky="w")
+        # self.NRandomPixelLabel = ctk.CTkLabel(self.sidebarFrame, text="N")
+        # self.NRandomPixelLabel.grid(row=10, column=0, padx=20, pady=(5, 5), sticky="w")
+        self.NRandomPixelEntry.grid(row=10, column=0, padx=10, pady=(5, 5), sticky="w")
+        self.NRandomPixelLabel = ctk.CTkLabel(self.sidebarFrame, text="N", anchor="n")
+        self.NRandomPixelLabel.grid(
+            row=10, column=0, padx=80, pady=(12.5, 5), sticky="w"
+        )
 
         self.colorByBlockButton = ctk.CTkRadioButton(
             self.sidebarFrame,
@@ -708,21 +810,45 @@ class imageColoriser(ctk.CTkFrame):
             row=12, column=0, columnspan=5, padx=(0, 0), pady=(0, 0), sticky="ew"
         )
         self.RhoSlider = ctk.CTkSlider(
-            self.sidebarFrame, from_=0, to=1, number_of_steps=20
+            # self.sidebarFrame, from_=0, to=1, number_of_steps=20
+            self.sidebarFrame,
+            from_=0,
+            to=1,
+            command=self.setRho,
         )
         self.RhoSlider.grid(
             row=13, column=0, columnspan=5, padx=(100, 5), pady=(5, 5), sticky="ew"
         )
-        self.RhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho")
-        self.RhoLabel.grid(row=13, column=0, padx=50, pady=(5, 5), sticky="w")
+        # self.RhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho")
+        # self.RhoLabel.grid(row=13, column=0, padx=50, pady=(5, 5), sticky="w")
+        self.RhoSlider.set(self.Rho)
+        self.RhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho", anchor="n")
+        self.RhoLabel.grid(row=13, column=0, padx=(70, 0), pady=(12.5, 5), sticky="w")
+        self.RhoEntry = ctk.CTkEntry(
+            self.sidebarFrame, width=50, placeholder_text=np.round(self.Rho, 2)
+        )
+        self.RhoEntry.grid(row=13, column=0, padx=10, pady=(5, 5), sticky="w")
+
         self.BetaSlider = ctk.CTkSlider(
-            self.sidebarFrame, from_=0, to=1, number_of_steps=20
+            # self.sidebarFrame, from_=0, to=1, number_of_steps=20
+            self.sidebarFrame,
+            from_=0,
+            to=1,
+            command=self.setBeta,
         )
         self.BetaSlider.grid(
             row=14, column=0, columnspan=5, padx=(100, 5), pady=(5, 5), sticky="ew"
         )
-        self.BetaLabel = ctk.CTkLabel(self.sidebarFrame, text="Beta")
-        self.BetaLabel.grid(row=14, column=0, padx=50, pady=(5, 5), sticky="w")
+        # self.BetaLabel = ctk.CTkLabel(self.sidebarFrame, text="Beta")
+        # self.BetaLabel.grid(row=14, column=0, padx=50, pady=(5, 5), sticky="w")
+
+        self.BetaSlider.set(self.Beta)
+        self.BetaLabel = ctk.CTkLabel(self.sidebarFrame, text="Beta", anchor="n")
+        self.BetaLabel.grid(row=14, column=0, padx=(70, 0), pady=(12.5, 5), sticky="w")
+        self.BetaEntry = ctk.CTkEntry(
+            self.sidebarFrame, width=50, placeholder_text=np.round(self.Beta, 2)
+        )
+        self.BetaEntry.grid(row=14, column=0, padx=10, pady=(5, 5), sticky="w")
 
     def generateAppearanceSection(self):
         # appearance section
@@ -756,6 +882,6 @@ class imageColoriser(ctk.CTkFrame):
 if __name__ == "__main__":
     root = ctk.CTk()
     root.title("MMSC Image Colouriser")
-    root.geometry(f"{1000}x{720}")
+    root.geometry(f"{1300}x{740}")
     app = imageColoriser(master=root)
     app.mainloop()
