@@ -413,7 +413,7 @@ class imageColoriser(ctk.CTkFrame):
 
     def setBeta(self,event):
         self.Beta = event
-        self.BetaEntry.configure(placeholder_text=self.Beta)
+        self.BetaEntry.configure(placeholder_text=np.round(self.Beta,2))
 
 
     def changeAppearanceEvent(self, new_appearance_mode: str):
@@ -646,10 +646,10 @@ class imageColoriser(ctk.CTkFrame):
             self.colorSelectorFigure, self.colorByPixelFrame
         )
         self.colorSelectorCanvas.get_tk_widget().grid(
-            row=0, column=3, rowspan=3, columnspan=3, padx = (5,5),pady=(5, 0), sticky="ns"
+            row=0, column=3, rowspan=3, columnspan=3, padx = (5,5),pady=(15, 0), sticky="ns"
         )
         self.colorSelectorCanvas.callbacks.connect(
-            "button_press_event", self.colorSelected
+            "button_press_event", self.colorSelected 
         )
         self.setColorRange(0.5)
 
