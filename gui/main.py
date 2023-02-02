@@ -682,6 +682,7 @@ class imageColoriser(ctk.CTkFrame):
             fg_color=self.selectedColors[0],
         )
         self.selectedColorButton1.grid(row=7, column=0, padx=(0, 0), pady=(0, 0))
+        #
 
         self.selectedColorButtonBorder2 = tk.Frame(
             self.colorByPixelFrame,
