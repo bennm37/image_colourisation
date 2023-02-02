@@ -37,12 +37,13 @@ class imageColoriser(ctk.CTkFrame):
         self.brushSizeMin = 0
         self.brushSizeMax = 20
         self.colorFrameColor = "gray17"
-        self.selectedColors = ["#FF0000", "#00FF00", "#0000FF"]
+        # self.selectedColors = ["#FF0000", "#00FF00", "#0000FF"]
+        self.selectedColors = ["#000000", "#FFFFFF", "#2596BE"]
         self.selectedColorButtonVar = 2
         # TODO: set these next values??
         self.NRandomPixels = 1000
         self.NRandomPixelsMax = 10000
-
+        self.colorRangeSliderInitial = 0.67
         self.Rho = 0.5
         self.Beta = 0.5
 
@@ -742,7 +743,7 @@ class imageColoriser(ctk.CTkFrame):
         )
         # self.colorRangeSlider.grid(row=2, column=3, columnspan=3)
         self.colorRangeSlider.grid(row=4, column=4, padx = (0,0),pady=(5, 5), columnspan=2,sticky="w")
-
+        self.colorRangeSlider.set(self.colorRangeSliderInitial)
         self.colorSelectorFigure = plt.figure(figsize=(0.7,0.7))
         # self.colorSelectorFigure = plt.figure(figsize=(0.5, 0.5))
         self.colorSelectorFigure.subplots_adjust(left=0, right=1, top=1, bottom=0)
@@ -775,7 +776,7 @@ class imageColoriser(ctk.CTkFrame):
         self.colorSelectorCanvas.callbacks.connect(
             "button_press_event", self.colorSelected
         )
-        self.setColorRange(0.5)
+        self.setColorRange(self.colorRangeSliderInitial)
 
         # TODO sort out color dropper button
         # # colorDropperImage = tk.PhotoImage('button_images/color_dropper.png')
