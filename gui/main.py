@@ -471,7 +471,7 @@ class imageColoriser(ctk.CTkFrame):
         self.imageFrame.grid(row=0, column=1, rowspan=4, columnspan=1, sticky="nsew")
         self.imageFrame.grid_rowconfigure(16, weight=1)
 
-        self.mainWindowFigure = plt.figure(figsize=(7, 8))  # TODO: what size?
+        self.mainWindowFigure = plt.figure(figsize=(20, 8))  # TODO: what size?
         self.mainWindowFigure.patch.set_facecolor(self.frameDark3)
         self.mainWindowFigure.subplots_adjust(
             # left=0.01, right=0.99, top=0.99, bottom=0.01, hspace=0, wspace=0
@@ -717,7 +717,7 @@ class imageColoriser(ctk.CTkFrame):
         # self.colorRangeSlider.grid(row=2, column=3, columnspan=3)
         self.colorRangeSlider.grid(row=3, column=3, pady=(0, 5), columnspan=3)
 
-        self.colorSelectorFigure = plt.figure(figsize=(1.25, 0.6))
+        self.colorSelectorFigure = plt.figure(figsize=(1, 1))
         # self.colorSelectorFigure = plt.figure(figsize=(0.5, 0.5))
         self.colorSelectorFigure.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.colorSelectorFigure.subplots_adjust(wspace=0.0, hspace=0.0)
@@ -743,7 +743,7 @@ class imageColoriser(ctk.CTkFrame):
             columnspan=3,
             padx=(5, 5),
             pady=(15, 0),
-            sticky="ns"
+            # sticky="ns"
             # row=0, column=4, rowspan=2, columnspan=2, pady=(5, 0), sticky="nsw"
         )
         self.colorSelectorCanvas.callbacks.connect(
