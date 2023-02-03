@@ -142,8 +142,10 @@ class imageColoriser(ctk.CTkFrame):
             rawImage = mpimg.imread(fileName)
             # special case with pngs
             if fileName.endswith(".png"):
-                rawImage = rawImage.astype(np.uint16)
+                # pass
+                # rawImage = rawImage.astype(np.uint8)
                 rawImage = rawImage[:, :, :3] * 255
+                rawImage = rawImage.astype(np.uint8)
 
             self.rawImage = rawImage
             self.rawImageExists = 1
