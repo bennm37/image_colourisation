@@ -7,7 +7,7 @@ grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
 grayImage = np.dstack([grayImage]*3)
 print(np.max(grayImage))
 xSize, ySize,d = grayImage.shape
-NRandomPixelsMax = 1000
+NRandomPixelsMax = 200
 
 # get random indices to eventually color in
 randomIndices = np.random.default_rng().choice(
@@ -40,6 +40,14 @@ colorisedImage = c.kernelColorise()
 print(f"{np.max(colorisedImage)=}")
 print(f"{np.min(colorisedImage)=}")
 print(f"{colorisedImage.dtype=}")
+
+# pixel histogram 
+fig,ax = plt.subplots()
+redPixelValues = colorisedImage[:,:,0].flatten()
+ax.hist(redPixelValues,bins=100)
+ax.set(xlim=(0,300))
+plt.show()
+
 fig,ax = plt.subplots(1,2)
 ax[0].imshow(someColorImage)
 ax[0].axis('off')
