@@ -53,16 +53,20 @@ class Colouriser:
         self.grayCoordinates = np.indices()
         self.colorCoordinates = colorCoordinates
         self.colorValues = colorValues
+        self.delta = parameters["delta"]
+        self.sigma1 = parameters["sigma1"]
+        self.sigma2 = parameters["sigma2"]
+        self.p = parameters["p"]
     
     def kernelColorise(self):
         image = np.zeros((self.width,self.height,3))
-
         for i in range(3):
-            KD = self.getK()
-            self.a_s = lag.solve()
-            layer = np.zeros((self.width,self.height))
-            image[i] = layer
-
+            KD = self.getK(self.colorCoordinates,self.colorCoordinates)
+            n = self.colorCoordinates.shape[0]
+            self.a_s = lag.solve(KD+self.delta*np.eye(n),colorValues)
+            image[i] = self.getk(self.grayCoordinates,self.colorCoordinates) @ self.a_s
+        return image
+    
     def convNetColorise(self):
         pass
 
