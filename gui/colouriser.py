@@ -48,15 +48,20 @@ colorValues = rawImage[randomCoordinates[:,0],randomCoordinates[:,1]]
 
 class Colouriser:
     def __init__(self,grayImage,colorCoordinates,colorValues,parameters):
-        self.aspectRatio = grayImage.shape
+        self.width,self.height = grayImage.shape
         self.grayImageVector = grayImage.flatten()
+        self.grayCoordinates = np.indices()
         self.colorCoordinates = colorCoordinates
         self.colorValues = colorValues
     
     def kernelColorise(self):
-        image = np.zeros((self.aspectRatio[0],self.aspectRatio[1],3))
+        image = np.zeros((self.width,self.height,3))
+
         for i in range(3):
-            image[i] = 
+            KD = self.getK()
+            self.a_s = lag.solve()
+            layer = np.zeros((self.width,self.height))
+            image[i] = layer
 
     def convNetColorise(self):
         pass
