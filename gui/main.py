@@ -8,6 +8,7 @@ from pathlib import Path
 import matplotlib.image as mpimg
 import matplotlib as mpl
 
+
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 # TODO work out what's happening with the columns in sidebarframe and get "edit" "file" and "appearance" labels to center better
@@ -19,6 +20,10 @@ class imageColoriser(ctk.CTkFrame):
         # super().__init__()
         ctk.CTkFrame.__init__(self, master)
         self.createUI()
+
+        # ignore this for now - just me testing importing new classes (Z)
+        self.testArray = [1, 2, 3]
+        self.newClassData = newClass(self)
 
     def createUI(self):
         # configure window
@@ -739,12 +744,14 @@ class imageColoriser(ctk.CTkFrame):
         self.placeholderButton.grid(row=7, column=3, padx=(5, 5), pady=(0, 0))
 
         self.colorRangeSlider = ctk.CTkSlider(
-            self.colorByPixelFrame, from_=0, to=1, command=self.setColorRange,width=150
+            self.colorByPixelFrame, from_=0, to=1, command=self.setColorRange, width=150
         )
         # self.colorRangeSlider.grid(row=2, column=3, columnspan=3)
-        self.colorRangeSlider.grid(row=4, column=4, padx = (0,0),pady=(5, 5), columnspan=2,sticky="w")
+        self.colorRangeSlider.grid(
+            row=4, column=4, padx=(0, 0), pady=(5, 5), columnspan=2, sticky="w"
+        )
         self.colorRangeSlider.set(self.colorRangeSliderInitial)
-        self.colorSelectorFigure = plt.figure(figsize=(0.7,0.7))
+        self.colorSelectorFigure = plt.figure(figsize=(0.7, 0.7))
         # self.colorSelectorFigure = plt.figure(figsize=(0.5, 0.5))
         self.colorSelectorFigure.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.colorSelectorFigure.subplots_adjust(wspace=0.0, hspace=0.0)
@@ -904,6 +911,14 @@ class imageColoriser(ctk.CTkFrame):
         #
         self.exitButton.grid(row=16, column=1)
         self.setDefaults()
+
+
+# we can just import the colorizer from a different file once everything's set up
+class newClass:
+    def __init__(self, parent):
+        self.parent = parent
+        self.newArray = np.multiply(parent.testArray, 2)
+        self.newText = parent.imagePath[3:10]
 
 
 if __name__ == "__main__":
