@@ -1,7 +1,7 @@
 import numpy as np 
 import numpy.linalg as lag
 import matplotlib.pyplot as plt
-
+from numba import njit 
 class Coloriser:
     def __init__(self,grayImage,colorCoordinates,colorValues,parameters):
         """grayImage should be of shape width x height x 3, colorCoordinates n x 2 , 
@@ -20,30 +20,48 @@ class Coloriser:
     def kernelColorise(self):
         image = np.zeros((self.width,self.height,3))
         for i in range(3):
-            KD = self.getK(self.colorCoordinates,self.colorCoordinates)
+            KD = getK(self.colorCoordinates,self.colorCoordinates,self.grayImage,self.sigma1,self.sigma2,self.p)
             n = self.colorCoordinates.shape[0]
             self.a_s = lag.solve(KD+self.delta*np.eye(n),self.colorValues[:,i])
-            K2 = self.getK(self.grayCoordinates,self.colorCoordinates)
-            # debugging
-            # print(f"{KD.shape=}")
-            # print(f"{n=}")
-            # print(f"{self.getK(self.grayCoordinates,self.colorCoordinates).shape=}")
-            # print(f"{K2 = }")
-            layer_i = self.getK(self.grayCoordinates,self.colorCoordinates) @ self.a_s
+            K2 = getK(self.grayCoordinates,self.colorCoordinates,self.grayImage,self.sigma1,self.sigma2,self.p)
+            layer_i = K2 @ self.a_s
             layer_i = layer_i.reshape(self.width,self.height)
             image[:,:,i] = layer_i
         return image.astype(np.uint16)
     
     def convNetColorise(self):
         pass
+@njit
+def expkernel(x):
+    return np.exp(-x**2)
 
-    def getK(self,X,Y):
-        """Generates the kernel matrix for 2 lists of indicies X and Y. X and Y 
-        are lists of coordiantes of shape k x 2"""
-        nx,ny = len(X),len(Y)
-        # return np.random.rand(nx,ny)/1000
-        distXY = lag.norm(X[:,np.newaxis]-Y[np.newaxis,:],axis=2)
-        grayX = self.grayImage[X[:,0],X[:,1]]
-        grayY = self.grayImage[Y[:,0],Y[:,1]]
-        grayXY = np.abs(grayX[:,np.newaxis]-grayY[np.newaxis,:])
-        return self.kernel(distXY/self.sigma1)*self.kernel(grayXY**self.p/self.sigma1)
+@njit 
+def norm(X):
+    return X[0]**2+X[1]**2
+
+# @njit
+# def getK(X,Y,grayImage,sigma1,sigma2,p):
+#     """Generates the kernel matrix for 2 lists of indicies X and Y. X and Y 
+#     are lists of coordiantes of shape k x 2"""
+#     # distXY = lag.norm(X[:,np.newaxis]-Y[np.newaxis,:],axis=2)
+#     distXY = grayImage.copy()
+#     grayX = np.zeros()
+#     for i in range(len(X)):
+#         grayX[i] = grayImage[X[i,0],X[i,1]]
+#     grayY = grayImage[Y[:,0],Y[:,1]]
+#     grayXY = np.abs(grayX[:,np.newaxis]-grayY[np.newaxis,:])
+#     return expkernel(distXY/sigma1)*expkernel(grayXY**p/sigma2)
+
+@njit
+def getK(X,Y,grayImage,sigma1,sigma2,p):
+    """Generates the kernel matrix for 2 lists of indicies X and Y. X and Y 
+    are lists of coordiantes of shape k x 2"""
+    nx,ny = len(X),len(Y)
+    K = np.zeros((nx,ny)) +255
+    for i in range(nx):
+        for j in range(ny):
+            distXY = norm(X[i]-Y[j])
+            grayXY = np.abs(grayImage[X[i,0],X[i,1]]-grayImage[Y[j,0],Y[j,1]])
+            K[i,j] = expkernel(distXY/sigma1)*expkernel(grayXY**p/sigma2)
+    return K
+

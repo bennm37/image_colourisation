@@ -42,11 +42,11 @@ print(f"{np.min(colorisedImage)=}")
 print(f"{colorisedImage.dtype=}")
 
 # pixel histogram 
-fig,ax = plt.subplots()
-redPixelValues = colorisedImage[:,:,0].flatten()
-ax.hist(redPixelValues,bins=100)
-ax.set(xlim=(0,300))
-plt.show()
+# fig,ax = plt.subplots()
+# redPixelValues = colorisedImage[:,:,0].flatten()
+# ax.hist(redPixelValues,bins=100)
+# ax.set(xlim=(0,300))
+# plt.show()
 
 fig,ax = plt.subplots(1,2)
 ax[0].imshow(someColorImage)
