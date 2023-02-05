@@ -175,6 +175,7 @@ def plotImages(rawImage, noisyImage, improvedImage):
 
 
 ##
+sd
 parameters = {
     "delta": 1e-4,  # 0.01,
     "sigma1": 149,  # 100,
