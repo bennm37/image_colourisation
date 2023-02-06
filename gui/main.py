@@ -8,13 +8,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from pathlib import Path
 import matplotlib.image as mpimg
 import matplotlib as mpl
-import gui.coloriser as Coloriser
+import gui.coloriserGUI as Coloriser
 
-# TODO: colorvalues,colorcoordinates for block
-
-
-# TODO: output coordinates of coloured images
-# TODO: coordinates -> indices
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 # TODO work out what's happening with the columns in sidebarframe and get "edit" "file" and "appearance" labels to center better
@@ -276,7 +271,6 @@ class imageColoriser(ctk.CTkFrame):
             self.coloredCoordinates = np.array(
                 self.randomCoordinates[0 : int(self.NRandomPixels)]
             ).astype(int)
-            # self.testImage = grayImageWithRandomColor
             self.colorValues = grayImageWithRandomColor[
                 self.coloredCoordinates[:, 0], self.coloredCoordinates[:, 1]
             ]
@@ -324,7 +318,6 @@ class imageColoriser(ctk.CTkFrame):
                         grayImageWithBlockColor[
                             y : y + colorBoxSize, x : x + colorBoxSize, :
                         ] = self.rawImage[y : y + colorBoxSize, x : x + colorBoxSize, :]
-                        self.testImage = grayImageWithBlockColor
                         # generate colorCoordinates and colorValues
 
                         coloredCoordinateBounds = np.array(
@@ -357,7 +350,6 @@ class imageColoriser(ctk.CTkFrame):
                             ),
                             axis=0,
                         ).astype(int)
-                        # self.testImage = grayImageWithBlockColor
                         self.colorValues = grayImageWithBlockColor[
                             self.coloredCoordinates[:, 1], self.coloredCoordinates[:, 0]
                         ]
@@ -461,7 +453,6 @@ class imageColoriser(ctk.CTkFrame):
                         ]
 
                         self.grayImageWithSomeColorExists = 1
-                        # self.testImage = grayImageWithManualColor
 
                         self.grayImageWithColorTemplate.set_data(
                             grayImageWithManualColor
@@ -484,15 +475,28 @@ class imageColoriser(ctk.CTkFrame):
     def saveImage(self):
         self.mainWindowFigure.savefig("./image.png")
 
-    def loadState(self):
+    def generateColoredImage(self):
         if self.grayImageWithSomeColorExists == 0:
             print("no such image!")
         else:
-            print(self.colorValues)
-            print(self.coloredCoordinates)
-            print("colored values")
+            normalKernel = lambda x: np.exp(-(x**2))
+            parameters = {
+                "delta": 0.01,
+                "sigma1": 100,
+                "sigma2": 100,
+                "p": 1,
+                "kernel": normalKernel,
+            }
             self.testArray = [1, 2, 3]
             self.newClassData = newClass(self)
+            self.algoData = Coloriser.Coloriser(
+                self.dimensionalisedGrayImage,
+                self.coloredCoordinates,
+                self.colorValues,
+                parameters,
+            )
+            self.colorisedImage = self.algoData.kernelColorise()
+            print("called coloriser")
         # self.algoData = Coloriser(
         #     self,
         # )
@@ -680,7 +684,7 @@ class imageColoriser(ctk.CTkFrame):
         self.saveImagePath.grid(row=2, column=1, columnspan=4, padx=10, pady=5)
 
         self.loadStateButton = ctk.CTkButton(
-            self.sidebarFrame, command=self.loadState, text="Load State"
+            self.sidebarFrame, command=self.generateColoredImage, text="Load State"
         )
         self.loadStateButton.grid(row=3, column=0, padx=20, pady=5)
         self.loadStatePath = ctk.CTkEntry(
@@ -1054,12 +1058,3 @@ if __name__ == "__main__":
     root.geometry(f"{1300}x{740}")
     app = imageColoriser(master=root)
     app.mainloop()
-
-##
-cc = app.coloredCoordinates
-cv = app.colorValues
-image = app.testImage
-# y = image[cc[:, 0], cc[:, 1]]
-# y = image[cc[:, 1], cc[:, 0]]
-
-##
