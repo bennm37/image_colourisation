@@ -6,7 +6,7 @@ from pathlib import Path
 import matplotlib.image as mpimg
 from gui.coloriser import Coloriser
 
-fileName = "banana.jpeg"
+fileName = "chipmunk.jpg"
 rawImage = plt.imread(f"images/{fileName}")
 grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
 grayImage = np.dstack([grayImage] * 3)
@@ -175,7 +175,6 @@ def plotImages(rawImage, noisyImage, improvedImage):
 
 
 ##
-sd
 parameters = {
     "delta": 1e-4,  # 0.01,
     "sigma1": 149,  # 100,
