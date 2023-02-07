@@ -1,7 +1,6 @@
 import tkinter as tk
 import itertools
 import customtkinter as ctk
-from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -10,23 +9,24 @@ import matplotlib.image as mpimg
 import matplotlib as mpl
 import gui.coloriserGUI as Coloriser
 
+# NOTE:
 # image takes [y,x,:]
-# coords take [y,x]
+# -> coords must be [y,x]
+
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+
 # TODO work out what's happening with the columns in sidebarframe and get "edit" "file" and "appearance" labels to center better
 # TODO make label backgrounds less chunky
 # TODO make sliders line up and longer
 # TODO: fix all the default stuff
+
+
 class imageColoriser(ctk.CTkFrame):
     def __init__(self, master=None):
         # super().__init__()
         ctk.CTkFrame.__init__(self, master)
         self.createUI()
-
-        # ignore this for now - just me testing importing new classes (Z)
-        # self.testArray = [1, 2, 3]
-        # self.newClassData = Coloriser(self,self.grayImage,self.colorCoordinates,self.colorValues,self.parameters)
 
     def createUI(self):
         # configure window
@@ -37,9 +37,6 @@ class imageColoriser(ctk.CTkFrame):
         # initial default values
         # TODO in setdefaults or similar ?
         self.rawImageExists = 0
-        self.loadingImage = mpimg.imread("../images/loading.png")
-        self.loadingImage = self.loadingImage.astype(np.uint16)
-        self.loadingImage = self.loadingImage[:, :, :3] * 255
         self.grayImageWithSomeColorExists = 0
         self.imagePath = "../images/apple.jpeg"
         self.statePath = "../states/apple.pkl"
@@ -48,7 +45,6 @@ class imageColoriser(ctk.CTkFrame):
         self.brushSizeMin = 0
         self.brushSizeMax = 20
         self.colorFrameColor = "gray17"
-        # self.selectedColors = ["#FF0000", "#00FF00", "#0000FF"]
         self.selectedColors = ["#000000", "#FFFFFF", "#2596BE"]
         self.selectedColorButtonVar = 2
         # TODO: set these next values??
@@ -72,6 +68,7 @@ class imageColoriser(ctk.CTkFrame):
         }
         self.frameDark3 = "#323333"
         self.frameLight3 = "#CFD0CF"
+
         # define image frame
 
         self.generateFrames()
@@ -87,32 +84,36 @@ class imageColoriser(ctk.CTkFrame):
     def setDefaults(self):
         self.imagePath = "../images/apple.jpeg"
         self.statePath = "../states/apple.pkl"
-        # self.colorMode = tk.IntVar(value=0)
         self.brushSizeMax = 30
         self.brushSizeMin = 1
         self.brushSize = 10
         self.NRandomPixelsSlider.set(self.NRandomPixels)
 
     def setColorRange(self, sliderVal, size=40):
-        # np.array([[color[0:3]]],dtype=np.uint16)
         size = 30
         color = np.array(self.rainbow(sliderVal)[:3]) * 255
         color = color.astype(np.uint16)
+
         t = np.linspace(0, 1, size)
         colorscale = color[np.newaxis, :] * t[:, np.newaxis]
         colorscale = colorscale[:, np.newaxis, :] * t[np.newaxis, :, np.newaxis]
         colorscale = colorscale.astype(np.uint16)
+
         white = np.array([255, 255, 255])
+
         grayscale = white[np.newaxis, :] * t[:, np.newaxis]
         grayscale = (
             grayscale[:, np.newaxis, :]
             - grayscale[:, np.newaxis, :] * t[np.newaxis, :, np.newaxis]
         )
         grayscale = grayscale.astype(np.uint16)
+
         self.colorGrid = grayscale + colorscale
         self.colorGrid = self.colorGrid[::-1]
+
         self.colorSelectorWindow.imshow(self.colorGrid, interpolation="bilinear")
         self.colorSelectorCanvas.draw_idle()
+
         # TODO work out how to set slider blob colour to change not slider background
         self.colorRangeSlider.configure(
             button_color="#{:02x}{:02x}{:02x}".format(color[0], color[1], color[2])
@@ -144,7 +145,7 @@ class imageColoriser(ctk.CTkFrame):
                 ("jpeg files", "*.jpeg"),
                 ("all files", "*.*"),
             ),
-        )  # TODO: initialdir?
+        )
 
         # save file name to be referenced
         self.fileName = fileName
@@ -160,10 +161,7 @@ class imageColoriser(ctk.CTkFrame):
             self.rawImageExists = 1
 
             rawImagePLTWindow.imshow(rawImage)
-            # self.mainPLTWindowBottomRight.imshow(rawImage)
-            # self.mainPLTWindowTopRight.imshow(rawImage)
             rawImagePLTWindow.axis("off")
-            # rawImagePLTWindow.set_title("Colored Image")
             self.canvas.draw()
 
             self.grayImageWithSomeColorExists = 0
@@ -181,10 +179,6 @@ class imageColoriser(ctk.CTkFrame):
             # show grayscale image
             grayImagePLTWindow.imshow(grayImage, cmap="gray")
             grayImagePLTWindow.axis("off")
-            # grayImagePLTWindow.set_title("Gray Image")
-            # grayImagePLTWindow.set_title(
-            #     "Gray Image", font=self.captionFont, fontdict=self.captionFontDict
-            # )
             self.canvas.draw()
 
             self.dimensionalisedGrayImage = self.dimensionalise(
@@ -199,15 +193,12 @@ class imageColoriser(ctk.CTkFrame):
             )
 
             # define the coordinate pairs which we will color;
-            # returns an array formatted as [[x0,y0],[x1,y1]...]
+            # returns an array formatted as [[y0,x0],[y1,x1]...]
             self.randomCoordinates = self.coordinatesFromIndices(
                 randomIndices, len(self.rawImage[0])
             )
-            # = [
-            #     [index % len(self.rawImage[0]), index // len(self.rawImage[0])]
-            #     for index in randomIndices
-            #
 
+            # choose method to colorise image when loaded
             self.loadColorChoice()
         return
 
@@ -252,12 +243,6 @@ class imageColoriser(ctk.CTkFrame):
                 self.rawImage, self.grayImage
             )
 
-            # Generate coloredCoordinates and colorValues
-
-            # self.colorCoordinates = self.coordinatesFromIndices(
-            #     self.coloredIndices, len(self.rawImage[0])
-            # )
-
             # go over random coordinates,
             # replacing as many pairs as necessary with their colored equivalents
             for index in range(0, int(self.NRandomPixels)):
@@ -265,14 +250,11 @@ class imageColoriser(ctk.CTkFrame):
                     self.randomCoordinates[index][1],
                     self.randomCoordinates[index][0],
                     :,
-                ] = (
-                    self.rawImage[
-                        self.randomCoordinates[index][1],
-                        self.randomCoordinates[index][0],
-                        :,
-                    ]
-                    * 0
-                )
+                ] = self.rawImage[
+                    self.randomCoordinates[index][1],
+                    self.randomCoordinates[index][0],
+                    :,
+                ]
 
             # get coloredCoordinates and colorValues
             self.coloredCoordinates = np.flip(
@@ -306,37 +288,24 @@ class imageColoriser(ctk.CTkFrame):
             )
 
             grayImageWithBlockColor = self.dimensionalise(self.rawImage, self.grayImage)
-            # xSize, ySize, null = self.rawImage.shape
-            # yStart = np.random.randint(0, ySize - 50)
-            # xStart = np.random.randint(0, xSize - 50)
-
-            # def addColorBox(xStart, xEnd, yStart, yEnd):
-            #     for i in range(xStart, xEnd):
-            #         for j in range(yStart, yEnd):
-            #             grayImageWithBlockColor[i, j, :] = self.rawImage[i, j, 0:3] * 0
 
             def onclick(event):
                 if self.colorMode.get() == 2:
                     if event.inaxes == blockColorPLTWindow:
                         x, y = event.xdata, event.ydata
                         x, y = np.round(x).astype(int), np.round(y).astype(int)
-                        colorBoxSize = 20
-                        print(x, y)
-                        # addColorBox(y, y + colorBoxSize, x, x + colorBoxSize)
+                        colorBoxSize = 2
 
                         grayImageWithBlockColor[
                             y : y + colorBoxSize, x : x + colorBoxSize, :
-                        ] = (
-                            self.rawImage[y : y + colorBoxSize, x : x + colorBoxSize, :]
-                            * 0
-                        )
-                        print(grayImageWithBlockColor[y, x, :])
+                        ] = self.rawImage[y : y + colorBoxSize, x : x + colorBoxSize, :]
+
                         # generate colorCoordinates and colorValues
 
                         coloredCoordinateBounds = np.array(
                             [[y, x], [y + colorBoxSize - 1, x + colorBoxSize - 1]]
                         )
-                        self.ccb = coloredCoordinateBounds
+
                         coloredYCoordinates = [
                             y
                             for y in range(
@@ -364,13 +333,10 @@ class imageColoriser(ctk.CTkFrame):
                             ),
                             axis=0,
                         ).astype(int)
-                        # self.coloredCoordinates = np.flip(
-                        #     self.coloredCoordinates, axis=1
-                        # )
+
                         self.colorValues = grayImageWithBlockColor[
                             self.coloredCoordinates[:, 0], self.coloredCoordinates[:, 1]
                         ]
-                        self.testImage = grayImageWithBlockColor
 
                         self.grayImageWithSomeColorExists = 1
 
@@ -383,12 +349,7 @@ class imageColoriser(ctk.CTkFrame):
             cid2 = self.canvas.mpl_connect("button_press_event", onclick)
 
             blockColorPLTWindow.axis("off")
-            # blockColorPLTWindow.set_title("Image with Block Color")
-            # blockColorPLTWindow.set_title(
-            #     "Image with Block Color",
-            #     font=self.captionFont,
-            #     fontdict=self.captionFontDict,
-            # )
+
             self.canvas.draw()
 
     def addManualColor(self):
@@ -407,9 +368,6 @@ class imageColoriser(ctk.CTkFrame):
             grayImageWithManualColor = self.dimensionalise(
                 self.rawImage, self.grayImage
             )
-            # xSize, ySize, null = rawImage.shape
-            # yStart = np.random.randint(0, ySize - 50)
-            # xStart = np.random.randint(0, xSize - 50)
 
             def onclick(event):
                 if self.colorMode.get() == 0:
@@ -437,7 +395,6 @@ class imageColoriser(ctk.CTkFrame):
                         coloredCoordinateBounds = np.array(
                             [[y, x], [y + self.brushSize - 1, x + self.brushSize - 1]]
                         )
-
                         coloredYCoordinates = [
                             y
                             for y in range(
@@ -482,12 +439,6 @@ class imageColoriser(ctk.CTkFrame):
             cid2 = self.canvas.mpl_connect("button_press_event", onclick)
 
             manualColorPLTWindow.axis("off")
-            # manualColorPLTWindow.set_title("Image with Manual Color")
-            # manualColorPLTWindow.set_title(
-            #     "Image with Manual Color",
-            #     font=self.captionFont,
-            #     fontdict=self.captionFontDict,
-            # )
             self.canvas.draw()
 
     def saveImage(self):
@@ -518,17 +469,13 @@ class imageColoriser(ctk.CTkFrame):
             print("Image generated!")
             colorisedWindow.imshow(self.colorisedImage)
             colorisedWindow.axis("off")
-            # randomisedColorPLTWindow.set_title("Image with Some Color")
             self.canvas.draw()
 
-        # self.algoData = Coloriser(
-        #     self,
-        # )
-        # print(self.newClassData.newArray)
-        # print(self.coloredIndices)
-
-    def saveState(self):
-        print("Save State")
+    def clearColorisedImage(self):
+        self.mainPLTWindowBottomRight.clear()
+        self.mainPLTWindowBottomRight.axis("off")
+        self.canvas.draw()
+        print("Cleared image!")
 
     def colorDropper(self):
         if self.colorDropperVar == 0:
@@ -540,41 +487,22 @@ class imageColoriser(ctk.CTkFrame):
 
     def selectedColor1(self):
         # TODO this is clunky, could refactor as radio buttons.
-        # print('Selected Color 1')
         self.selectedColorButtonVar = 1
-        # self.selectedColorButton1.configure(border_width=3, border_color="green")
-        # self.selectedColorButton2.configure(border_width=0)
-        # self.selectedColorButton3.configure(border_width=0)
-
         self.selectedColorButton1.configure(border_width=2, border_color="#b2b2b2")
         self.selectedColorButton2.configure(border_width=1, border_color="gray16")
         self.selectedColorButton3.configure(border_width=1, border_color="gray16")
-        # self.selectedColorButtonBorder2.configure(highlightbackground="black")
-        # self.selectedColorButtonBorder3.configure(highlightbackground="black")
 
     def selectedColor2(self):
-        # print('Selected Color 2')
         self.selectedColorButtonVar = 2
         self.selectedColorButton1.configure(border_width=1, border_color="gray16")
         self.selectedColorButton2.configure(border_width=2, border_color="#b2b2b2")
         self.selectedColorButton3.configure(border_width=1, border_color="gray16")
-        # self.selectedColorButtonBorder1.configure(highlightbackground="black")
-        # self.selectedColorButtonBorder2.configure(highlightbackground="red")
-        # self.selectedColorButtonBorder3.configure(highlightbackground="black")
 
     def selectedColor3(self):
-        # print('Selected Color 3')
         self.selectedColorButtonVar = 3
-        # self.selectedColorButton1.configure(border_width=0)
-        # self.selectedColorButton2.configure(border_width=0)
-        # self.selectedColorButton3.configure(border_width=3, border_color="green")
-        #
         self.selectedColorButton1.configure(border_width=1, border_color="gray16")
         self.selectedColorButton2.configure(border_width=1, border_color="gray16")
         self.selectedColorButton3.configure(border_width=2, border_color="#b2b2b2")
-        # self.selectedColorButtonBorder1.configure(highlightbackground="black")
-        # self.selectedColorButtonBorder2.configure(highlightbackground="black")
-        # self.selectedColorButtonBorder3.configure(highlightbackground="red")
 
     def colorSelected(self, event):
         print("Color Selected")
@@ -717,7 +645,9 @@ class imageColoriser(ctk.CTkFrame):
         self.loadStatePath.grid(row=3, column=1, columnspan=4, padx=10, pady=5)
 
         self.saveStateButton = ctk.CTkButton(
-            self.sidebarFrame, command=self.saveState, text="Save State"
+            self.sidebarFrame,
+            command=self.clearColorisedImage,
+            text="Clear colorised image",
         )
         self.saveStateButton.grid(row=4, column=0, padx=20, pady=5)
         self.saveStatePath = ctk.CTkEntry(
@@ -769,13 +699,11 @@ class imageColoriser(ctk.CTkFrame):
 
         brushSizePady = 0
         self.brushSizeLabel = ctk.CTkLabel(
-            # self.colorByPixelFrame, text="Brush size", anchor="w"
             self.colorByPixelFrame,
             text="Size",
             anchor="nw",
         )
         self.brushSizeLabel.grid(
-            # row=0, column=0, columnspan=3, padx=(20, 0), sticky="w"
             row=1,
             column=1,
             columnspan=1,
@@ -789,7 +717,7 @@ class imageColoriser(ctk.CTkFrame):
         self.brushSizeEntry.grid(
             row=1, column=0, padx=10, pady=(brushSizePady, 5), sticky="w"
         )
-        # self.brushSizeEntry.grid(row=0, column=2, padx=0, pady=(5, 5), sticky="w")
+
         self.brushSizeSlider = ctk.CTkSlider(
             self.colorByPixelFrame,
             from_=self.brushSizeMin,
@@ -799,19 +727,13 @@ class imageColoriser(ctk.CTkFrame):
             width=100,
         )
         self.brushSizeSlider.grid(
-            row=1,
-            column=1,
-            columnspan=2,
-            padx=(25, 0),
-            pady=(brushSizePady, 5)
-            # row=1, column=0, columnspan=3, padx=(0, 0), pady=(5, 20), sticky="ew"
+            row=1, column=1, columnspan=2, padx=(25, 0), pady=(brushSizePady, 5)
         )
         # selected color buttons and borders #TODO: get rid of frame
         self.selectedColorButtonBorder1 = tk.Frame(
             self.colorByPixelFrame,
-            # highlightbackground="green",  # self.colorFrameColor,
             highlightthickness=0,
-            bg=self.colorFrameColor,  # colorByPixelFrame._bg_color[1],  # self.sidebarFrame._bg_color[0],
+            bg=self.colorFrameColor,
             width=10,
             height=10,
         )
@@ -821,7 +743,6 @@ class imageColoriser(ctk.CTkFrame):
 
         self.selectedColorButton1 = ctk.CTkButton(
             self.selectedColorButtonBorder1,
-            # self.sidebarFrame,
             command=self.selectedColor1,
             text="",
             border_width=1,
@@ -835,19 +756,7 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColorButton1.grid(row=7, column=0, padx=(0, 5), pady=(0, 0))
         #
 
-        # self.selectedColorButtonBorder2 = tk.Frame(
-        #     self.colorByPixelFrame,
-        #     # highlightbackground=self.colorFrameColor,
-        #     highlightthickness=0,
-        #     bg=self.colorFrameColor,
-        #     width=10,
-        #     height=10,
-        # )
-        # self.selectedColorButtonBorder2.grid(
-        #     row=2, column=1, padx=(20, 5), pady=(5, 20)
-        # )
         self.selectedColorButton2 = ctk.CTkButton(
-            # self.selectedColorButtonBorder2,
             self.selectedColorButtonBorder1,
             command=self.selectedColor2,
             text="",
@@ -860,20 +769,8 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.selectedColorButton2.grid(row=7, column=1, padx=(5, 5), pady=(0, 0))
 
-        # self.selectedColorButtonBorder3 = tk.Frame(
-        #     self.colorByPixelFrame,
-        #     # highlightbackground=self.colorFrameColor,
-        #     highlightthickness=0,
-        #     bg=self.colorFrameColor,
-        #     width=10,
-        #     height=10,
-        # )
-        # self.selectedColorButtonBorder3.grid(
-        #     row=2, column=2, padx=(20, 5), pady=(5, 20)
-        # )
         self.selectedColorButton3 = ctk.CTkButton(
             self.selectedColorButtonBorder1,
-            # self.sidebarFrame,
             command=self.selectedColor3,
             text="",
             border_width=1,
@@ -887,8 +784,6 @@ class imageColoriser(ctk.CTkFrame):
 
         self.placeholderButton = ctk.CTkButton(
             self.selectedColorButtonBorder1,
-            # self.sidebarFrame,
-            # command=print("hello"),
             text="Undo",
             border_width=1,
             border_color="gray16",
@@ -901,24 +796,16 @@ class imageColoriser(ctk.CTkFrame):
         self.colorRangeSlider = ctk.CTkSlider(
             self.colorByPixelFrame, from_=0, to=1, command=self.setColorRange, width=150
         )
-        # self.colorRangeSlider.grid(row=2, column=3, columnspan=3)
         self.colorRangeSlider.grid(
             row=4, column=4, padx=(0, 0), pady=(5, 5), columnspan=2, sticky="w"
         )
         self.colorRangeSlider.set(self.colorRangeSliderInitial)
         self.colorSelectorFigure = plt.figure(figsize=(0.7, 0.7))
-        # self.colorSelectorFigure = plt.figure(figsize=(0.5, 0.5))
         self.colorSelectorFigure.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.colorSelectorFigure.subplots_adjust(wspace=0.0, hspace=0.0)
 
         self.colorSelectorWindow = self.colorSelectorFigure.add_subplot()
         self.colorSelectorWindow.axis("off")
-        # for item in [self.colorSelectorFigure, self.colorSelectorAx]:
-        #     item.patch.set_visible(False)
-        # self.colorSelectorAx.spines['top'].set_visible(False)
-        # self.colorSelectorAx.spines['right'].set_visible(False)
-        # self.colorSelectorAx.spines['bottom'].set_visible(False)
-        # self.colorSelectorAx.spines['left'].set_visible(False)
 
         self.rainbow = mpl.colormaps["gist_rainbow"]
 
@@ -932,8 +819,6 @@ class imageColoriser(ctk.CTkFrame):
             columnspan=3,
             padx=(5, 5),
             pady=(15, 0),
-            # sticky="ns"
-            # row=0, column=4, rowspan=2, columnspan=2, pady=(5, 0), sticky="nsw"
         )
         self.colorSelectorCanvas.callbacks.connect(
             "button_press_event", self.colorSelected
@@ -970,9 +855,6 @@ class imageColoriser(ctk.CTkFrame):
         self.NRandomPixelEntry = ctk.CTkEntry(
             self.sidebarFrame, width=50, placeholder_text=int(self.NRandomPixels)
         )
-        # self.NRandomPixelEntry.grid(row=10, column=0, padx=40, pady=(5, 5), sticky="w")
-        # self.NRandomPixelLabel = ctk.CTkLabel(self.sidebarFrame, text="N")
-        # self.NRandomPixelLabel.grid(row=10, column=0, padx=20, pady=(5, 5), sticky="w")
         self.NRandomPixelEntry.grid(row=10, column=0, padx=10, pady=(5, 5), sticky="w")
         self.NRandomPixelLabel = ctk.CTkLabel(self.sidebarFrame, text="N", anchor="n")
         self.NRandomPixelLabel.grid(
@@ -999,7 +881,6 @@ class imageColoriser(ctk.CTkFrame):
             row=12, column=0, columnspan=5, padx=(0, 0), pady=(0, 0), sticky="ew"
         )
         self.RhoSlider = ctk.CTkSlider(
-            # self.sidebarFrame, from_=0, to=1, number_of_steps=20
             self.sidebarFrame,
             from_=0,
             to=1,
@@ -1008,8 +889,6 @@ class imageColoriser(ctk.CTkFrame):
         self.RhoSlider.grid(
             row=13, column=0, columnspan=5, padx=(100, 5), pady=(5, 5), sticky="ew"
         )
-        # self.RhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho")
-        # self.RhoLabel.grid(row=13, column=0, padx=50, pady=(5, 5), sticky="w")
         self.RhoSlider.set(self.Rho)
         self.RhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho", anchor="n")
         self.RhoLabel.grid(row=13, column=0, padx=(70, 0), pady=(12.5, 5), sticky="w")
@@ -1019,7 +898,6 @@ class imageColoriser(ctk.CTkFrame):
         self.RhoEntry.grid(row=13, column=0, padx=10, pady=(5, 5), sticky="w")
 
         self.BetaSlider = ctk.CTkSlider(
-            # self.sidebarFrame, from_=0, to=1, number_of_steps=20
             self.sidebarFrame,
             from_=0,
             to=1,
@@ -1068,14 +946,6 @@ class imageColoriser(ctk.CTkFrame):
         self.setDefaults()
 
 
-# we can just import the colorizer from a different file once everything's set up
-class newClass:
-    def __init__(self, parent):
-        self.parent = parent
-        self.newArray = np.multiply(parent.testArray, 2)
-        self.newText = parent.imagePath[3:10]
-
-
 if __name__ == "__main__":
     root = ctk.CTk()
     root.title("MMSC Image Colouriser")
@@ -1083,16 +953,6 @@ if __name__ == "__main__":
     app = imageColoriser(master=root)
     app.mainloop()
 
-##
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# # x = app.colorisedImage
-# ax.imshow(x)
-# plt.show()
-
-##
 cc = app.coloredCoordinates
-# ccb = app.ccb
 cv = app.colorValues
 image = app.rawImage
-# timage = app.testImage
