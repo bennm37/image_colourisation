@@ -10,6 +10,7 @@ import matplotlib.image as mpimg
 import matplotlib as mpl
 import gui.coloriserGUI as Coloriser
 
+# TODO: coordinates decide on one format, and also sort out color by thing
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 # TODO work out what's happening with the columns in sidebarframe and get "edit" "file" and "appearance" labels to center better
@@ -35,8 +36,10 @@ class imageColoriser(ctk.CTkFrame):
         # initial default values
         # TODO in setdefaults or similar ?
         self.rawImageExists = 0
+        self.loadingImage = mpimg.imread("../images/loading.png")
+        self.loadingImage = self.loadingImage.astype(np.uint16)
+        self.loadingImage = self.loadingImage[:, :, :3] * 255
         self.grayImageWithSomeColorExists = 0
-
         self.imagePath = "../images/apple.jpeg"
         self.statePath = "../states/apple.pkl"
         self.colorMode = tk.IntVar(value=0)
@@ -258,22 +261,24 @@ class imageColoriser(ctk.CTkFrame):
             # replacing as many pairs as necessary with their colored equivalents
             for index in range(0, int(self.NRandomPixels)):
                 grayImageWithRandomColor[
-                    self.randomCoordinates[index][0],
                     self.randomCoordinates[index][1],
-                    :,
-                ] = self.rawImage[
                     self.randomCoordinates[index][0],
-                    self.randomCoordinates[index][1],
                     :,
-                ]
+                ] = (
+                    self.rawImage[
+                        self.randomCoordinates[index][1],
+                        self.randomCoordinates[index][0],
+                        :,
+                    ]
+                    * 0
+                )
 
             # get coloredCoordinates and colorValues
             self.coloredCoordinates = np.array(
                 self.randomCoordinates[0 : int(self.NRandomPixels)]
             ).astype(int)
-            self.testImage = grayImageWithRandomColor
             self.colorValues = grayImageWithRandomColor[
-                self.coloredCoordinates[:, 0], self.coloredCoordinates[:, 1]
+                self.coloredCoordinates[:, 1], self.coloredCoordinates[:, 0]
             ]
 
             self.grayImageWithSomeColorExists = 1
@@ -312,28 +317,33 @@ class imageColoriser(ctk.CTkFrame):
                     if event.inaxes == blockColorPLTWindow:
                         x, y = event.xdata, event.ydata
                         x, y = np.round(x).astype(int), np.round(y).astype(int)
-                        colorBoxSize = 2
-
+                        colorBoxSize = 20
+                        print(x, y)
                         # addColorBox(y, y + colorBoxSize, x, x + colorBoxSize)
 
                         grayImageWithBlockColor[
                             y : y + colorBoxSize, x : x + colorBoxSize, :
-                        ] = self.rawImage[y : y + colorBoxSize, x : x + colorBoxSize, :]
+                        ] = (
+                            self.rawImage[y : y + colorBoxSize, x : x + colorBoxSize, :]
+                            * 0
+                        )
+                        print(grayImageWithBlockColor[y, x, :])
                         # generate colorCoordinates and colorValues
 
                         coloredCoordinateBounds = np.array(
-                            [[x, y], [x + colorBoxSize - 1, y + colorBoxSize - 1]]
+                            [[y, x], [y + colorBoxSize - 1, x + colorBoxSize - 1]]
                         )
-                        coloredXCoordinates = [
-                            x
-                            for x in range(
+                        self.ccb = coloredCoordinateBounds
+                        coloredYCoordinates = [
+                            y
+                            for y in range(
                                 coloredCoordinateBounds[0][0],
                                 coloredCoordinateBounds[1][0] + 1,
                             )
                         ]
-                        coloredYCoordinates = [
-                            y
-                            for y in range(
+                        coloredXCoordinates = [
+                            x
+                            for x in range(
                                 coloredCoordinateBounds[0][1],
                                 coloredCoordinateBounds[1][1] + 1,
                             )
@@ -344,7 +354,7 @@ class imageColoriser(ctk.CTkFrame):
                                 list(
                                     set(
                                         itertools.product(
-                                            coloredXCoordinates, coloredYCoordinates
+                                            coloredYCoordinates, coloredXCoordinates
                                         )
                                     )
                                 )
@@ -354,9 +364,10 @@ class imageColoriser(ctk.CTkFrame):
                         # self.coloredCoordinates = np.flip(
                         #     self.coloredCoordinates, axis=1
                         # )
-                        self.colorValues = self.rawImage[
+                        self.colorValues = grayImageWithBlockColor[
                             self.coloredCoordinates[:, 0], self.coloredCoordinates[:, 1]
                         ]
+                        self.testImage = grayImageWithBlockColor
 
                         self.grayImageWithSomeColorExists = 1
 
@@ -483,12 +494,14 @@ class imageColoriser(ctk.CTkFrame):
         if self.grayImageWithSomeColorExists == 0:
             print("no such image!")
         else:
+            colorisedWindow = self.mainPLTWindowBottomRight
+            colorisedWindow.clear()
             normalKernel = lambda x: np.exp(-(x**2))
             parameters = {
-                "delta": 2e-4,
-                "sigma1": 100,
-                "sigma2": 100,
-                "p": 0.5,
+                "delta": 1e-4,
+                "sigma1": 109,
+                "sigma2": 81,
+                "p": 0.2,
                 "kernel": normalKernel,
             }
             self.algoData = Coloriser.Coloriser(
@@ -497,8 +510,14 @@ class imageColoriser(ctk.CTkFrame):
                 self.colorValues,
                 parameters,
             )
+            print("Generating image, please wait...")
             self.colorisedImage = self.algoData.kernelColorise()
-            print("called coloriser")
+            print("Image generated!")
+            colorisedWindow.imshow(self.colorisedImage)
+            colorisedWindow.axis("off")
+            # randomisedColorPLTWindow.set_title("Image with Some Color")
+            self.canvas.draw()
+
         # self.algoData = Coloriser(
         #     self,
         # )
@@ -686,7 +705,7 @@ class imageColoriser(ctk.CTkFrame):
         self.saveImagePath.grid(row=2, column=1, columnspan=4, padx=10, pady=5)
 
         self.loadStateButton = ctk.CTkButton(
-            self.sidebarFrame, command=self.generateColoredImage, text="Load State"
+            self.sidebarFrame, command=self.generateColoredImage, text="Colorise Image"
         )
         self.loadStateButton.grid(row=3, column=0, padx=20, pady=5)
         self.loadStatePath = ctk.CTkEntry(
@@ -1062,14 +1081,15 @@ if __name__ == "__main__":
     app.mainloop()
 
 ##
-fig = plt.figure()
-ax = fig.add_subplot(111)
-x = app.colorisedImage
-ax.imshow(x)
-plt.show()
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# # x = app.colorisedImage
+# ax.imshow(x)
+# plt.show()
 
 ##
 cc = app.coloredCoordinates
+ccb = app.ccb
 cv = app.colorValues
 image = app.rawImage
-gimage = app.dimensionalisedGrayImage
+timage = app.testImage
