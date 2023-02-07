@@ -10,8 +10,6 @@ import matplotlib.image as mpimg
 import matplotlib as mpl
 import gui.coloriserGUI as Coloriser
 
-# TODO: coordinates decide on one format, and also sort out color by thing takes y first
-# block is ok
 # image takes [y,x,:]
 # coords take [y,x]
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -437,19 +435,19 @@ class imageColoriser(ctk.CTkFrame):
                         # generate colorCoordinates and colorValues
 
                         coloredCoordinateBounds = np.array(
-                            [[x, y], [x + self.brushSize - 1, y + self.brushSize - 1]]
+                            [[y, x], [y + self.brushSize - 1, x + self.brushSize - 1]]
                         )
-                        print(coloredCoordinateBounds)
-                        coloredXCoordinates = [
-                            x
-                            for x in range(
+
+                        coloredYCoordinates = [
+                            y
+                            for y in range(
                                 coloredCoordinateBounds[0][0],
                                 coloredCoordinateBounds[1][0] + 1,
                             )
                         ]
-                        coloredYCoordinates = [
-                            y
-                            for y in range(
+                        coloredXCoordinates = [
+                            x
+                            for x in range(
                                 coloredCoordinateBounds[0][1],
                                 coloredCoordinateBounds[1][1] + 1,
                             )
@@ -460,7 +458,7 @@ class imageColoriser(ctk.CTkFrame):
                                 list(
                                     set(
                                         itertools.product(
-                                            coloredXCoordinates, coloredYCoordinates
+                                            coloredYCoordinates, coloredXCoordinates
                                         )
                                     )
                                 )
