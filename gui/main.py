@@ -11,6 +11,7 @@ import matplotlib as mpl
 import gui.coloriserGUI as Coloriser
 
 # TODO: coordinates decide on one format, and also sort out color by thing takes y first
+# block is ok
 # image takes [y,x,:]
 # coords take [y,x]
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -276,11 +277,13 @@ class imageColoriser(ctk.CTkFrame):
                 )
 
             # get coloredCoordinates and colorValues
-            self.coloredCoordinates = np.array(
-                self.randomCoordinates[0 : int(self.NRandomPixels)]
-            ).astype(int)
+            self.coloredCoordinates = np.flip(
+                np.array(self.randomCoordinates[0 : int(self.NRandomPixels)]).astype(
+                    int
+                )
+            )
             self.colorValues = grayImageWithRandomColor[
-                self.coloredCoordinates[:, 1], self.coloredCoordinates[:, 0]
+                self.coloredCoordinates[:, 0], self.coloredCoordinates[:, 1]
             ]
 
             self.grayImageWithSomeColorExists = 1
@@ -1091,7 +1094,7 @@ if __name__ == "__main__":
 
 ##
 cc = app.coloredCoordinates
-ccb = app.ccb
+# ccb = app.ccb
 cv = app.colorValues
 image = app.rawImage
-timage = app.testImage
+# timage = app.testImage
