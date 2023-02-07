@@ -10,7 +10,9 @@ import matplotlib.image as mpimg
 import matplotlib as mpl
 import gui.coloriserGUI as Coloriser
 
-# TODO: coordinates decide on one format, and also sort out color by thing
+# TODO: coordinates decide on one format, and also sort out color by thing takes y first
+# image takes [y,x,:]
+# coords take [y,x]
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 # TODO work out what's happening with the columns in sidebarframe and get "edit" "file" and "appearance" labels to center better
