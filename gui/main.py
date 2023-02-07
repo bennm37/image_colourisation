@@ -154,8 +154,8 @@ class imageColoriser(ctk.CTkFrame):
             rawImage = mpimg.imread(fileName)
             # special case with pngs
             if fileName.endswith(".png"):
-                rawImage = rawImage.astype(np.uint16)
                 rawImage = rawImage[:, :, :3] * 255
+                rawImage = rawImage.astype(np.uint16)
 
             self.rawImage = rawImage
             self.rawImageExists = 1
@@ -453,9 +453,9 @@ class imageColoriser(ctk.CTkFrame):
             normalKernel = lambda x: np.exp(-(x**2))
             parameters = {
                 "delta": 1e-4,
-                "sigma1": 109,
-                "sigma2": 81,
-                "p": 0.2,
+                "sigma1": 100,
+                "sigma2": 10,
+                "p": 2,
                 "kernel": normalKernel,
             }
             self.algoData = Coloriser.Coloriser(
@@ -952,7 +952,7 @@ if __name__ == "__main__":
     root.geometry(f"{1300}x{740}")
     app = imageColoriser(master=root)
     app.mainloop()
-
-cc = app.coloredCoordinates
-cv = app.colorValues
+##
+# cc = app.coloredCoordinates
+# cv = app.colorValues
 image = app.rawImage
