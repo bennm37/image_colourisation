@@ -9,6 +9,7 @@ from pathlib import Path
 import matplotlib.image as mpimg
 import matplotlib as mpl
 import gui.coloriserGUI as Coloriser
+import gui.popupWaitingWindow as waitingWindowClass
 
 # NOTE:
 # image takes [y,x,:]
@@ -449,6 +450,8 @@ class imageColoriser(ctk.CTkFrame):
         if self.grayImageWithSomeColorExists == 0:
             print("no such image!")
         else:
+            popupWaitingWindow = waitingWindowClass.waitingWindow()
+
             colorisedWindow = self.mainPLTWindowBottomRight
             colorisedWindow.clear()
             normalKernel = lambda x: np.exp(-(x**2))
@@ -465,12 +468,12 @@ class imageColoriser(ctk.CTkFrame):
                 self.colorValues,
                 parameters,
             )
-            print("Generating image, please wait...")
             self.colorisedImage = self.algoData.kernelColorise()
-            print("Image generated!")
             colorisedWindow.imshow(self.colorisedImage)
             colorisedWindow.axis("off")
             self.canvas.draw()
+
+            popupWaitingWindow.destroy()
 
     def clearColorisedImage(self):
         self.mainPLTWindowBottomRight.clear()
@@ -648,7 +651,7 @@ class imageColoriser(ctk.CTkFrame):
         self.loadImagePath.grid(row=1, column=1, columnspan=4, padx=10, pady=5)
 
         self.saveImageButton = ctk.CTkButton(
-            self.sidebarFrame, command=self.saveImage, text="Save Image"
+            self.sidebarFrame, command=popup_bonus, text="Save Image"
         )
         self.saveImageButton.grid(row=2, column=0, padx=20, pady=5)
         self.saveImagePath = ctk.CTkEntry(
@@ -965,6 +968,19 @@ class imageColoriser(ctk.CTkFrame):
         #
         self.exitButton.grid(row=16, column=1)
         self.setDefaults()
+
+
+def popup_bonus():
+    win = ctk.CTkToplevel()
+    win.wm_title("Window")
+
+    l = tk.Label(win, text="Input")
+    l.grid(row=0, column=0)
+
+    b = ctk.CTkButton(win, text="Okay", command=win.destroy)
+    b.grid(row=1, column=0)
+    win.wait_visibility()
+    win.grab_set()
 
 
 if __name__ == "__main__":
