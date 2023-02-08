@@ -384,8 +384,8 @@ class imageColoriser(ctk.CTkFrame):
 
                         x, y = event.xdata, event.ydata  # coordinates
                         x, y = np.round(x).astype(int), np.round(y).astype(int)
-                        print(x)
-                        print(y)
+                        # print(x)
+                        # print(y)
 
                         grayImageWithManualColor[
                             y : y + self.brushSize, x : x + self.brushSize, :
@@ -597,22 +597,26 @@ class imageColoriser(ctk.CTkFrame):
 
         # define the canvas upon which we place the images
         self.canvas = FigureCanvasTkAgg(self.mainWindowFigure, self.imageFrame)
-        # NavigationToolbar2Tk
-        # self.canvas.get_tk_widget().pack(side="top", padx=4, pady=4)
         self.canvas.get_tk_widget().pack(side="top", padx=0, pady=0)
         self.toolbar = tkagg.NavigationToolbar2Tk(self.canvas, self.imageFrame)
+        self.toolbar.set_message = lambda x: ""
         self.toolbar.config(background="gray16")
-        self.toolbar._message_label.config(background="gray16")
-        for button in self.toolbar.winfo_children()[0:3]:
+        self.toolbar.children["!button2"].pack_forget()
+        self.toolbar.children["!button3"].pack_forget()
+        self.toolbar.children["!button4"].pack_forget()
+        self.toolbar._message_label.config(
+            background="gray16"
+        )  # TODO: make the checkboxes dark blue when selected
+        for button in self.toolbar.winfo_children()[0:-2]:
             button.configure(
                 background="#3A7EBF",
                 highlightbackground="#325882",
-                highlightcolor="#325882",
-                fg="#325882",
-                activeforeground="#325882",
-                activebackground="#325882",
+                # highlightcolor="#325882",
+                # fg="#325882",
+                # activeforeground="#325882",
+                # activebackground="#325882",
             )
-        # self.toolbar = NavigationToolbar2TkAgg( self.canvas, self )
+        self.toolbar.winfo_children()[-2].configure(background="gray16")
         self.toolbar.update()
         self.toolbar.pack(side="bottom", padx=3, pady=3)
         self.canvas.draw()
