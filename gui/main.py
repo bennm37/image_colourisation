@@ -1,4 +1,5 @@
 import tkinter as tk
+import matplotlib.backends.backend_tkagg as tkagg
 import itertools
 import customtkinter as ctk
 import matplotlib.pyplot as plt
@@ -569,7 +570,7 @@ class imageColoriser(ctk.CTkFrame):
         self.imageFrame.grid(row=0, column=1, rowspan=4, columnspan=1, sticky="nsew")
         self.imageFrame.grid_rowconfigure(16, weight=1)
 
-        self.mainWindowFigure = plt.figure(figsize=(20, 8))  # TODO: what size?
+        self.mainWindowFigure = plt.figure(figsize=(20, 7))  # TODO: what size?
         self.mainWindowFigure.patch.set_facecolor(self.frameDark3)
         self.mainWindowFigure.subplots_adjust(
             # left=0.01, right=0.99, top=0.99, bottom=0.01, hspace=0, wspace=0
@@ -596,8 +597,24 @@ class imageColoriser(ctk.CTkFrame):
 
         # define the canvas upon which we place the images
         self.canvas = FigureCanvasTkAgg(self.mainWindowFigure, self.imageFrame)
+        # NavigationToolbar2Tk
         # self.canvas.get_tk_widget().pack(side="top", padx=4, pady=4)
         self.canvas.get_tk_widget().pack(side="top", padx=0, pady=0)
+        self.toolbar = tkagg.NavigationToolbar2Tk(self.canvas, self.imageFrame)
+        self.toolbar.config(background="gray16")
+        self.toolbar._message_label.config(background="gray16")
+        for button in self.toolbar.winfo_children()[0:3]:
+            button.configure(
+                background="#3A7EBF",
+                highlightbackground="#325882",
+                highlightcolor="#325882",
+                fg="#325882",
+                activeforeground="#325882",
+                activebackground="#325882",
+            )
+        # self.toolbar = NavigationToolbar2TkAgg( self.canvas, self )
+        self.toolbar.update()
+        self.toolbar.pack(side="bottom", padx=3, pady=3)
         self.canvas.draw()
 
         # create sidebar and widgets after defining frame
