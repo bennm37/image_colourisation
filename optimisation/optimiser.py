@@ -5,40 +5,185 @@ import numpy as np
 from pathlib import Path
 import matplotlib.image as mpimg
 from gui.coloriser import Coloriser
+import h5py
+from sys import getsizeof
 
-fileName = "chipmunk.jpg"
-rawImage = plt.imread(f"images/{fileName}")
-grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
-grayImage = np.dstack([grayImage] * 3)
-xSize, ySize, d = grayImage.shape
-NRandomPixelsMax = 500
-# get random indices to eventually color in
-randomIndices = np.random.default_rng().choice(
-    xSize * ySize, size=int(NRandomPixelsMax), replace=False
-)
 
-# define the coordinate pairs which we will color;
-# returns an array formatted as [[x0,y0],[x1,y1]...]
-randomCoordinates = np.array(
-    [[index % xSize, index // xSize] for index in randomIndices]
-)
-# someColorImage = grayImage.copy()
-# someColorImage[randomCoordinates[:, 0], randomCoordinates[:, 1]] = rawImage[
-#     randomCoordinates[:, 0], randomCoordinates[:, 1]
-# ]
+def plotImages(rawImage, noisyImage, improvedImage):
+    mainWindowFigure = plt.figure()
+    extraFigure = plt.figure()
+    rawImageWindow = mainWindowFigure.add_subplot(111)
+    optimisedImageWindow = extraFigure.add_subplot(111)
+    rawImageWindow.imshow(rawImage)
+    optimisedImageWindow.imshow(improvedImage)
+    optimisedImageWindow.axis("off")
+    optimisedImageWindow.set_title("improved image")
+    rawImageWindow.axis("off")
+    rawImageWindow.set_title("raw image")
+    plt.show()
 
-colorCoordinates = randomCoordinates
-colorValues = rawImage[randomCoordinates[:, 0], randomCoordinates[:, 1]]
-# parameters = {
-normalKernel = lambda x: np.exp(-(x**2))
-#     "delta": 0.01,
-#     "sigma1": 100,
-#     "sigma2": 100,
-#     "p": 1,
-#     "kernel": normalKernel,
-# }
 
-#
+def getInit(fileName):
+    # fileName = "chipmunk.jpg"
+    rawImage = plt.imread(f"images/{fileName}")
+    grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
+    grayImage = np.dstack([grayImage] * 3)
+    xSize, ySize, d = grayImage.shape
+    NRandomPixelsMax = 500
+    # get random indices to eventually color in
+    randomIndices = np.random.default_rng().choice(
+        xSize * ySize, size=int(NRandomPixelsMax), replace=False
+    )
+
+    # define the coordinate pairs which we will color;
+    # returns an array formatted as [[x0,y0],[x1,y1]...]
+    randomCoordinates = np.array(
+        [[index % xSize, index // xSize] for index in randomIndices]
+    )
+    # someColorImage = grayImage.copy()
+    # someColorImage[randomCoordinates[:, 0], randomCoordinates[:, 1]] = rawImage[
+    #     randomCoordinates[:, 0], randomCoordinates[:, 1]
+    # ]
+
+    colorCoordinates = randomCoordinates
+    colorValues = rawImage[randomCoordinates[:, 0], randomCoordinates[:, 1]]
+    return rawImage, grayImage, colorCoordinates, colorValues
+
+
+rim, gim, cc, cv = getInit("chipmunk.jpg")
+gc = np.indices([gim.shape[0], gim.shape[1]]).reshape(2, gim.shape[0] * gim.shape[1]).T
+gim2 = gim[:, :, 0]
+delta, sigma1, sigma2, p = 0.01, 100, 100, 1
+kernel = lambda x: np.exp(-(x**2))
+# normalKernel = lambda x: np.exp(-(x**2))
+params = {
+    "delta": delta,
+    "sigma1": sigma1,
+    "sigma2": sigma1,
+    "p": p,
+    "kernel": lambda x: np.exp(-(x**2)),
+}
+
+
+def colorise(grayImage, colorCoordinates, colorValues, parameters):
+    """grayImage should be of shape width x height x 3, colorCoordinates n x 2 ,
+    colorValues n x 3"""
+    width, height, d = grayImage.shape
+    grayImage = grayImage[:, :, 0]
+    grayCoordinates = np.indices([width, height]).reshape(2, width * height).T
+    colorCoordinates = colorCoordinates
+    colorValues = colorValues
+    delta = parameters["delta"]
+    sigma1 = parameters["sigma1"]
+    sigma2 = parameters["sigma2"]
+    p = parameters["p"]
+    kernel = parameters["kernel"]
+
+    image = np.zeros((width, height, 3))
+    for i in range(3):
+        KD = getK(colorCoordinates, colorCoordinates, grayImage)
+        n = colorCoordinates.shape[0]
+        a_s = np.linalg.solve(KD + delta * np.eye(n), colorValues[:, i])
+        # K2 = self.getK(self.grayCoordinates, self.colorCoordinates)
+        # debugging
+        # print(f"{KD.shape=}")
+        # print(f"{n=}")
+        # print(f"{self.getK(self.grayCoordinates,self.colorCoordinates).shape=}")
+        # print(f"{K2 = }")
+        layer_i = getK(grayCoordinates, colorCoordinates, grayImage) @ a_s
+        layer_i = layer_i.reshape(width, height)
+        image[:, :, i] = layer_i
+    return image.astype(np.uint16)
+
+
+def getK(X, Y, grayImage):
+    """Generates the kernel matrix for 2 lists of indicies X and Y. X and Y
+    are lists of coordiantes of shape k x 2"""
+    nx, ny = len(X), len(Y)
+    # return np.random.rand(nx,ny)/1000
+    print("doing norm")
+    distXY = np.linalg.norm(
+        X[:, np.newaxis].astype(np.int32) - Y[np.newaxis, :].astype(np.int32), axis=2
+    )
+    print("finished norm")
+    grayX = grayImage[X[:, 0], X[:, 1]]
+    grayY = grayImage[Y[:, 0], Y[:, 1]]
+    grayXY = np.abs(
+        grayX[:, np.newaxis].astype(np.int32) - grayY[np.newaxis, :].astype(np.int32)
+    )
+    return kernel(distXY / sigma1) * kernel(grayXY**p / sigma2)
+
+
+def getChunk(gc, cc):
+    gc = gc[:, np.newaxis]
+    cc = cc[np.newaxis, :]
+    return gc, cc
+
+
+gc2, cc2 = getChunk(gc, cc)
+##
+# a_s = np.linalg.solve(getK(cc, cc, gim2) + delta * np.eye(cc.shape[0]), cv[:, 0])
+# x = colorise(gim, cc, cv, params)
+t = gc[:, np.newaxis].astype(np.int32)
+x = gc
+y = cc
+chunksize = 10000
+# t2 = np.zeros((10, y.shape[0], 2))
+# for i in range(0, x.shape[0]):
+with h5py.File("test.h5", "a") as hf:
+    dset = hf.create_dataset(
+        "voltage284",
+        (x.shape[0], 500, 2),
+        # (x.shape[0], y.shape[0], 2),
+        maxshape=(None, None, None),
+        dtype="i8",
+        # chunks=(, 500, 2),
+    )
+    # dset[:, :, :] = np.random.randint(dset.shape)
+    print(dset.shape)
+    for i in range(0, chunksize):
+        # for i in range(0, x.shape[0]):
+        print(i)
+        # print(i)
+        # dset.resize(dset.shape[0] + chunksize, axis=0)
+        # TODO: new gc
+        t = gc2[0 + chunksize * i : chunksize + chunksize * i] - cc2[:]
+        print(t.shape)
+        dset[0 + chunksize * i : chunksize + chunksize * i, :, :] = t
+        # print(.shape)
+        # t2 = gc[i, :] - cc[:, :]
+        # hf.resize("name-of-dataset", data=t2)
+        ##
+with h5py.File("test.h5", "r") as f:
+    # Print all root level object names (aka keys)
+    # these can be group or dataset names
+    print("Keys: %s" % f.keys())
+    # get first object name/key; may or may NOT be a group
+    a_group_key = list(f.keys())[0]
+
+    # get the object type for a_group_key: usually group or dataset
+    print(type(f[a_group_key]))
+
+    # If a_group_key is a group name,
+    # this gets the object names in the group and returns as a list
+    data = list(f[a_group_key])
+
+    # If a_group_key is a dataset name,
+    # this gets the dataset values and returns as a list
+    data = list(f[a_group_key])
+    # preferred methods to get dataset values:
+    ds_obj = f[a_group_key]  # returns as a h5py dataset object
+    ds_arr = f[a_group_key][()]  # returns as a numpy array
+##
+tt = cc[np.newaxis, :].astype(np.int32)
+##
+z = np.subtract(t, tt)
+print("done")
+##
+t = getK(gc, cc, gim2)
+print("done!")
+
+##
 def readImage(name):
     fileName = Path(".", "images", name)
     rawImage = mpimg.imread(fileName)
@@ -160,18 +305,6 @@ for i in range(60):
     print(f"Run {i}")
     print(f"Loss: {loss}")
 ##
-def plotImages(rawImage, noisyImage, improvedImage):
-    mainWindowFigure = plt.figure()
-    extraFigure = plt.figure()
-    rawImageWindow = mainWindowFigure.add_subplot(111)
-    optimisedImageWindow = extraFigure.add_subplot(111)
-    rawImageWindow.imshow(rawImage)
-    optimisedImageWindow.imshow(improvedImage)
-    optimisedImageWindow.axis("off")
-    optimisedImageWindow.set_title("improved image")
-    rawImageWindow.axis("off")
-    rawImageWindow.set_title("raw image")
-    plt.show()
 
 
 ##
