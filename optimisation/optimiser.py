@@ -6,6 +6,7 @@ from pathlib import Path
 import matplotlib.image as mpimg
 from gui.coloriser import Coloriser
 import h5py
+import numexpr as ne
 from sys import getsizeof
 
 
@@ -50,9 +51,9 @@ def getInit(fileName):
     return rawImage, grayImage, colorCoordinates, colorValues
 
 
-rim, gim, cc, cv = getInit("chipmunk.jpg")
-gc = np.indices([gim.shape[0], gim.shape[1]]).reshape(2, gim.shape[0] * gim.shape[1]).T
-gim2 = gim[:, :, 0]
+# rim, gim, cc, cv = getInit("chipmunk.jpg")
+# gc = np.indices([gim.shape[0], gim.shape[1]]).reshape(2, gim.shape[0] * gim.shape[1]).T
+# gim2 = gim[:, :, 0]
 delta, sigma1, sigma2, p = 0.01, 100, 100, 1
 kernel = lambda x: np.exp(-(x**2))
 # normalKernel = lambda x: np.exp(-(x**2))
@@ -114,46 +115,50 @@ def getK(X, Y, grayImage):
     return kernel(distXY / sigma1) * kernel(grayXY**p / sigma2)
 
 
-def getChunk(gc, cc):
-    gc = gc[:, np.newaxis]
-    cc = cc[np.newaxis, :]
-    return gc, cc
+def saveDifferences(fileName):
+    rim, gim, cc, cv = getInit(fileName)
+    gc = (
+        np.indices([gim.shape[0], gim.shape[1]])
+        .reshape(2, gim.shape[0] * gim.shape[1])
+        .T
+    )
+    # gim2 = gim[:, :, 0]
+    gc2 = gc[:, np.newaxis].astype(np.int32)
+    cc2 = cc[np.newaxis, :].astype(np.int32)
+    return np.split(ne.evaluate("gc2-cc2"), 1000)
+    # np.save("diffArray.npy", ne.evaluate("gc2 - cc2")=)
+    # return np.einsum(
+    #     "ijk,ijk->ij",
+    #     ne.evaluate("gc2 - cc2"),
+    #     ne.evaluate("gc2-cc2"),
+    #     optimize="optimal",
+    # )
 
 
-gc2, cc2 = getChunk(gc, cc)
+t = saveDifferences("chipmunk.jpg")
+print("generatred t")
 ##
-# a_s = np.linalg.solve(getK(cc, cc, gim2) + delta * np.eye(cc.shape[0]), cv[:, 0])
-# x = colorise(gim, cc, cv, params)
-t = gc[:, np.newaxis].astype(np.int32)
-x = gc
-y = cc
-chunksize = 10000
-# t2 = np.zeros((10, y.shape[0], 2))
+# q = np.empty((1500000, 500))
+
+##
+for i in range(0, len(t)):
+    print(i)
+    workingmat = t[0]
+    del t[0]
+    # print("deleted")
+    np.save(
+        f"./tmp/run{i}",
+        np.einsum("ijk,ijk->ij", workingmat, workingmat, optimize="optimal"),
+    )
+
+# t = ne.evaluate("gc2-cc2")
+##
+# np.save("test_large_array_save.dat", t, allow_pickle=False)
+##
 # for i in range(0, x.shape[0]):
 with h5py.File("test.h5", "a") as hf:
-    dset = hf.create_dataset(
-        "voltage284",
-        (x.shape[0], 500, 2),
-        # (x.shape[0], y.shape[0], 2),
-        maxshape=(None, None, None),
-        dtype="i8",
-        # chunks=(, 500, 2),
-    )
-    # dset[:, :, :] = np.random.randint(dset.shape)
-    print(dset.shape)
-    for i in range(0, chunksize):
-        # for i in range(0, x.shape[0]):
-        print(i)
-        # print(i)
-        # dset.resize(dset.shape[0] + chunksize, axis=0)
-        # TODO: new gc
-        t = gc2[0 + chunksize * i : chunksize + chunksize * i] - cc2[:]
-        print(t.shape)
-        dset[0 + chunksize * i : chunksize + chunksize * i, :, :] = t
-        # print(.shape)
-        # t2 = gc[i, :] - cc[:, :]
-        # hf.resize("name-of-dataset", data=t2)
-        ##
+    dset = hf.create_dataset("voltage284", data=t, chunks=True)
+    ##
 with h5py.File("test.h5", "r") as f:
     # Print all root level object names (aka keys)
     # these can be group or dataset names
