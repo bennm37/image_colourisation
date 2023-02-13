@@ -204,18 +204,21 @@ def getLayerI(x, y):
 def getColK(gim, x, y, col):
     colXY = x[:] - y[col]
     print(colXY.shape)
-    distXYSquared = np.einsum(
-        "ij,ij->i",
-        colXY,
-        colXY,
-        optimize="optimal",
-    )
+    # distXYSquared = np.einsum(
+    #     "ij,ij->i",
+    #     colXY,
+    #     colXY,
+    #     optimize="optimal",
+    # )
+    distXYSquared = ne.evaluate("sum(colXY**2,1)")
     print(distXYSquared.shape)
     grayX = gim[x[:, 0], x[:, 1]].astype(np.float64)
     grayY = gim[y[:, 0], y[:, 1]].astype(np.float64)
     grayXY = np.abs((grayX[:] - grayY[col]))
     return np.exp(-distXYSquared / 100**2) * kernel(grayXY**2 / 100)
 
+
+y = getColK(gim, gc, cc, 100)
 
 KD = getKD(cc)
 ##
@@ -230,7 +233,6 @@ layerIOld = getK(gc, cc, gim) @ a_sOld
 layerIOld = layerIOld.reshape(225, 225)
 ##
 colval = 1
-x = getColK(gim, gc, cc, colval)
 # print(colK - t[:, colval, :])
 # q = np.empty((1500000, 500))
 # x = linalg_norm(t)

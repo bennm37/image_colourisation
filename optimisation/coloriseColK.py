@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.linalg as lag
+import numexpr as ne
 import matplotlib.pyplot as plt
 
 
@@ -58,19 +59,34 @@ class Coloriser:
         # !IMPORTANT: fixes floats
         colXY = x[:] - y[col]
         # print(colXY.shape)
-        distXYSquared = np.einsum(
-            "ij,ij->i",
-            colXY,
-            colXY,
-            optimize="optimal",
-        )
-        # print(distXYSquared.shape)
+        # TODO: einsum or numexpr?
+        # distXYSquared = np.einsum(
+        #     "ij,ij->i",
+        #     colXY,
+        #     colXY,
+        #     optimize="optimal",
+        # )
+        distXYSquared = ne.evaluate("sum(colXY**2,1)")
         grayX = self.grayImage[x[:, 0], x[:, 1]].astype(np.float64)
         grayY = self.grayImage[y[:, 0], y[:, 1]].astype(np.float64)
-        grayXY = np.abs((grayX[:] - grayY[col]))
-        return np.exp(-distXYSquared / self.sigma1**2) * self.kernel(
-            grayXY**self.p / self.sigma2
+        grayAbsDiff = np.abs((grayX[:] - grayY[col]))
+        # print("going to get grayxykernelised")
+        grayXYKernelised = ne.evaluate(
+            "exp( -( (grayDiff ** power)/s2 )**2 )",
+            local_dict={"grayDiff": grayAbsDiff, "power": self.p, "s2": self.sigma2},
         )
+        # grayXY = ne.evaluate("abs(grayX[:] - grayY[col])")
+        # grayXYKernelised = self.kernel(() ** self.p / self.sigma2)
+        # s1 = self.sigma1
+        # print("going to get distxykernelised")
+        distXYKernelised = ne.evaluate(
+            "exp(-distSquared / (s1)**2)",
+            local_dict={"distSquared": distXYSquared, "s1": self.sigma1},
+        )
+        return ne.evaluate("distXYKernelised * grayXYKernelised")
+        # return np.exp(-distXYSquared / self.sigma1**2) * self.kernel(
+        #     grayXY**self.p / self.sigma2
+        # )
 
     def getKD(self, x):
         KD = np.zeros((x.shape[0], x.shape[0]))
@@ -81,6 +97,7 @@ class Coloriser:
     def getLayerI(self, x, y):
         layerI = np.zeros((x.shape[0], y.shape[0]))
         for i in range(0, y.shape[0]):
+            # print(f"on layer {i}")
             layerI[:, i] = self.getColK(x, y, i)[:]
         return layerI
 
@@ -89,6 +106,7 @@ class Coloriser:
         image = np.zeros((self.width, self.height, 3))
         KD = self.getKD(self.colorCoordinates)
         for i in range(3):
+            print(f"on iter {i}")
             n = self.colorCoordinates.shape[0]
             self.a_s = lag.solve(
                 KD + self.delta * np.eye(n), self.colorValues[:, i].astype(np.float64)
@@ -99,6 +117,7 @@ class Coloriser:
             # print(f"{n=}")
             # print(f"{self.getK(self.grayCoordinates,self.colorCoordinates).shape=}")
             # print(f"{K2 = }")
+            print("getting layer")
             layer_i = (
                 self.getLayerI(self.grayCoordinates, self.colorCoordinates) @ self.a_s
             )
