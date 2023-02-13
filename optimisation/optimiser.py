@@ -13,7 +13,7 @@ from sys import getsizeof
 
 def linalg_norm(a):
     sq_norm = ne.evaluate("sum(a**2,2)")
-    del a
+    a = None
     return sq_norm
 
 
@@ -33,7 +33,7 @@ def plotImages(rawImage, noisyImage, improvedImage):
 
 def getInit(fileName):
     # fileName = "chipmunk.jpg"
-    rawImage = plt.imread(f"images/{fileName}")
+    rawImage = plt.imread(f"../images/{fileName}")
     grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
     grayImage = np.dstack([grayImage] * 3)
     xSize, ySize, d = grayImage.shape
@@ -58,9 +58,10 @@ def getInit(fileName):
     return rawImage, grayImage, colorCoordinates, colorValues
 
 
-# rim, gim, cc, cv = getInit("chipmunk.jpg")
-# gc = np.indices([gim.shape[0], gim.shape[1]]).reshape(2, gim.shape[0] * gim.shape[1]).T
-# gim2 = gim[:, :, 0]
+rim, gim, cc, cv = getInit("apple.jpeg")
+
+gc = np.indices([gim.shape[0], gim.shape[1]]).reshape(2, gim.shape[0] * gim.shape[1]).T
+gim = gim[:, :, 0]
 delta, sigma1, sigma2, p = 0.01, 100, 100, 1
 kernel = lambda x: np.exp(-(x**2))
 # normalKernel = lambda x: np.exp(-(x**2))
@@ -109,53 +110,128 @@ def getK(X, Y, grayImage):
     are lists of coordiantes of shape k x 2"""
     nx, ny = len(X), len(Y)
     # return np.random.rand(nx,ny)/1000
-    print("doing norm")
-    distXY = np.linalg.norm(
-        X[:, np.newaxis].astype(np.int32) - Y[np.newaxis, :].astype(np.int32), axis=2
-    )
-    print("finished norm")
+    distXY = np.linalg.norm(X[:, np.newaxis] - Y[np.newaxis, :], axis=2)
     grayX = grayImage[X[:, 0], X[:, 1]]
     grayY = grayImage[Y[:, 0], Y[:, 1]]
-    grayXY = np.abs(
-        grayX[:, np.newaxis].astype(np.int32) - grayY[np.newaxis, :].astype(np.int32)
+    grayXY = np.abs(grayX[:, np.newaxis] - grayY[np.newaxis, :])
+    return kernel(distXY / 100) * kernel(grayXY**2 / 100)
+
+
+getKInitial = getK(cc, cc, gim)
+# ##
+# # return kernel(distXY / sigma1) * kernel(grayXY**p / sigma2)
+#
+#
+# def saveDifferences(fileName):
+#     rim, gim, cc, cv = getInit(fileName)
+#     gc = (
+#         np.indices([gim.shape[0], gim.shape[1]])
+#         .reshape(2, gim.shape[0] * gim.shape[1])
+#         .T
+#     )
+#     gim = gim[:, :, 0]
+#     # rim = None
+#     # gim = None
+#     # gim2 = gim[:, :, 0]
+#     gc2 = gc[:, np.newaxis].astype(np.int32)
+#     cc2 = cc[np.newaxis, :].astype(np.int32)
+#     # gc = None
+#     # cc = None
+#     # t = ne.evaluate("gc2-cc2")
+#     print("generatred t")
+#     # gc2 = None
+#     # cc2 = None
+#     # print("working on x")
+#     # x = linalg_norm(t)
+#     # print("generated x")
+#     # t = None
+#     return (
+#         gc,
+#         cc,
+#         gim,
+#     )  # t
+#     # ne.evaluate("gc2-cc2")  # np.split(ne.evaluate("gc2-cc2"), 1000)
+#     # np.save("diffArray.npy", ne.evaluate("gc2 - cc2")=)
+#     # return np.einsum(
+#     #     "ijk,ijk->ij",
+#     #     ne.evaluate("gc2 - cc2"),
+#     #     ne.evaluate("gc2-cc2"),
+#     #     optimize="optimal",
+#     # )
+#
+#
+# (
+#     gc,
+#     cc,
+#     gim,
+# ) = saveDifferences("chipmunk.jpg")
+#
+#
+# grayX = gim[gc[:, 0], gc[:, 1]]
+# grayY = gim[cc[:, 0], cc[:, 1]]
+# grayXY = np.abs(grayX[:] - grayY[0])
+# grayXY = grayXY**0.5
+#
+# grayXY = np.abs(grayX[:, np.newaxis] - grayY[np.newaxis, :])
+
+# colXY = gc[:] - cc[0]
+# print(colXY.shape)
+# distXYSquared = np.einsum(
+#     "ij,ij->i",
+#     colXY,
+#     colXY,
+#     optimize="optimal",
+# )[:, np.newaxis]
+
+##
+# BEGINS THE COLUMNAL IMPLEMENTATION
+
+
+def getKD(x):
+    KD = np.zeros((x.shape[0], x.shape[0]))
+    for i in range(0, x.shape[0]):
+        KD[:, i] = getColK(gim, x, x, i)[:]
+    return KD
+
+
+def getLayerI(x, y):
+    layerI = np.zeros((x.shape[0], y.shape[0]))
+    for i in range(0, y.shape[0]):
+        layerI[:, i] = getColK(gim, x, y, i)[:]
+    return layerI
+
+
+def getColK(gim, x, y, col):
+    colXY = x[:] - y[col]
+    print(colXY.shape)
+    distXYSquared = np.einsum(
+        "ij,ij->i",
+        colXY,
+        colXY,
+        optimize="optimal",
     )
-    return kernel(distXY / sigma1) * kernel(grayXY**p / sigma2)
+    print(distXYSquared.shape)
+    grayX = gim[x[:, 0], x[:, 1]].astype(np.float64)
+    grayY = gim[y[:, 0], y[:, 1]].astype(np.float64)
+    grayXY = np.abs((grayX[:] - grayY[col]))
+    return np.exp(-distXYSquared / 100**2) * kernel(grayXY**2 / 100)
 
 
-def saveDifferences(fileName):
-    rim, gim, cc, cv = getInit(fileName)
-    gc = (
-        np.indices([gim.shape[0], gim.shape[1]])
-        .reshape(2, gim.shape[0] * gim.shape[1])
-        .T
-    )
-    rim = None
-    gim = None
-    # gim2 = gim[:, :, 0]
-    gc2 = gc[:, np.newaxis].astype(np.int32)
-    cc2 = cc[np.newaxis, :].astype(np.int32)
-    gc = None
-    cc = None
-    t = ne.evaluate("gc2-cc2")
-    print("generatred t")
-    gc2 = None
-    cc2 = None
-    print("working on x")
-    x = linalg_norm(t)
-    print("generated x")
-    t = None
-    return x
-    # ne.evaluate("gc2-cc2")  # np.split(ne.evaluate("gc2-cc2"), 1000)
-    # np.save("diffArray.npy", ne.evaluate("gc2 - cc2")=)
-    # return np.einsum(
-    #     "ijk,ijk->ij",
-    #     ne.evaluate("gc2 - cc2"),
-    #     ne.evaluate("gc2-cc2"),
-    #     optimize="optimal",
-    # )
+KD = getKD(cc)
+##
+a_sOld = np.linalg.solve(getKInitial + delta * np.eye(cc.shape[0]), cv[:, 0])
+a_sCol = np.linalg.solve(KD + delta * np.eye(cc.shape[0]), cv[:, 0].astype(np.float64))
+##
+layerI = getLayerI(gc, cc)
+layerI = layerI @ a_sCol
+layerI = layerI.reshape(225, 225)
 
-
-x = saveDifferences("chipmunk.jpg")
+layerIOld = getK(gc, cc, gim) @ a_sOld
+layerIOld = layerIOld.reshape(225, 225)
+##
+colval = 1
+x = getColK(gim, gc, cc, colval)
+# print(colK - t[:, colval, :])
 # q = np.empty((1500000, 500))
 # x = linalg_norm(t)
 # del t

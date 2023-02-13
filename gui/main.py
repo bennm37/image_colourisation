@@ -8,7 +8,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from pathlib import Path
 import matplotlib.image as mpimg
 import matplotlib as mpl
-import gui.coloriserGUI as Coloriser
+
+# import gui.coloriserGUI as Coloriser
+import optimisation.coloriseColK as Coloriser
 import gui.popupWaitingWindow as waitingWindowClass
 
 # NOTE:
@@ -458,8 +460,8 @@ class imageColoriser(ctk.CTkFrame):
             parameters = {
                 "delta": 1e-4,
                 "sigma1": 100,
-                "sigma2": 10,
-                "p": 2,
+                "sigma2": 100,
+                "p": 0.5,
                 "kernel": normalKernel,
             }
             self.algoData = Coloriser.Coloriser(
@@ -468,7 +470,8 @@ class imageColoriser(ctk.CTkFrame):
                 self.colorValues,
                 parameters,
             )
-            self.colorisedImage = self.algoData.kernelColorise()
+            self.colorisedImage = self.algoData.kernelColoriseFIXED()
+            # self.colorisedImage = self.algoData.kernelColorise()
             colorisedWindow.imshow(self.colorisedImage)
             colorisedWindow.axis("off")
             self.canvas.draw()
