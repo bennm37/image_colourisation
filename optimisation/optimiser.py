@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
-from benderopt.base import OptimizationProblem, Observation
-from benderopt.optimizer import optimizers
+
+# from benderopt.base import OptimizationProblem, Observation
+# from benderopt.optimizer import optimizers
 import numpy as np
 from pathlib import Path
 import matplotlib.image as mpimg
@@ -8,6 +9,12 @@ from gui.coloriser import Coloriser
 import h5py
 import numexpr as ne
 from sys import getsizeof
+
+
+def linalg_norm(a):
+    sq_norm = ne.evaluate("sum(a**2,2)")
+    del a
+    return sq_norm
 
 
 def plotImages(rawImage, noisyImage, improvedImage):
@@ -122,10 +129,23 @@ def saveDifferences(fileName):
         .reshape(2, gim.shape[0] * gim.shape[1])
         .T
     )
+    rim = None
+    gim = None
     # gim2 = gim[:, :, 0]
     gc2 = gc[:, np.newaxis].astype(np.int32)
     cc2 = cc[np.newaxis, :].astype(np.int32)
-    return np.split(ne.evaluate("gc2-cc2"), 1000)
+    gc = None
+    cc = None
+    t = ne.evaluate("gc2-cc2")
+    print("generatred t")
+    gc2 = None
+    cc2 = None
+    print("working on x")
+    x = linalg_norm(t)
+    print("generated x")
+    t = None
+    return x
+    # ne.evaluate("gc2-cc2")  # np.split(ne.evaluate("gc2-cc2"), 1000)
     # np.save("diffArray.npy", ne.evaluate("gc2 - cc2")=)
     # return np.einsum(
     #     "ijk,ijk->ij",
@@ -135,11 +155,10 @@ def saveDifferences(fileName):
     # )
 
 
-t = saveDifferences("chipmunk.jpg")
-print("generatred t")
-##
+x = saveDifferences("chipmunk.jpg")
 # q = np.empty((1500000, 500))
-
+# x = linalg_norm(t)
+# del t
 ##
 for i in range(0, len(t)):
     print(i)
