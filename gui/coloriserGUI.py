@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.linalg as lag
+import numexpr as ne
 import matplotlib.pyplot as plt
 
 
@@ -52,3 +53,59 @@ class Coloriser:
         return self.kernel(distXY / self.sigma1) * self.kernel(
             grayXY**self.p / self.sigma2
         )
+
+    def getColK(self, x, y, col):
+        # TODO: einsum or numexpr?
+        # distXYSquared = np.einsum(
+        #     "ij,ij->i",
+        #     colXY,
+        #     colXY,
+        #     optimize="optimal",
+        # )
+
+        colXY = x[:] - y[col]
+        distXYKernelised = ne.evaluate(
+            "exp(-distSquared / (s1)**2)",
+            local_dict={
+                "distSquared": ne.evaluate("sum(colXY**2,1)"),
+                "s1": self.sigma1,
+            },
+        )
+
+        grayX = self.grayImage[x[:, 0], x[:, 1]].astype(np.float64)
+        grayY = self.grayImage[y[:, 0], y[:, 1]].astype(np.float64)
+        grayAbsDiff = np.abs((grayX[:] - grayY[col]))
+        grayXYKernelised = ne.evaluate(
+            "exp( -( (grayDiff ** power)/s2 )**2 )",
+            local_dict={"grayDiff": grayAbsDiff, "power": self.p, "s2": self.sigma2},
+        )
+        return ne.evaluate("distXYKernelised * grayXYKernelised")
+
+    def getKD(self, x):
+        KD = np.zeros((x.shape[0], x.shape[0]))
+        for col in range(0, x.shape[0]):
+            KD[:, col] = self.getColK(x, x, col)[:]
+        return KD
+
+    def getLayerI(self, x, y):
+        layerI = np.zeros((x.shape[0], y.shape[0]))
+        for col in range(0, y.shape[0]):
+            layerI[:, col] = self.getColK(x, y, col)[:]
+        return layerI
+
+    def kernelColoriseColumnal(self):
+        image = np.zeros((self.width, self.height, 3))
+        KD = self.getKD(self.colorCoordinates)
+        n = self.colorCoordinates.shape[0]
+        print(
+            "Generating template image layer...\n(Note: This process may take several minutes for large (> 1000 * 1000) images."
+        )
+        layerITemplate = self.getLayerI(self.grayCoordinates, self.colorCoordinates)
+        for i in range(3):
+            self.a_s = lag.solve(
+                KD + self.delta * np.eye(n), self.colorValues[:, i].astype(np.float64)
+            )
+            layer_i = layerITemplate @ self.a_s
+            layer_i = layer_i.reshape(self.width, self.height)
+            image[:, :, i] = layer_i
+        return image.astype(np.uint64)

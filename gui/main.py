@@ -1,18 +1,17 @@
 import tkinter as tk
-import matplotlib.backends.backend_tkagg as tkagg
-import itertools
 import customtkinter as ctk
-import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib.backends.backend_tkagg as tkagg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from pathlib import Path
+import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib as mpl
+import itertools
+import pathlib
+import numpy as np
+import coloriserGUI as Coloriser
+import popupWaitingWindow as waitingWindowClass
 
-# import gui.coloriserGUI as Coloriser
-import optimisation.coloriseColK as Coloriser
-import gui.popupWaitingWindow as waitingWindowClass
-
+mainDirectory = pathlib.Path(__file__).parent.parent  # directory containing main files
 # NOTE:
 # image takes [y,x,:]
 # -> coords must be [y,x]
@@ -42,9 +41,9 @@ class imageColoriser(ctk.CTkFrame):
         # TODO in setdefaults or similar ?
         self.rawImageExists = 0
         self.grayImageWithSomeColorExists = 0
-        self.imagePath = "../images/apple.jpeg"
+        self.fileName = "Select file"
         self.statePath = "../states/apple.pkl"
-        self.colorMode = tk.IntVar(value=0)
+        self.colorMode = tk.IntVar(value=1)
         self.labelColor = ("#B2B2B2", "#525252")
         self.brushSizeMin = 0
         self.brushSizeMax = 20
@@ -53,13 +52,13 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColorButtonVar = 2
         # TODO: set these next values??
         self.NRandomPixels = 1000
-        self.NRandomPixelsMax = 10000
+        self.NRandomPixelsMax = 5000
         self.colorRangeSliderInitial = 0.67
         self.Rho = 0.5
         self.Beta = 0.5
 
         # styling
-        fpath = Path(
+        fpath = pathlib.Path(
             mpl.get_data_path(),
             "/Users/benn-m/Documents/image_colourisation/gui/fonts/Roboto-Medium.ttf",
         )
@@ -86,7 +85,7 @@ class imageColoriser(ctk.CTkFrame):
         self.generateAppearanceSection()
 
     def setDefaults(self):
-        self.imagePath = "../images/apple.jpeg"
+        self.fileName = "Select file"
         self.statePath = "../states/apple.pkl"
         self.brushSizeMax = 30
         self.brushSizeMin = 1
@@ -141,7 +140,7 @@ class imageColoriser(ctk.CTkFrame):
 
         # load file
         fileName = ctk.filedialog.askopenfilename(
-            initialdir=str(Path("..", "images")),
+            initialdir=str(pathlib.Path(mainDirectory, "images")),
             title="Select A File",
             filetypes=(
                 ("jpg files", "*.jpg"),
@@ -153,6 +152,8 @@ class imageColoriser(ctk.CTkFrame):
 
         # save file name to be referenced
         self.fileName = fileName
+
+        self.loadImagePath.configure(placeholder_text=self.fileName)
 
         if fileName:
             rawImage = mpimg.imread(fileName)
@@ -456,6 +457,7 @@ class imageColoriser(ctk.CTkFrame):
 
             colorisedWindow = self.mainPLTWindowBottomRight
             colorisedWindow.clear()
+
             normalKernel = lambda x: np.exp(-(x**2))
             parameters = {
                 "delta": 1e-4,
@@ -464,14 +466,13 @@ class imageColoriser(ctk.CTkFrame):
                 "p": 0.5,
                 "kernel": normalKernel,
             }
-            self.algoData = Coloriser.Coloriser(
+            self.coloriserInstance = Coloriser.Coloriser(
                 self.dimensionalisedGrayImage,
                 self.coloredCoordinates,
                 self.colorValues,
                 parameters,
             )
-            self.colorisedImage = self.algoData.kernelColoriseFIXED()
-            # self.colorisedImage = self.algoData.kernelColorise()
+            self.colorisedImage = self.coloriserInstance.kernelColoriseColumnal()
             colorisedWindow.imshow(self.colorisedImage)
             colorisedWindow.axis("off")
             self.canvas.draw()
@@ -649,38 +650,38 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.loadImageButton.grid(row=1, column=0, padx=5, pady=5)
         self.loadImagePath = ctk.CTkEntry(
-            self.sidebarFrame, placeholder_text=self.imagePath
+            self.sidebarFrame, placeholder_text=self.fileName
         )
         self.loadImagePath.grid(row=1, column=1, columnspan=4, padx=10, pady=5)
-
-        self.saveImageButton = ctk.CTkButton(
-            self.sidebarFrame, command=popup_bonus, text="Save Image"
-        )
-        self.saveImageButton.grid(row=2, column=0, padx=20, pady=5)
-        self.saveImagePath = ctk.CTkEntry(
-            self.sidebarFrame, placeholder_text=self.imagePath
-        )
-        self.saveImagePath.grid(row=2, column=1, columnspan=4, padx=10, pady=5)
 
         self.loadStateButton = ctk.CTkButton(
             self.sidebarFrame, command=self.generateColoredImage, text="Colorise Image"
         )
-        self.loadStateButton.grid(row=3, column=0, padx=20, pady=5)
+        self.loadStateButton.grid(row=2, column=0, padx=20, pady=5)
         self.loadStatePath = ctk.CTkEntry(
             self.sidebarFrame, placeholder_text=self.statePath
         )
-        self.loadStatePath.grid(row=3, column=1, columnspan=4, padx=10, pady=5)
+        self.loadStatePath.grid(row=2, column=1, columnspan=4, padx=10, pady=5)
 
         self.saveStateButton = ctk.CTkButton(
             self.sidebarFrame,
             command=self.clearColorisedImage,
             text="Clear colorised image",
         )
-        self.saveStateButton.grid(row=4, column=0, padx=20, pady=5)
+        self.saveStateButton.grid(row=3, column=0, padx=20, pady=5)
         self.saveStatePath = ctk.CTkEntry(
             self.sidebarFrame, placeholder_text=self.statePath
         )
-        self.saveStatePath.grid(row=4, column=1, columnspan=4, padx=10, pady=5)
+        self.saveStatePath.grid(row=3, column=1, columnspan=4, padx=10, pady=5)
+
+        self.saveImageButton = ctk.CTkButton(
+            self.sidebarFrame, command=None, text="Placeholder"
+        )
+        self.saveImageButton.grid(row=4, column=0, padx=20, pady=5)
+        self.saveImagePath = ctk.CTkEntry(
+            self.sidebarFrame, placeholder_text=self.fileName
+        )
+        self.saveImagePath.grid(row=4, column=1, columnspan=4, padx=10, pady=5)
 
     def generateEditSection(self):
         # edit section
