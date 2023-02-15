@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import matplotlib.image as mpimg
-from gui.coloriser import Coloriser
+from gui.coloriserGUI import Coloriser
 import h5py
 import numexpr as ne
 from sys import getsizeof
