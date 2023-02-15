@@ -54,11 +54,15 @@ class imageColoriser(ctk.CTkFrame):
         self.NRandomPixels = 1000
         self.NRandomPixelsMax = 5000
         self.colorRangeSliderInitial = 0.67
+        self.deltaEntry = ctk.StringVar(value="1e-4")
+        self.rhoEntry = ctk.StringVar(value="0.5")
+        self.sigma1Entry = ctk.StringVar(value="100")
+        self.sigma2Entry = ctk.StringVar(value="100")
 
-        # self.rhoValue = ctk.StringVar(value="0.5")
-        # self.sigma1Value = ctk.StringVar(value="100")
-        # self.sigma2Value = ctk.StringVar(value="100")
-        self.Beta = 1
+        self.deltaValue = 1e-4
+        self.rhoValue = 0.5
+        self.sigma1Value = 100
+        self.sigma2Value = 100
 
         # styling
         fpath = pathlib.Path(
@@ -464,9 +468,9 @@ class imageColoriser(ctk.CTkFrame):
             normalKernel = lambda x: np.exp(-(x**2))
             parameters = {
                 "delta": self.deltaValue,
-                "sigma1": 100,
-                "sigma2": 100,
-                "p": 0.5,
+                "sigma1": self.sigma1Value,
+                "sigma2": self.sigma2Value,
+                "p": self.rhoValue,
                 "kernel": normalKernel,
             }
             self.coloriserInstance = Coloriser.Coloriser(
@@ -544,14 +548,6 @@ class imageColoriser(ctk.CTkFrame):
         self.NRandomPixelEntry.configure(placeholder_text=int(self.NRandomPixels))
         if self.colorMode.get() == 1:
             self.addRandomisedColor()
-
-    def setRho(self, event):
-        self.Rho = event
-        self.deltaEntry.configure(placeholder_text=np.round(self.Rho, 2))
-
-    def setBeta(self, event):
-        self.Beta = event
-        self.rhoEntryBox.configure(placeholder_text=np.round(self.Beta, 2))
 
     def setColorChoiceBackground(self, color):
         if color == "dark":
@@ -688,7 +684,7 @@ class imageColoriser(ctk.CTkFrame):
 
     def hello(self):
         print(self.rhoEntry.get())
-        print(self.deltaEntry)
+        print(self.deltaValue)
         print(self.sigma1Entry)
         print(self.sigma1Entry)
 
@@ -942,21 +938,6 @@ class imageColoriser(ctk.CTkFrame):
             row=12, column=0, columnspan=5, padx=(0, 0), pady=(0, 0), sticky="ew"
         )
 
-        self.deltaEntry = ctk.StringVar(value="1e-4")
-        self.rhoEntry = ctk.StringVar(value="0.5")
-        self.sigma1Entry = ctk.StringVar(value="100")
-        self.sigma2Entry = ctk.StringVar(value="100")
-        # self.RhoSlider = ctk.CTkEntry(
-        #     self.sidebarFrame,
-        #     # variable=self.sda,
-        #     # from_=0,
-        #     # to=1,
-        #     # command=self.setRho,
-        # )
-        # self.RhoSlider.grid(
-        #     row=13, column=0, columnspan=5, padx=(100, 5), pady=(5, 5), sticky="ew"
-        # )
-        # self.RhoSlider.set(self.Rho)
         self.deltaLabel = ctk.CTkLabel(self.sidebarFrame, text="Delta:", anchor="n")
         self.deltaLabel.grid(row=13, column=0, padx=(20, 0), pady=(12.5, 5), sticky="w")
         self.deltaEntryBox = ctk.CTkEntry(
@@ -966,19 +947,6 @@ class imageColoriser(ctk.CTkFrame):
         self.deltaEntryBox.grid(row=13, column=1, columnspan=4, padx=10, pady=(5, 5))
         self.deltaEntry.trace("w", self.setDelta)
 
-        # self.BetaSlider = ctk.CTkSlider(
-        #     self.sidebarFrame,
-        #     from_=0,
-        #     to=1,
-        #     command=self.setBeta,
-        # )
-        # self.BetaSlider.grid(
-        #     row=14, column=0, columnspan=5, padx=(100, 5), pady=(5, 5), sticky="ew"
-        # )
-        # self.BetaLabel = ctk.CTkLabel(self.sidebarFrame, text="Beta")
-        # self.BetaLabel.grid(row=14, column=0, padx=50, pady=(5, 5), sticky="w")
-
-        # self.BetaSlider.set(self.Beta)
         self.rhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho:", anchor="n")
         self.rhoLabel.grid(row=14, column=0, padx=(20, 0), pady=(12.5, 5), sticky="w")
         self.rhoEntryBox = ctk.CTkEntry(
@@ -1005,12 +973,10 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.sigma2EntryBox = ctk.CTkEntry(
             self.sidebarFrame,
-            # width=100,
             textvariable=self.sigma2Entry,
         )
         self.sigma2EntryBox.grid(row=16, column=1, columnspan=4, padx=10, pady=(5, 5))
         self.sigma2Entry.trace("w", self.setSigma2)
-        # self.loadStateP)
 
     def generateAppearanceSection(self):
         # appearance section
