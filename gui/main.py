@@ -971,7 +971,9 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.deltaEntry,
         )
-        self.deltaEntryBox.grid(row=13, column=1, columnspan=4, padx=(20,5), pady=(5, 5))
+        self.deltaEntryBox.grid(
+            row=13, column=1, columnspan=4, padx=(20, 5), pady=(5, 5)
+        )
         self.deltaEntry.trace("w", self.setDelta)
 
         self.rhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho:", anchor="n")
@@ -980,7 +982,7 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.rhoEntry,
         )
-        self.rhoEntryBox.grid(row=14, column=1, padx=(20,5), pady=(5, 5), columnspan=4)
+        self.rhoEntryBox.grid(row=14, column=1, padx=(20, 5), pady=(5, 5), columnspan=4)
         self.rhoEntry.trace("w", self.setRho)
 
         self.sigma1Label = ctk.CTkLabel(self.sidebarFrame, text="Sigma 1:", anchor="n")
@@ -989,7 +991,9 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.sigma1Entry,
         )
-        self.sigma1EntryBox.grid(row=15, column=1, padx=(20,5), pady=(5, 5), columnspan=4)
+        self.sigma1EntryBox.grid(
+            row=15, column=1, padx=(20, 5), pady=(5, 5), columnspan=4
+        )
         self.sigma1Entry.trace("w", self.setSigma1)
 
         self.sigma2Label = ctk.CTkLabel(self.sidebarFrame, text="Sigma 2:", anchor="n")
@@ -998,7 +1002,9 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.sigma2Entry,
         )
-        self.sigma2EntryBox.grid(row=16, column=1, columnspan=4, padx=(20,5), pady=(5, 5))
+        self.sigma2EntryBox.grid(
+            row=16, column=1, columnspan=4, padx=(20, 5), pady=(5, 5)
+        )
         self.sigma2Entry.trace("w", self.setSigma2)
 
     def generateAppearanceSection(self):
@@ -1026,7 +1032,7 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame, text="Exit", command=root.destroy
         )
         #
-        self.exitButton.grid(row=18, column=1,padx=(20,5))
+        self.exitButton.grid(row=18, column=1, padx=(20, 5))
         self.setDefaults()
 
 
