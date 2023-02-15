@@ -154,8 +154,10 @@ class imageColoriser(ctk.CTkFrame):
 
         # save file name to be referenced
         self.fileName = fileName
+        self.colorisedFileName = f"{fileName.split('.')[0]}_colorised.{fileName.split('.')[1]}"
 
         self.loadImageEntry.configure(placeholder_text=self.fileName)
+        self.saveImageEntry.configure(placeholder_text=self.colorisedFileName)
 
         if fileName:
             rawImage = mpimg.imread(fileName)
@@ -449,7 +451,12 @@ class imageColoriser(ctk.CTkFrame):
             self.canvas.draw()
 
     def saveImage(self):
-        self.mainWindowFigure.savefig("./image.png")
+        # self.mainWindowFigure.savefig("./image.png")
+        try:
+            plt.imsave(f"{self.colorisedFileName}",self.colorisedImage.astype(np.uint8))
+        except AttributeError:
+            print("Please colorise the image first.")
+        print("Image Saved Successfully!")
 
     def generateColoredImage(self):
         if self.grayImageWithSomeColorExists == 0:
@@ -648,34 +655,25 @@ class imageColoriser(ctk.CTkFrame):
         )
         self.loadImageEntry.grid(row=1, column=1, columnspan=4, padx=(20,5), pady=5)
 
+        self.saveImageButton = ctk.CTkButton(
+            self.sidebarFrame, command=self.saveImage, text="Save Image"
+        )
+        self.saveImageButton.grid(row = 2, column=0, padx=20, pady=5)
+        self.saveImageEntry = ctk.CTkEntry(
+            self.sidebarFrame, placeholder_text=self.fileName
+        )
+        self.saveImageEntry.grid(row = 2, column=1, columnspan=4, padx=(20,5), pady=5)
+
         self.colorisedImageButton = ctk.CTkButton(
             self.sidebarFrame, command=self.generateColoredImage, text="Colorise Image"
         )
-        self.colorisedImageButton.grid(row=2, column=0, padx=20, pady=5)
-        self.colorisedImageEntry = ctk.CTkEntry(
-            self.sidebarFrame, placeholder_text=self.statePath
-        )
-        self.colorisedImageEntry.grid(row=2, column=1, columnspan=4, padx=(20,5), pady=5)
-
+        self.colorisedImageButton.grid(row=3, column=0, padx=20, pady=(5,10))
         self.clearColorisedImageButton = ctk.CTkButton(
             self.sidebarFrame,
             command=self.clearColorisedImage,
             text="Clear colorised image",
         )
-        self.clearColorisedImageButton.grid(row=3, column=0, padx=20, pady=5)
-        self.clearColorisedImagePath = ctk.CTkEntry(
-            self.sidebarFrame, placeholder_text=self.statePath
-        )
-        self.clearColorisedImagePath.grid(row=3, column=1, columnspan=4, padx=(20,5), pady=5)
-
-        self.saveImageButton = ctk.CTkButton(
-            self.sidebarFrame, command=self.hello, text="Save Image"
-        )
-        self.saveImageButton.grid(row=4, column=0, padx=20, pady=5)
-        self.saveImagePath = ctk.CTkEntry(
-            self.sidebarFrame, placeholder_text=self.fileName
-        )
-        self.saveImagePath.grid(row=4, column=1, columnspan=4, padx=(20,5), pady=5)
+        self.clearColorisedImageButton.grid(row=3, column=1, padx=(20,5), pady=(5,10))
 
     def hello(self):
         print(self.rhoEntry.get())
@@ -1018,7 +1016,7 @@ def popup_bonus():
 if __name__ == "__main__":
     root = ctk.CTk()
     root.title("MMSC Image Colouriser")
-    root.geometry(f"{1300}x{768}")
+    root.geometry(f"{1300}x{750}")
     app = imageColoriser(master=root)
     app.mainloop()
 ##
