@@ -19,11 +19,6 @@ mainDirectory = pathlib.Path(__file__).parent.parent  # directory containing mai
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
-# TODO work out what's happening with the columns in sidebarframe and get "edit" "file" and "appearance" labels to center better
-# TODO make label backgrounds less chunky
-# TODO make sliders line up and longer
-# TODO: fix all the default stuff
-
 
 class imageColoriser(ctk.CTkFrame):
     def __init__(self, master=None):
@@ -160,7 +155,7 @@ class imageColoriser(ctk.CTkFrame):
         # save file name to be referenced
         self.fileName = fileName
 
-        self.loadImagePath.configure(placeholder_text=self.fileName)
+        self.loadImageEntry.configure(placeholder_text=self.fileName)
 
         if fileName:
             rawImage = mpimg.imread(fileName)
@@ -648,39 +643,39 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame, command=self.loadImage, text="Load Image"
         )
         self.loadImageButton.grid(row=1, column=0, padx=5, pady=5)
-        self.loadImagePath = ctk.CTkEntry(
+        self.loadImageEntry = ctk.CTkEntry(
             self.sidebarFrame, placeholder_text=self.fileName
         )
-        self.loadImagePath.grid(row=1, column=1, columnspan=4, padx=10, pady=5)
+        self.loadImageEntry.grid(row=1, column=1, columnspan=4, padx=(20,5), pady=5)
 
-        self.loadStateButton = ctk.CTkButton(
+        self.colorisedImageButton = ctk.CTkButton(
             self.sidebarFrame, command=self.generateColoredImage, text="Colorise Image"
         )
-        self.loadStateButton.grid(row=2, column=0, padx=20, pady=5)
-        self.loadStatePath = ctk.CTkEntry(
+        self.colorisedImageButton.grid(row=2, column=0, padx=20, pady=5)
+        self.colorisedImageEntry = ctk.CTkEntry(
             self.sidebarFrame, placeholder_text=self.statePath
         )
-        self.loadStatePath.grid(row=2, column=1, columnspan=4, padx=10, pady=5)
+        self.colorisedImageEntry.grid(row=2, column=1, columnspan=4, padx=(20,5), pady=5)
 
-        self.saveStateButton = ctk.CTkButton(
+        self.clearColorisedImageButton = ctk.CTkButton(
             self.sidebarFrame,
             command=self.clearColorisedImage,
             text="Clear colorised image",
         )
-        self.saveStateButton.grid(row=3, column=0, padx=20, pady=5)
-        self.saveStatePath = ctk.CTkEntry(
+        self.clearColorisedImageButton.grid(row=3, column=0, padx=20, pady=5)
+        self.clearColorisedImagePath = ctk.CTkEntry(
             self.sidebarFrame, placeholder_text=self.statePath
         )
-        self.saveStatePath.grid(row=3, column=1, columnspan=4, padx=10, pady=5)
+        self.clearColorisedImagePath.grid(row=3, column=1, columnspan=4, padx=(20,5), pady=5)
 
         self.saveImageButton = ctk.CTkButton(
-            self.sidebarFrame, command=self.hello, text="Placeholder"
+            self.sidebarFrame, command=self.hello, text="Save Image"
         )
         self.saveImageButton.grid(row=4, column=0, padx=20, pady=5)
         self.saveImagePath = ctk.CTkEntry(
             self.sidebarFrame, placeholder_text=self.fileName
         )
-        self.saveImagePath.grid(row=4, column=1, columnspan=4, padx=10, pady=5)
+        self.saveImagePath.grid(row=4, column=1, columnspan=4, padx=(20,5), pady=5)
 
     def hello(self):
         print(self.rhoEntry.get())
@@ -830,7 +825,7 @@ class imageColoriser(ctk.CTkFrame):
             self.colorByPixelFrame, from_=0, to=1, command=self.setColorRange, width=150
         )
         self.colorRangeSlider.grid(
-            row=4, column=4, padx=(0, 0), pady=(5, 5), columnspan=2, sticky="w"
+            row=4, column=4, padx=(0, 5), pady=(5, 5), columnspan=2, sticky="w"
         )
         self.colorRangeSlider.set(self.colorRangeSliderInitial)
         self.colorSelectorFigure = plt.figure(figsize=(0.7, 0.7))
@@ -850,7 +845,7 @@ class imageColoriser(ctk.CTkFrame):
             column=3,
             rowspan=3,
             columnspan=3,
-            padx=(5, 5),
+            padx=(5, 10),
             pady=(15, 0),
         )
         self.colorSelectorCanvas.callbacks.connect(
@@ -944,7 +939,7 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.deltaEntry,
         )
-        self.deltaEntryBox.grid(row=13, column=1, columnspan=4, padx=(5,35), pady=(5, 5))
+        self.deltaEntryBox.grid(row=13, column=1, columnspan=4, padx=(20,5), pady=(5, 5))
         self.deltaEntry.trace("w", self.setDelta)
 
         self.rhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho:", anchor="n")
@@ -953,7 +948,7 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.rhoEntry,
         )
-        self.rhoEntryBox.grid(row=14, column=1, padx=(5,35), pady=(5, 5), columnspan=4)
+        self.rhoEntryBox.grid(row=14, column=1, padx=(20,5), pady=(5, 5), columnspan=4)
         self.rhoEntry.trace("w", self.setRho)
 
         self.sigma1Label = ctk.CTkLabel(self.sidebarFrame, text="Sigma 1:", anchor="n")
@@ -964,7 +959,7 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.sigma1Entry,
         )
-        self.sigma1EntryBox.grid(row=15, column=1, padx=(5,35), pady=(5, 5), columnspan=4)
+        self.sigma1EntryBox.grid(row=15, column=1, padx=(20,5), pady=(5, 5), columnspan=4)
         self.sigma1Entry.trace("w", self.setSigma1)
 
         self.sigma2Label = ctk.CTkLabel(self.sidebarFrame, text="Sigma 2:", anchor="n")
@@ -975,7 +970,7 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.sigma2Entry,
         )
-        self.sigma2EntryBox.grid(row=16, column=1, columnspan=4, padx=(5,35), pady=(5, 5))
+        self.sigma2EntryBox.grid(row=16, column=1, columnspan=4, padx=(20,5), pady=(5, 5))
         self.sigma2Entry.trace("w", self.setSigma2)
 
     def generateAppearanceSection(self):
@@ -1003,7 +998,7 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame, text="Exit", command=root.destroy
         )
         #
-        self.exitButton.grid(row=18, column=1)
+        self.exitButton.grid(row=18, column=1,padx=(20,5))
         self.setDefaults()
 
 
