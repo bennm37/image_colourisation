@@ -958,12 +958,12 @@ class imageColoriser(ctk.CTkFrame):
         # )
         # self.RhoSlider.set(self.Rho)
         self.deltaLabel = ctk.CTkLabel(self.sidebarFrame, text="Delta:", anchor="n")
-        self.deltaLabel.grid(row=13, column=0, padx=(20, 0), pady=(12.5, 5), sticky="w")
+        self.deltaLabel.grid(row=13, column=0, padx=(20, 0), pady=(5, 5), sticky="w")
         self.deltaEntryBox = ctk.CTkEntry(
             self.sidebarFrame,
             textvariable=self.deltaEntry,
         )
-        self.deltaEntryBox.grid(row=13, column=1, columnspan=4, padx=10, pady=(5, 5))
+        self.deltaEntryBox.grid(row=13, column=1, columnspan=4, padx=(5,35), pady=(5, 5))
         self.deltaEntry.trace("w", self.setDelta)
 
         # self.BetaSlider = ctk.CTkSlider(
@@ -980,35 +980,35 @@ class imageColoriser(ctk.CTkFrame):
 
         # self.BetaSlider.set(self.Beta)
         self.rhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho:", anchor="n")
-        self.rhoLabel.grid(row=14, column=0, padx=(20, 0), pady=(12.5, 5), sticky="w")
+        self.rhoLabel.grid(row=14, column=0, padx=(20, 0), pady=(5, 5), sticky="w")
         self.rhoEntryBox = ctk.CTkEntry(
             self.sidebarFrame,
             textvariable=self.rhoEntry,
         )
-        self.rhoEntryBox.grid(row=14, column=1, padx=10, pady=(5, 5), columnspan=4)
+        self.rhoEntryBox.grid(row=14, column=1, padx=(5,35), pady=(5, 5), columnspan=4)
         self.rhoEntry.trace("w", self.setRho)
 
         self.sigma1Label = ctk.CTkLabel(self.sidebarFrame, text="Sigma 1:", anchor="n")
         self.sigma1Label.grid(
-            row=15, column=0, padx=(20, 0), pady=(12.5, 5), sticky="w"
+            row=15, column=0, padx=(20, 0), pady=(5, 5), sticky="w"
         )
         self.sigma1EntryBox = ctk.CTkEntry(
             self.sidebarFrame,
             textvariable=self.sigma1Entry,
         )
-        self.sigma1EntryBox.grid(row=15, column=1, padx=10, pady=(5, 5), columnspan=4)
+        self.sigma1EntryBox.grid(row=15, column=1, padx=(5,35), pady=(5, 5), columnspan=4)
         self.sigma1Entry.trace("w", self.setSigma1)
 
         self.sigma2Label = ctk.CTkLabel(self.sidebarFrame, text="Sigma 2:", anchor="n")
         self.sigma2Label.grid(
-            row=16, column=0, padx=(20, 0), pady=(12.5, 5), sticky="w"
+            row=16, column=0, padx=(20, 0), pady=(5, 5), sticky="w"
         )
         self.sigma2EntryBox = ctk.CTkEntry(
             self.sidebarFrame,
             # width=100,
             textvariable=self.sigma2Entry,
         )
-        self.sigma2EntryBox.grid(row=16, column=1, columnspan=4, padx=10, pady=(5, 5))
+        self.sigma2EntryBox.grid(row=16, column=1, columnspan=4, padx=(5,35), pady=(5, 5))
         self.sigma2Entry.trace("w", self.setSigma2)
         # self.loadStateP)
 
