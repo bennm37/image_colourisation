@@ -21,39 +21,40 @@ class Coloriser:
         self.p = parameters["p"]
         self.kernel = parameters["kernel"]
 
-    def kernelColorise(self):
+    def kernelColoriseColumnal(self):
         image = np.zeros((self.width, self.height, 3))
+        KD = self.getKD(self.colorCoordinates)
+        n = self.colorCoordinates.shape[0]
+        print(
+            "Generating template image layer...\n(Note: This process may take several minutes for large (> 1000 * 1000) images."
+        )
+        layerITemplate = self.getLayerI(self.grayCoordinates, self.colorCoordinates)
         for i in range(3):
-            KD = self.getK(self.colorCoordinates, self.colorCoordinates)
-            n = self.colorCoordinates.shape[0]
-            self.a_s = lag.solve(KD + self.delta * np.eye(n), self.colorValues[:, i])
-            # K2 = self.getK(self.grayCoordinates, self.colorCoordinates)
-            # debugging
-            # print(f"{KD.shape=}")
-            # print(f"{n=}")
-            # print(f"{self.getK(self.grayCoordinates,self.colorCoordinates).shape=}")
-            # print(f"{K2 = }")
-            layer_i = self.getK(self.grayCoordinates, self.colorCoordinates) @ self.a_s
+            self.a_s = lag.solve(
+                KD + self.delta * np.eye(n), self.colorValues[:, i].astype(np.float64)
+            )
+            layer_i = layerITemplate @ self.a_s
             layer_i = layer_i.reshape(self.width, self.height)
             image[:, :, i] = layer_i
+        return image.astype(np.uint64)
+
+    def kernelColoriseColumnalLarge(self):
+        image = np.zeros((self.width, self.height, 3))
+        KD = self.getKD(self.colorCoordinates)
+        n = self.colorCoordinates.shape[0]
+        for i in range(3):
+            print(f"Starting layer {i+1}")
+            self.a_s = lag.solve(KD + self.delta * np.eye(n), self.colorValues[:, i])
+            layerI = np.zeros((self.grayCoordinates.shape[0]))
+            for col in range(n):
+                layerI += self.getColK(self.grayCoordinates, self.colorCoordinates, col)*self.a_s[col]
+            layerI = layerI.reshape(self.width, self.height)
+            image[:, :, i] = layerI
         return image.astype(np.uint16)
 
     def convNetColorise(self):
         pass
-
-    def getK(self, X, Y):
-        """Generates the kernel matrix for 2 lists of indicies X and Y. X and Y
-        are lists of coordiantes of shape k x 2"""
-        nx, ny = len(X), len(Y)
-        # return np.random.rand(nx,ny)/1000
-        distXY = lag.norm(X[:, np.newaxis] - Y[np.newaxis, :], axis=2)
-        grayX = self.grayImage[X[:, 0], X[:, 1]]
-        grayY = self.grayImage[Y[:, 0], Y[:, 1]]
-        grayXY = np.abs(grayX[:, np.newaxis] - grayY[np.newaxis, :])
-        return self.kernel(distXY / self.sigma1) * self.kernel(
-            grayXY**self.p / self.sigma2
-        )
-
+    
     def getColK(self, x, y, col):
         # TODO: einsum or numexpr?
         # distXYSquared = np.einsum(
@@ -93,19 +94,4 @@ class Coloriser:
             layerI[:, col] = self.getColK(x, y, col)[:]
         return layerI
 
-    def kernelColoriseColumnal(self):
-        image = np.zeros((self.width, self.height, 3))
-        KD = self.getKD(self.colorCoordinates)
-        n = self.colorCoordinates.shape[0]
-        print(
-            "Generating template image layer...\n(Note: This process may take several minutes for large (> 1000 * 1000) images."
-        )
-        layerITemplate = self.getLayerI(self.grayCoordinates, self.colorCoordinates)
-        for i in range(3):
-            self.a_s = lag.solve(
-                KD + self.delta * np.eye(n), self.colorValues[:, i].astype(np.float64)
-            )
-            layer_i = layerITemplate @ self.a_s
-            layer_i = layer_i.reshape(self.width, self.height)
-            image[:, :, i] = layer_i
-        return image.astype(np.uint64)
+
