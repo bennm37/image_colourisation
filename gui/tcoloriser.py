@@ -2,12 +2,13 @@ from coloriserGUI import Coloriser
 import numpy as np
 import matplotlib.pyplot as plt
 
-rawImage = plt.imread("../images/chipmunk.jpg")
+rawImage = plt.imread("./images/fresco.png")
+rawImage = (256*rawImage).astype(np.float64)
 grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
 grayImage = np.dstack([grayImage] * 3)
 print(np.max(grayImage))
 xSize, ySize, d = grayImage.shape
-NRandomPixelsMax = 300
+NRandomPixelsMax = 500
 
 # get random indices to eventually color in
 randomIndices = np.random.default_rng().choice(
@@ -37,13 +38,13 @@ colorValues = rawImage[randomCoordinates[:, 0], randomCoordinates[:, 1]]
 normalKernel = lambda x: np.exp(-(x**2))
 parameters = {
     "delta": 0.01,
-    "sigma1": 100,
-    "sigma2": 100,
+    "sigma1": 150,
+    "sigma2": 150,
     "p": 1,
     "kernel": normalKernel,
 }
 c = Coloriser(grayImage, colorCoordinates, colorValues, parameters)
-colorisedImage = c.kernelColorise()
+colorisedImage = c.kernelColoriseColumnal2()
 print(f"{np.max(colorisedImage)=}")
 print(f"{np.min(colorisedImage)=}")
 print(f"{colorisedImage.dtype=}")
