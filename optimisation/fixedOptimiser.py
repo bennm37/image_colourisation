@@ -29,7 +29,7 @@ def getInit(fileName):
     grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
     grayImage = np.dstack([grayImage] * 3)
     xSize, ySize, d = grayImage.shape
-    NRandomPixelsMax = 50
+    NRandomPixelsMax = 500
     # get random indices to eventually color in
     randomIndices = np.random.default_rng().choice(
         xSize * ySize, size=int(NRandomPixelsMax), replace=False
@@ -51,7 +51,7 @@ def getInit(fileName):
     return rawImage, someColorImage, colorCoordinates, colorValues
 
 
-fileName = "flower.jpg"
+fileName = "flower.png"
 rim, gim, cc, cv = getInit(fileName)
 normalKernel = lambda x: np.exp(-(x**2))
 # gc = np.indices([gim.shape[0], gim.shape[1]]).reshape(2, gim.shape[0] * gim.shape[1]).T
@@ -96,15 +96,15 @@ def objectiveFunction(sigma1, sigma2, rho):
 
 ##
 RBFProblemParameters = [
-    # {
-    #     "name": "delta",
-    #     "category": "loguniform",
-    #     "search_space": {
-    #         "low": 1e-7,
-    #         "high": 1e-1,
-    #         "step": 1e-6,
-    #     },
-    # },
+    {
+        "name": "delta",
+        "category": "loguniform",
+        "search_space": {
+            "low": 1e-7,
+            "high": 1e-1,
+            "step": 1e-6,
+        },
+    },
     {
         "name": "sigma1",
         "category": "uniform",
@@ -154,15 +154,15 @@ for i in range(500):
 ##
 parameters = {
     "delta": 1e-6,  # 0.01,
-    "sigma1": 149,  # 100,
-    "sigma2": 108,  # 100,
-    "p": 0.2,  # 1,
+    "sigma1": 11,  # 100,
+    "sigma2": 51,  # 100,
+    "p": 0.7,  # 1,
     "kernel": normalKernel,
 }
 rawImage = readImage(fileName)
-c = Coloriser(gim, cc, colorValues, parameters)
-colorImage = c.kernelColorise()
+c = Coloriser(gim, cc, cv, parameters)
+colorImage = c.kernelColoriseColumnal()
 generateCosts(rawImage, colorImage)
 ##
-plotImages(grayImage, rawImage, colorImage)
+plotImages(rim, gim, gim)
 ##

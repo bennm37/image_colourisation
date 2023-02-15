@@ -27,12 +27,14 @@ ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark
 
 class imageColoriser(ctk.CTkFrame):
     def __init__(self, master=None):
-        # super().__init__()
+        # create the frame which will contain our GUI
         ctk.CTkFrame.__init__(self, master)
+
+        # the createUI() method generates the application winodw
         self.createUI()
 
     def createUI(self):
-        # configure window
+        # configure window parameters
         root.grid_columnconfigure((1, 2, 3), weight=1)
         root.grid_columnconfigure((4, 5, 6, 7, 8), weight=1)
         root.grid_rowconfigure((0, 1, 2), weight=1)
@@ -54,6 +56,9 @@ class imageColoriser(ctk.CTkFrame):
         self.NRandomPixels = 1000
         self.NRandomPixelsMax = 5000
         self.colorRangeSliderInitial = 0.67
+
+        # these entry variables are what we use
+        # to hold info on what our values for delta, rho, etc. are
         self.deltaEntry = ctk.StringVar(value="1e-4")
         self.rhoEntry = ctk.StringVar(value="0.5")
         self.sigma1Entry = ctk.StringVar(value="100")
@@ -79,7 +84,8 @@ class imageColoriser(ctk.CTkFrame):
         self.frameDark3 = "#323333"
         self.frameLight3 = "#CFD0CF"
 
-        # define image frame
+        # now generate the sub-frames which have all the buttons
+        # etc. that we need
 
         self.generateFrames()
 
@@ -100,6 +106,11 @@ class imageColoriser(ctk.CTkFrame):
         self.NRandomPixelsSlider.set(self.NRandomPixels)
 
     def setColorRange(self, sliderVal, size=40):
+        """
+        Depending on where the color slider is, generate
+        appropriate colors and update the window where we
+        choose colors.
+        """
         size = 30
         color = np.array(self.rainbow(sliderVal)[:3]) * 255
         color = color.astype(np.uint16)
@@ -135,6 +146,11 @@ class imageColoriser(ctk.CTkFrame):
         )  # convert to hex
 
     def loadImage(self):
+        """
+        When called, refreshes all plt windows and prompts the user to select an image.
+        Upon selection displays the image as well as grayscaled versions, with one of these
+        ready to be coloured in.
+        """
         self.grayImageExists = 0
         self.rawImageExists = 0
         self.grayImageWithSomeColorExists = 0
@@ -193,9 +209,7 @@ class imageColoriser(ctk.CTkFrame):
             grayImagePLTWindow.axis("off")
             self.canvas.draw()
 
-            self.dimensionalisedGrayImage = self.dimensionalise(
-                self.rawImage, self.grayImage
-            )
+            self.dimensionalisedGrayImage = self.dimensionalise(self.grayImage)
 
             xSize, ySize = self.grayImage.shape
 
@@ -215,30 +229,41 @@ class imageColoriser(ctk.CTkFrame):
         return
 
     def coordinatesFromIndices(self, indices, size):
+        """
+        Given a list of indices, generates the corresponding coordinates
+        """
         coordinates = [[index % size, index // size] for index in indices]
         return coordinates
 
     def loadColorChoice(self):
+        """
+        when called, looks at which radio button has been selected for
+        how the user wants to add color into the image. upon matching
+        this case, calls the appropriate method.
+        """
         match self.colorMode.get():
             case 0:
                 self.addManualColor()
             case 1:
                 self.addRandomisedColor()
             case 2:
-                self.addBlockColor()
+                self.addBlockOfOriginalColor()
 
-    def dimensionalise(self, rawImage, grayImage):
-        grayImage3D = np.stack((grayImage,) * 3, axis=-1)
-
-        # replace the pixels of the grayscale image with the pixels of the original image
-        percentage = 0.1
-        mask = np.random.rand(*grayImage.shape) < percentage
-        grayImage3D[mask, :] = rawImage[mask, :]
-
+    def dimensionalise(self, grayImage):
+        """
+        Ensures that grayscale images have 3 dimensions to be filled with RGB values
+        """
         grayImage3D = np.stack((grayImage,) * 3, axis=-1)
         return grayImage3D
 
     def addRandomisedColor(self):
+        """
+        When called, adds N randomly selected correctly colored pixels to the grayscale image.
+        These N pixels are pre-determined from the given image and defined maximum number of colored
+        pixels, and the number currently colored may be updated on the fly.
+        This method also generates the appropriate colored pixel coordinates and RGB values
+        to be used in colorising via the Coloriser class.
+        """
         if self.rawImageExists == 0:
             pass
         else:
@@ -251,9 +276,7 @@ class imageColoriser(ctk.CTkFrame):
                 self.dimensionalisedGrayImage
             )
 
-            grayImageWithRandomColor = self.dimensionalise(
-                self.rawImage, self.grayImage
-            )
+            grayImageWithRandomColor = self.dimensionalise(self.grayImage)
 
             # go over random coordinates,
             # replacing as many pairs as necessary with their colored equivalents
@@ -283,10 +306,14 @@ class imageColoriser(ctk.CTkFrame):
             self.grayImageWithColorTemplate.set_data(grayImageWithRandomColor)
             self.grayImageWithColorTemplate.autoscale()
             randomisedColorPLTWindow.axis("off")
-            # randomisedColorPLTWindow.set_title("Image with Some Color")
             self.canvas.draw()
 
-    def addBlockColor(self):
+    def addBlockOfOriginalColor(self):
+        """
+        This method colors the grayscale image with a square block of the
+        original picture's color, whilst also generating the color coordinates and
+        color values which are used in Coloriser to re-color the image.
+        """
         if self.rawImageExists == 0:
             pass
         else:
@@ -299,8 +326,11 @@ class imageColoriser(ctk.CTkFrame):
                 self.dimensionalisedGrayImage
             )
 
-            grayImageWithBlockColor = self.dimensionalise(self.rawImage, self.grayImage)
+            grayImageWithBlockColor = self.dimensionalise(self.grayImage)
 
+            # this function colors the image where clicked, whilst
+            # also updating the GUI as well as noting the coordinates of where
+            # has been clicked, alongside the RGB values of the colored pixels.
             def onclick(event):
                 if self.colorMode.get() == 2:
                     if event.inaxes == blockColorPLTWindow:
@@ -308,43 +338,14 @@ class imageColoriser(ctk.CTkFrame):
                         x, y = np.round(x).astype(int), np.round(y).astype(int)
                         colorBoxSize = 2
 
+                        # this step overwrites the grayscale RGB values with their
+                        # raw-image values.
                         grayImageWithBlockColor[
                             y : y + colorBoxSize, x : x + colorBoxSize, :
                         ] = self.rawImage[y : y + colorBoxSize, x : x + colorBoxSize, :]
 
-                        # generate colorCoordinates and colorValues
-
-                        coloredCoordinateBounds = np.array(
-                            [[y, x], [y + colorBoxSize - 1, x + colorBoxSize - 1]]
-                        )
-
-                        coloredYCoordinates = [
-                            y
-                            for y in range(
-                                coloredCoordinateBounds[0][0],
-                                coloredCoordinateBounds[1][0] + 1,
-                            )
-                        ]
-                        coloredXCoordinates = [
-                            x
-                            for x in range(
-                                coloredCoordinateBounds[0][1],
-                                coloredCoordinateBounds[1][1] + 1,
-                            )
-                        ]
-                        self.coloredCoordinates = np.append(
-                            self.coloredCoordinates,
-                            np.array(
-                                list(
-                                    set(
-                                        itertools.product(
-                                            coloredYCoordinates, coloredXCoordinates
-                                        )
-                                    )
-                                )
-                            ),
-                            axis=0,
-                        ).astype(int)
+                        # generate colorCoordinates
+                        self.getColoredCoordinatesFromClickBounds(y, x, colorBoxSize)
 
                         self.colorValues = grayImageWithBlockColor[
                             self.coloredCoordinates[:, 0], self.coloredCoordinates[:, 1]
@@ -358,13 +359,18 @@ class imageColoriser(ctk.CTkFrame):
                         self.grayImageWithColorTemplate.autoscale()
                     self.canvas.draw_idle()
 
-            cid2 = self.canvas.mpl_connect("button_press_event", onclick)
+            self.canvas.mpl_connect("button_press_event", onclick)
 
             blockColorPLTWindow.axis("off")
 
             self.canvas.draw()
 
     def addManualColor(self):
+        """
+        This method adds a block of color to the grayscale image where it has been clicked.
+        The color that is added can be chosen manually. Furthermore this method generates the
+        color coordinates and color values of where has been selected.
+        """
         if self.rawImageExists == 0:
             pass
         else:
@@ -377,17 +383,22 @@ class imageColoriser(ctk.CTkFrame):
                 self.dimensionalisedGrayImage
             )
 
-            grayImageWithManualColor = self.dimensionalise(
-                self.rawImage, self.grayImage
-            )
+            grayImageWithManualColor = self.dimensionalise(self.grayImage)
 
+            # this function colors the image where clicked, whilst
+            # also updating the GUI as well as noting the coordinates of where
+            # has been clicked, alongside the RGB values of the colored pixels.
             def onclick(event):
                 if self.colorMode.get() == 0:
                     if event.inaxes == manualColorPLTWindow:
+                        # the selected colors are stored in hex format in this
+                        # program; we first grab that color
                         selectedColorInHex = self.selectedColors[
                             self.selectedColorButtonVar - 1
                         ]
 
+                        # next we convert this hex color to an RGB value which we can
+                        # input into an array
                         selectedColorInRGB = list(
                             int(selectedColorInHex.lstrip("#")[i : i + 2], 16)
                             for i in (0, 2, 4)
@@ -395,45 +406,16 @@ class imageColoriser(ctk.CTkFrame):
 
                         x, y = event.xdata, event.ydata  # coordinates
                         x, y = np.round(x).astype(int), np.round(y).astype(int)
-                        # print(x)
-                        # print(y)
 
+                        # overwrite the gray image where clicked with the new chosen
+                        # color
                         grayImageWithManualColor[
                             y : y + self.brushSize, x : x + self.brushSize, :
                         ] = selectedColorInRGB
 
                         # generate colorCoordinates and colorValues
 
-                        coloredCoordinateBounds = np.array(
-                            [[y, x], [y + self.brushSize - 1, x + self.brushSize - 1]]
-                        )
-                        coloredYCoordinates = [
-                            y
-                            for y in range(
-                                coloredCoordinateBounds[0][0],
-                                coloredCoordinateBounds[1][0] + 1,
-                            )
-                        ]
-                        coloredXCoordinates = [
-                            x
-                            for x in range(
-                                coloredCoordinateBounds[0][1],
-                                coloredCoordinateBounds[1][1] + 1,
-                            )
-                        ]
-                        self.coloredCoordinates = np.append(
-                            self.coloredCoordinates,
-                            np.array(
-                                list(
-                                    set(
-                                        itertools.product(
-                                            coloredYCoordinates, coloredXCoordinates
-                                        )
-                                    )
-                                )
-                            ),
-                            axis=0,
-                        ).astype(int)
+                        self.getColoredCoordinatesFromClickBounds(y, x, self.brushSize)
 
                         self.colorValues = grayImageWithManualColor[
                             self.coloredCoordinates[:, 0], self.coloredCoordinates[:, 1]
@@ -448,18 +430,58 @@ class imageColoriser(ctk.CTkFrame):
 
                     self.canvas.draw_idle()
 
-            cid2 = self.canvas.mpl_connect("button_press_event", onclick)
+            self.canvas.mpl_connect("button_press_event", onclick)
 
             manualColorPLTWindow.axis("off")
             self.canvas.draw()
+
+    def getColoredCoordinatesFromClickBounds(self, y, x, clickSize):
+        """
+        This method generates a list of colored coordinates to be used
+        for methods in which the gray picture is clicked with a given square
+        pixel size. To generate the coordinates we first define the bounds they
+        lie between, then create arrays of all the possible X and Y coordinates
+        between those bounds. Then, take these lists of X, and Y coordinates and
+        get the corresponding tuples.
+        """
+        coloredCoordinateBounds = np.array(
+            [[y, x], [y + clickSize - 1, x + clickSize - 1]]
+        )
+        coloredYCoordinates = [
+            y
+            for y in range(
+                coloredCoordinateBounds[0][0],
+                coloredCoordinateBounds[1][0] + 1,
+            )
+        ]
+        coloredXCoordinates = [
+            x
+            for x in range(
+                coloredCoordinateBounds[0][1],
+                coloredCoordinateBounds[1][1] + 1,
+            )
+        ]
+        self.coloredCoordinates = np.append(
+            self.coloredCoordinates,
+            np.array(
+                list(set(itertools.product(coloredYCoordinates, coloredXCoordinates)))
+            ),
+            axis=0,
+        ).astype(int)
 
     def saveImage(self):
         self.mainWindowFigure.savefig("./image.png")
 
     def generateColoredImage(self):
+        """
+        This method takes our image with some color in it, and
+        calls Coloriser to colorise it, using parameters defined by
+        the user via the GUI.
+        """
         if self.grayImageWithSomeColorExists == 0:
             print("no such image!")
         else:
+            # generate a waiting popup
             popupWaitingWindow = waitingWindowClass.waitingWindow()
 
             colorisedWindow = self.mainPLTWindowBottomRight
@@ -473,12 +495,16 @@ class imageColoriser(ctk.CTkFrame):
                 "p": self.rhoValue,
                 "kernel": normalKernel,
             }
+
+            # creating an instance of the Coloriser class
             self.coloriserInstance = Coloriser.Coloriser(
                 self.dimensionalisedGrayImage,
                 self.coloredCoordinates,
                 self.colorValues,
                 parameters,
             )
+
+            # calling a method within this instance to colorise our image
             self.colorisedImage = self.coloriserInstance.kernelColoriseColumnal()
             colorisedWindow.imshow(self.colorisedImage)
             colorisedWindow.axis("off")
@@ -487,6 +513,9 @@ class imageColoriser(ctk.CTkFrame):
             popupWaitingWindow.destroy()
 
     def clearColorisedImage(self):
+        """
+        Simply clear the colorised image from the bottom right window
+        """
         self.mainPLTWindowBottomRight.clear()
         self.mainPLTWindowBottomRight.axis("off")
         self.canvas.draw()
@@ -501,7 +530,6 @@ class imageColoriser(ctk.CTkFrame):
             self.colorDropperVar = 0
 
     def selectedColor1(self):
-        # TODO this is clunky, could refactor as radio buttons.
         self.selectedColorButtonVar = 1
         self.selectedColorButton1.configure(border_width=2, border_color="#b2b2b2")
         self.selectedColorButton2.configure(border_width=1, border_color="gray16")
@@ -894,14 +922,16 @@ class imageColoriser(ctk.CTkFrame):
             row=10, column=0, padx=80, pady=(12.5, 5), sticky="w"
         )
 
-        self.colorByBlockButton = ctk.CTkRadioButton(
+        self.addBlockOfOriginalColorButton = ctk.CTkRadioButton(
             self.sidebarFrame,
             text="Color by Grid",
-            command=self.addBlockColor,
+            command=self.addBlockOfOriginalColor,
             variable=self.colorMode,
             value=2,
         )
-        self.colorByBlockButton.grid(row=11, column=0, pady=10, padx=20, sticky="nw")
+        self.addBlockOfOriginalColorButton.grid(
+            row=11, column=0, pady=10, padx=20, sticky="nw"
+        )
 
     def setDelta(self, *args):
         try:
@@ -944,7 +974,9 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.deltaEntry,
         )
-        self.deltaEntryBox.grid(row=13, column=1, columnspan=4, padx=(5,35), pady=(5, 5))
+        self.deltaEntryBox.grid(
+            row=13, column=1, columnspan=4, padx=(5, 35), pady=(5, 5)
+        )
         self.deltaEntry.trace("w", self.setDelta)
 
         self.rhoLabel = ctk.CTkLabel(self.sidebarFrame, text="Rho:", anchor="n")
@@ -953,29 +985,29 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             textvariable=self.rhoEntry,
         )
-        self.rhoEntryBox.grid(row=14, column=1, padx=(5,35), pady=(5, 5), columnspan=4)
+        self.rhoEntryBox.grid(row=14, column=1, padx=(5, 35), pady=(5, 5), columnspan=4)
         self.rhoEntry.trace("w", self.setRho)
 
         self.sigma1Label = ctk.CTkLabel(self.sidebarFrame, text="Sigma 1:", anchor="n")
-        self.sigma1Label.grid(
-            row=15, column=0, padx=(20, 0), pady=(5, 5), sticky="w"
-        )
+        self.sigma1Label.grid(row=15, column=0, padx=(20, 0), pady=(5, 5), sticky="w")
         self.sigma1EntryBox = ctk.CTkEntry(
             self.sidebarFrame,
             textvariable=self.sigma1Entry,
         )
-        self.sigma1EntryBox.grid(row=15, column=1, padx=(5,35), pady=(5, 5), columnspan=4)
+        self.sigma1EntryBox.grid(
+            row=15, column=1, padx=(5, 35), pady=(5, 5), columnspan=4
+        )
         self.sigma1Entry.trace("w", self.setSigma1)
 
         self.sigma2Label = ctk.CTkLabel(self.sidebarFrame, text="Sigma 2:", anchor="n")
-        self.sigma2Label.grid(
-            row=16, column=0, padx=(20, 0), pady=(5, 5), sticky="w"
-        )
+        self.sigma2Label.grid(row=16, column=0, padx=(20, 0), pady=(5, 5), sticky="w")
         self.sigma2EntryBox = ctk.CTkEntry(
             self.sidebarFrame,
             textvariable=self.sigma2Entry,
         )
-        self.sigma2EntryBox.grid(row=16, column=1, columnspan=4, padx=(5,35), pady=(5, 5))
+        self.sigma2EntryBox.grid(
+            row=16, column=1, columnspan=4, padx=(5, 35), pady=(5, 5)
+        )
         self.sigma2Entry.trace("w", self.setSigma2)
 
     def generateAppearanceSection(self):
