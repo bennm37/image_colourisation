@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 
 class Coloriser:
+        
     def __init__(self, grayImage, colorCoordinates, colorValues, parameters):
         """grayImage should be of shape width x height x 3, colorCoordinates n x 2 ,
         colorValues n x 3"""
