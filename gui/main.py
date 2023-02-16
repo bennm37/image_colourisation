@@ -182,7 +182,7 @@ class imageColoriser(ctk.CTkFrame):
             # special case with pngs
             if fileName.endswith(".png"):
                 rawImage = rawImage[:, :, :3] * 255
-                rawImage = rawImage.astype(np.uint16)
+                rawImage = rawImage.astype(np.uint64)
 
             self.rawImage = rawImage
             self.rawImageExists = 1
