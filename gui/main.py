@@ -48,8 +48,8 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColors = ["#000000", "#FFFFFF", "#2596BE"]
         self.selectedColorButtonVar = 2
         # TODO: set these next values??
-        self.NRandomPixels = 1000
-        self.NRandomPixelsMax = 5000
+        self.NRandomPixels = 500
+        self.NRandomPixelsMax = 1500
         self.colorRangeSliderInitial = 0.67
 
         # these entry variables are what we use
@@ -179,8 +179,13 @@ class imageColoriser(ctk.CTkFrame):
 
         if fileName:
             rawImage = mpimg.imread(fileName)
+            self.y = rawImage
             # special case with pngs
             if fileName.endswith(".png"):
+                # remove transparency, convert to white
+                if rawImage.shape[2] == 4:
+                    for i in np.argwhere(rawImage[:, :, 3] != 1):
+                        rawImage[i[0], i[1], :] = 1.0
                 rawImage = rawImage[:, :, :3] * 255
                 rawImage = rawImage.astype(np.uint64)
 
@@ -904,7 +909,7 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             from_=0,
             to=self.NRandomPixelsMax,
-            number_of_steps=20,
+            number_of_steps=50,
             command=self.setNRandomPixels,
         )
         self.NRandomPixelsSlider.grid(
@@ -1058,4 +1063,5 @@ if __name__ == "__main__":
 ##
 # cc = app.coloredCoordinates
 # cv = app.colorValues
-image = app.rawImage
+# image = app.rawImage
+x = app.y
