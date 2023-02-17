@@ -179,7 +179,9 @@ class imageColoriser(ctk.CTkFrame):
 
         if fileName:
             rawImage = mpimg.imread(fileName)
-            self.y = rawImage
+            if rawImage.dtype == "float32":
+                if fileName.endswith(".jpg") or fileName.endswith(".jpeg"):
+                    rawImage = (rawImage * 255).astype(np.uint8)
             # special case with pngs
             if fileName.endswith(".png"):
                 # remove transparency, convert to white
@@ -1064,4 +1066,3 @@ if __name__ == "__main__":
 # cc = app.coloredCoordinates
 # cv = app.colorValues
 # image = app.rawImage
-x = app.y

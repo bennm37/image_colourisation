@@ -48,7 +48,7 @@ def getInit(fileName):
 
     colorCoordinates = randomCoordinates
     colorValues = rawImage[randomCoordinates[:, 0], randomCoordinates[:, 1]]
-    return rawImage, someColorImage, colorCoordinates, colorValues
+    return rawImage, grayImage, colorCoordinates, colorValues
 
 
 fileName = "orange-flower.jpg"

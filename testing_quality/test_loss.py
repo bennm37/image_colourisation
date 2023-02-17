@@ -1,13 +1,13 @@
 import sys
-sys.path.append('../gui')
-import numpy as np
+
+# sys.path.append("../gui")
 import os
-import coloriserGUI
-import numpy as np
+from gui.coloriserGUI import Coloriser
 import numexpr as ne
 
 # Zella's Magic
 import matplotlib.pyplot as plt
+
 # from benderopt.base import OptimizationProblem, Observation
 # from benderopt.optimizer import optimizers
 import numpy as np
@@ -15,7 +15,8 @@ from pathlib import Path
 import matplotlib.image as mpimg
 from sys import getsizeof
 
-class test_coloriser_taxi(coloriserGUI.Coloriser):
+
+class test_coloriser_taxi(Coloriser):
     # initialize class as usual
     def __init__(self, grayImage, colorCoordinates, colorValues, parameters):
         super().__init__(grayImage, colorCoordinates, colorValues, parameters)
@@ -36,7 +37,6 @@ class test_coloriser_taxi(coloriserGUI.Coloriser):
         grayX = self.grayImage[x[:, 0], x[:, 1]].astype(np.float64)
         grayY = self.grayImage[y[:, 0], y[:, 1]].astype(np.float64)
 
-
         grayXY_dist = abs(grayX[:] - grayY[col])
         gray_kernel = ne.evaluate(
             "exp(-grayXY_dist / (s2)**2)",
@@ -47,12 +47,13 @@ class test_coloriser_taxi(coloriserGUI.Coloriser):
         )
 
         return ne.evaluate("dist_kernel * gray_kernel")
-    
+
     @staticmethod
     def taxi_norm(x, y):
         return np.sum(np.abs(x - y), axis=1)
 
-class test_coloriser_normalized(coloriserGUI.Coloriser):
+
+class test_coloriser_normalized(Coloriser):
     # initialize class as usual
     def __init__(self, grayImage, colorCoordinates, colorValues, parameters):
         super().__init__(grayImage, colorCoordinates, colorValues, parameters)
@@ -85,12 +86,14 @@ class test_coloriser_normalized(coloriserGUI.Coloriser):
         )
 
         return ne.evaluate("distXYKernelised * gray_kernel")
-    
+
+
 def readImage(name):
-    fileName = Path(".", "images", name)
+    fileName = Path(".", "allims", name)
     rawImage = mpimg.imread(fileName)
     rawImage = np.round(rawImage).astype(np.uint8)
     return rawImage
+
 
 def generateCosts(rawImage, noisyImage):
     actualImage = rawImage.astype(np.float64)
@@ -102,13 +105,26 @@ def generateCosts(rawImage, noisyImage):
     finalDiff = rDiff + gDiff + bDiff
     return finalDiff
 
+
 def getInit(fileName):
     # fileName = "chipmunk.jpg"
-    rawImage = plt.imread(f"images/{fileName}")
-    grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
-    grayImage = np.dstack([grayImage] * 3)
+    rawImage = plt.imread(f"allims/{fileName}")
+    if rawImage.dtype == "float32":
+        if fileName.endswith(".jpg") or fileName.endswith(".jpeg"):
+            rawImage = (rawImage * 255).astype(np.uint8)
+    if fileName.endswith(".png"):
+        # remove transparency, convert to white
+        if rawImage.shape[2] == 4:
+            for i in np.argwhere(rawImage[:, :, 3] != 1):
+                rawImage[i[0], i[1], :] = 1.0
+        rawImage = rawImage[:, :, :3] * 255
+        rawImage = rawImage.astype(np.uint64)
+    grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114])
+    grayImage = np.round(grayImage).astype(np.uint16)  # 16 or 8?
+    grayImage = np.stack((grayImage,) * 3, axis=-1)
+    # grayImage = np.dstack([grayImage] * 3)
     xSize, ySize, d = grayImage.shape
-    NRandomPixelsMax = 500
+    NRandomPixelsMax = 250
     # get random indices to eventually color in
     randomIndices = np.random.default_rng().choice(
         xSize * ySize, size=int(NRandomPixelsMax), replace=False
@@ -129,12 +145,11 @@ def getInit(fileName):
     return rawImage, grayImage, colorCoordinates, colorValues
 
 
-
 def test_colorise(file_name):
 
     rawImage, grayImage, colorCoordinates, colorValues = getInit(file_name)
 
-    rawImage = readImage(file_name)
+    # rawImage = readImage(file_name)
 
     normalKernel = lambda x: np.exp(-(x**2))
 
@@ -146,7 +161,7 @@ def test_colorise(file_name):
         "kernel": normalKernel,
     }
 
-    c = coloriserGUI.Coloriser(grayImage, colorCoordinates, colorValues, parameters)
+    c = Coloriser(grayImage, colorCoordinates, colorValues, parameters)
     colorImage = c.kernelColoriseColumnal()
 
     # save the colorized image
@@ -155,10 +170,9 @@ def test_colorise(file_name):
     return generateCosts(rawImage, colorImage)
 
 
-
 if __name__ == "__main__":
 
-    folder_name = 'images'
+    folder_name = "allims"
     file_names = os.listdir(folder_name)
     results = np.zeros(len(file_names))
     worst = 0
@@ -166,8 +180,8 @@ if __name__ == "__main__":
     best = np.inf
     best_index = -1
 
-
     for i, file_name in enumerate(file_names):
+        print(file_name)
         results[i] = test_colorise(file_name)
         if results[i] > worst:
             worst = results[i]
@@ -175,9 +189,8 @@ if __name__ == "__main__":
         if results[i] < best:
             best = results[i]
             best_index = i
-    
-    print('Worst image: ', file_names[worst_index], ' with loss: ', worst)
-    print('Best image: ', file_names[best_index], ' with loss: ', best)
-    print('Average loss: ', np.mean(results))
-    print('Standard deviation: ', np.std(results))
-        
+
+    print("Worst image: ", file_names[worst_index], " with loss: ", worst)
+    print("Best image: ", file_names[best_index], " with loss: ", best)
+    print("Average loss: ", np.mean(results))
+    print("Standard deviation: ", np.std(results))
