@@ -263,7 +263,7 @@ class imageColoriser(ctk.CTkFrame):
         """
         Ensures that grayscale images have 3 dimensions to be filled with RGB values
         """
-        grayImage3D = np.stack((grayImage,) * 3, axis=-1).astype(np.uint64)
+        grayImage3D = np.stack((grayImage,) * 3, axis=-1).astype(np.int64)
         return grayImage3D
 
     def addRandomisedColor(self):

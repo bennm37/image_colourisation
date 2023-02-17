@@ -121,10 +121,10 @@ def getInit(fileName):
         rawImage = rawImage.astype(np.uint64)
     grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114])
     grayImage = np.round(grayImage).astype(np.uint16)  # 16 or 8?
-    grayImage = np.stack((grayImage,) * 3, axis=-1)
+    grayImage = np.stack((grayImage,) * 3, axis=-1).astype(np.int64)
     # grayImage = np.dstack([grayImage] * 3)
     xSize, ySize, d = grayImage.shape
-    NRandomPixelsMax = 250
+    NRandomPixelsMax = 100
     # get random indices to eventually color in
     randomIndices = np.random.default_rng().choice(
         xSize * ySize, size=int(NRandomPixelsMax), replace=False
@@ -165,7 +165,11 @@ def test_colorise(file_name):
     colorImage = c.kernelColoriseColumnal()
 
     # save the colorized image
-    plt.imsave(f"results/{file_name}", colorImage.astype(np.uint8))
+    plt.imsave(f"results/{file_name}", (colorImage.clip(0)).astype(np.uint8))
+    plt.imshow(colorImage)
+    plt.show()
+    global xx
+    xx = colorImage
 
     return generateCosts(rawImage, colorImage)
 
