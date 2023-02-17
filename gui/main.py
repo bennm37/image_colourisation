@@ -1051,7 +1051,7 @@ def popup_bonus():
 
 if __name__ == "__main__":
     root = ctk.CTk()
-    root.title("MMSC Image Colouriser")
+    root.title("MMSC Image Coloriser")
     root.geometry(f"{1300}x{750}")
     app = imageColoriser(master=root)
     app.mainloop()
