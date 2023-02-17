@@ -179,9 +179,12 @@ class imageColoriser(ctk.CTkFrame):
 
         if fileName:
             rawImage = mpimg.imread(fileName)
+            self.t = rawImage
             if rawImage.dtype == "float32":
                 if fileName.endswith(".jpg") or fileName.endswith(".jpeg"):
                     rawImage = (rawImage * 255).astype(np.uint8)
+                else:
+                    pass
             # special case with pngs
             if fileName.endswith(".png"):
                 # remove transparency, convert to white
@@ -190,7 +193,8 @@ class imageColoriser(ctk.CTkFrame):
                         rawImage[i[0], i[1], :] = 1.0
                 rawImage = rawImage[:, :, :3] * 255
                 rawImage = rawImage.astype(np.uint64)
-
+                print(np.max(rawImage))
+            self.q = rawImage
             self.rawImage = rawImage
             self.rawImageExists = 1
 
@@ -259,7 +263,7 @@ class imageColoriser(ctk.CTkFrame):
         """
         Ensures that grayscale images have 3 dimensions to be filled with RGB values
         """
-        grayImage3D = np.stack((grayImage,) * 3, axis=-1)
+        grayImage3D = np.stack((grayImage,) * 3, axis=-1).astype(np.uint64)
         return grayImage3D
 
     def addRandomisedColor(self):
@@ -1066,3 +1070,5 @@ if __name__ == "__main__":
 # cc = app.coloredCoordinates
 # cv = app.colorValues
 # image = app.rawImage
+x = app.colorisedImage
+print(np.max(x))
