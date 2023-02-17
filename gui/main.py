@@ -182,7 +182,7 @@ class imageColoriser(ctk.CTkFrame):
             # special case with pngs
             if fileName.endswith(".png"):
                 rawImage = rawImage[:, :, :3] * 255
-                rawImage = rawImage.astype(np.uint16)
+                rawImage = rawImage.astype(np.uint64)
 
             self.rawImage = rawImage
             self.rawImageExists = 1
@@ -1051,7 +1051,7 @@ def popup_bonus():
 
 if __name__ == "__main__":
     root = ctk.CTk()
-    root.title("MMSC Image Colouriser")
+    root.title("MMSC Image Coloriser")
     root.geometry(f"{1300}x{750}")
     app = imageColoriser(master=root)
     app.mainloop()

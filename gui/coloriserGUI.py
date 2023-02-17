@@ -47,14 +47,17 @@ class Coloriser:
             self.a_s = lag.solve(KD + self.delta * np.eye(n), self.colorValues[:, i])
             layerI = np.zeros((self.grayCoordinates.shape[0]))
             for col in range(n):
-                layerI += self.getColK(self.grayCoordinates, self.colorCoordinates, col)*self.a_s[col]
+                layerI += (
+                    self.getColK(self.grayCoordinates, self.colorCoordinates, col)
+                    * self.a_s[col]
+                )
             layerI = layerI.reshape(self.width, self.height)
             image[:, :, i] = layerI
         return image.astype(np.uint16)
 
     def convNetColorise(self):
         pass
-    
+
     def getColK(self, x, y, col):
         # TODO: einsum or numexpr?
         # distXYSquared = np.einsum(
@@ -64,7 +67,9 @@ class Coloriser:
         #     optimize="optimal",
         # )
 
-        colXY = x[:] - y[col]
+        # normalised
+        # colXY = x[:] - y[col]
+        colXY = (x[:] - y[col]) / np.array([self.width, self.height])
         distXYKernelised = ne.evaluate(
             "exp(-distSquared / (s1)**2)",
             local_dict={
@@ -93,5 +98,3 @@ class Coloriser:
         for col in range(0, y.shape[0]):
             layerI[:, col] = self.getColK(x, y, col)[:]
         return layerI
-
-

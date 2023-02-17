@@ -51,7 +51,7 @@ def getInit(fileName):
     return rawImage, someColorImage, colorCoordinates, colorValues
 
 
-fileName = "flower.png"
+fileName = "orange-flower.jpg"
 rim, gim, cc, cv = getInit(fileName)
 normalKernel = lambda x: np.exp(-(x**2))
 # gc = np.indices([gim.shape[0], gim.shape[1]]).reshape(2, gim.shape[0] * gim.shape[1]).T
@@ -76,10 +76,10 @@ def generateCosts(rawImage, noisyImage):
     return finalDiff
 
 
-def objectiveFunction(sigma1, sigma2, rho):
+def objectiveFunction(delta, sigma1, sigma2, rho):
     # print(parameters)
     parameters = {
-        "delta": 1e-6,  # 0.01,
+        "delta": delta,  # 0.01,
         "sigma1": sigma1,  # 100,
         "sigma2": sigma2,  # 100,
         "p": rho,  # 1,
@@ -134,13 +134,12 @@ RBFProblemParameters = [
     },
 ]
 
-maxIterations = 200
+maxIterations = 100
 optimisationProblem = OptimizationProblem.from_list(RBFProblemParameters)
 parzenOptimiser = optimizers["parzen_estimator"](
     optimisationProblem
 )  #'random' or 'parzen_estimator'
-i = 0
-for i in range(500):
+for i in range(maxIterations):
     newParameterSuggestion = parzenOptimiser.suggest()
     loss = objectiveFunction(**newParameterSuggestion)[0]
     parzenObservation = Observation.from_dict(
