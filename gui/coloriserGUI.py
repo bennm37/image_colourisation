@@ -29,12 +29,10 @@ class Coloriser:
             "Generating template image layer...\n(Note: This process may take several minutes for large (> 1000 * 1000) images."
         )
         layerITemplate = self.getLayerI(self.grayCoordinates, self.colorCoordinates)
-        # print(f" max val = {np.max(layerITemplate)}")
         for i in range(3):
             self.a_s = lag.solve(
                 KD + self.delta * np.eye(n), self.colorValues[:, i].astype(np.float64)
             )
-            print(np.sum((np.abs(self.a_s) < 1e-5)))
             layer_i = layerITemplate @ self.a_s
             layer_i = layer_i.reshape(self.width, self.height)
             image[:, :, i] = layer_i

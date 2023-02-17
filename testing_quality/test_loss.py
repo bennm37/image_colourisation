@@ -103,7 +103,7 @@ def generateCosts(rawImage, noisyImage):
     gDiff = np.sum(differences[:, :, 1] * 0.587)
     bDiff = np.sum(differences[:, :, 2] * 0.114)
     finalDiff = rDiff + gDiff + bDiff
-    return finalDiff
+    return finalDiff / (rawImage.shape[0] * rawImage.shape[1])
 
 
 def getInit(fileName):
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     best_index = -1
 
     for i, file_name in enumerate(file_names):
-        print(file_name)
+        print(f"on {file_name}, run {i}")
         results[i] = test_colorise(file_name)
         if results[i] > worst:
             worst = results[i]
