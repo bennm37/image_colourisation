@@ -25,9 +25,6 @@ class Coloriser:
         image = np.zeros((self.width, self.height, 3))
         KD = self.getKD(self.colorCoordinates)
         n = self.colorCoordinates.shape[0]
-        print(
-            "Generating template image layer...\n(Note: This process may take several minutes for large (> 1000 * 1000) images."
-        )
         layerITemplate = self.getLayerI(self.grayCoordinates, self.colorCoordinates)
         for i in range(3):
             self.a_s = lag.solve(
@@ -36,9 +33,12 @@ class Coloriser:
             layer_i = layerITemplate @ self.a_s
             layer_i = layer_i.reshape(self.width, self.height)
             image[:, :, i] = layer_i
-        return image.astype(np.int64)
+        return np.clip(image, 0, 255).astype(
+            np.uint8
+        )  # ensure range of output image is between 0, 255
 
     def kernelColoriseColumnalLarge(self):
+        print("Generating kernel...\n(Note: This process may take several minutes.)")
         image = np.zeros((self.width, self.height, 3))
         KD = self.getKD(self.colorCoordinates)
         n = self.colorCoordinates.shape[0]

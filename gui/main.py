@@ -1066,9 +1066,3 @@ if __name__ == "__main__":
     root.geometry(f"{1300}x{750}")
     app = imageColoriser(master=root)
     app.mainloop()
-##
-# cc = app.coloredCoordinates
-# cv = app.colorValues
-# image = app.rawImage
-x = app.colorisedImage
-print(np.max(x))

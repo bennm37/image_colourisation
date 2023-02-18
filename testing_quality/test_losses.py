@@ -124,7 +124,7 @@ def getInit(fileName):
     grayImage = np.round(grayImage).astype(np.uint16)  # 16 or 8?
     grayImage = np.stack((grayImage,) * 3, axis=-1).astype(np.int64)
     xSize, ySize, d = grayImage.shape
-    NRandomPixelsMax = 100
+    NRandomPixelsMax = 50
     # get random indices to eventually color in
     randomIndices = np.random.default_rng().choice(
         xSize * ySize, size=int(NRandomPixelsMax), replace=False
@@ -162,9 +162,11 @@ def test_colorise(file_name):
 
     # save the colorized image
     savePath = pathlib.Path(mainDirectory, "results", file_name)
-    plt.imsave(savePath, np.clip(colorImage, 0, 255).astype(np.uint8))
-    plt.imshow(colorImage)
-    plt.show()
+    plt.imsave(savePath, colorImage)
+
+    # Uncomment below to show images as they are generated!
+    # plt.imshow(colorImage)
+    # plt.show()
 
     return generateCosts(rawImage, colorImage)
 
