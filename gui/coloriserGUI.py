@@ -53,7 +53,9 @@ class Coloriser:
                 )
             layerI = layerI.reshape(self.width, self.height)
             image[:, :, i] = layerI
-        return image.astype(np.uint16)
+        return np.clip(image, 0, 255).astype(
+            np.uint8
+        )  # ensure range of output image is between 0, 255
 
     def convNetColorise(self):
         pass

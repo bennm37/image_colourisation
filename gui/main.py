@@ -49,7 +49,7 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColorButtonVar = 2
         # TODO: set these next values??
         self.NRandomPixels = 500
-        self.NRandomPixelsMax = 1500
+        self.NRandomPixelsMax = 1000
         self.colorRangeSliderInitial = 0.67
 
         # these entry variables are what we use

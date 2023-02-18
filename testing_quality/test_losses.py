@@ -1,9 +1,7 @@
-import sys
-
-# sys.path.append("../gui")
 import os
 from gui.coloriserGUI import Coloriser
 import numexpr as ne
+import glob
 
 # Zella's Magic
 import matplotlib.pyplot as plt
@@ -11,9 +9,11 @@ import matplotlib.pyplot as plt
 # from benderopt.base import OptimizationProblem, Observation
 # from benderopt.optimizer import optimizers
 import numpy as np
-from pathlib import Path
+import pathlib
 import matplotlib.image as mpimg
-from sys import getsizeof
+
+mainDirectory = pathlib.Path(__file__).parent.parent  # directory containing main files
+##
 
 
 class test_coloriser_taxi(Coloriser):
@@ -89,7 +89,7 @@ class test_coloriser_normalized(Coloriser):
 
 
 def readImage(name):
-    fileName = Path(".", "allims", name)
+    fileName = pathlib.Path(".", "allims", name)
     rawImage = mpimg.imread(fileName)
     rawImage = np.round(rawImage).astype(np.uint8)
     return rawImage
@@ -107,8 +107,9 @@ def generateCosts(rawImage, noisyImage):
 
 
 def getInit(fileName):
-    # fileName = "chipmunk.jpg"
-    rawImage = plt.imread(f"allims/{fileName}")
+    imageToRead = pathlib.Path(mainDirectory, folder_name, fileName)
+    rawImage = plt.imread(imageToRead)
+    print(imageToRead)
     if rawImage.dtype == "float32":
         if fileName.endswith(".jpg") or fileName.endswith(".jpeg"):
             rawImage = (rawImage * 255).astype(np.uint8)
@@ -122,7 +123,6 @@ def getInit(fileName):
     grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114])
     grayImage = np.round(grayImage).astype(np.uint16)  # 16 or 8?
     grayImage = np.stack((grayImage,) * 3, axis=-1).astype(np.int64)
-    # grayImage = np.dstack([grayImage] * 3)
     xSize, ySize, d = grayImage.shape
     NRandomPixelsMax = 100
     # get random indices to eventually color in
@@ -135,10 +135,6 @@ def getInit(fileName):
     randomCoordinates = np.array(
         [[index % xSize, index // xSize] for index in randomIndices]
     )
-    # someColorImage = grayImage.copy()
-    # someColorImage[randomCoordinates[:, 0], randomCoordinates[:, 1]] = rawImage[
-    #     randomCoordinates[:, 0], randomCoordinates[:, 1]
-    # ]
 
     colorCoordinates = randomCoordinates
     colorValues = rawImage[randomCoordinates[:, 0], randomCoordinates[:, 1]]
@@ -165,19 +161,32 @@ def test_colorise(file_name):
     colorImage = c.kernelColoriseColumnal()
 
     # save the colorized image
-    plt.imsave(f"results/{file_name}", (colorImage.clip(0)).astype(np.uint8))
+    savePath = pathlib.Path(mainDirectory, "results", file_name)
+    plt.imsave(savePath, np.clip(colorImage, 0, 255).astype(np.uint8))
     plt.imshow(colorImage)
     plt.show()
-    global xx
-    xx = colorImage
 
     return generateCosts(rawImage, colorImage)
 
 
 if __name__ == "__main__":
+    # To run just create 2 folders in the 'image_colourisation'
+    # project:
+    # Folder 1: to contain all output images. This must be called "results"
+    # Folder 2: another folder containing all images to test. Enter its name
+    # under the `folder_name` variable.
 
     folder_name = "allims"
-    file_names = os.listdir(folder_name)
+    # clean results folder first before every run.
+    resultsFolder = pathlib.Path(mainDirectory, "results")
+    filesToDelete = glob.glob(str(pathlib.Path(resultsFolder, "*")))
+    for f in filesToDelete:
+        try:
+            os.remove(f)
+        except OSError as e:
+            print("Error: %s : %s" % (f, e.strerror))
+
+    file_names = os.listdir(pathlib.Path(mainDirectory, folder_name))
     results = np.zeros(len(file_names))
     worst = 0
     worst_index = -1
