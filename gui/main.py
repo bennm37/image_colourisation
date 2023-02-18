@@ -48,8 +48,8 @@ class imageColoriser(ctk.CTkFrame):
         self.selectedColors = ["#000000", "#FFFFFF", "#2596BE"]
         self.selectedColorButtonVar = 2
         # TODO: set these next values??
-        self.NRandomPixels = 1000
-        self.NRandomPixelsMax = 5000
+        self.NRandomPixels = 500
+        self.NRandomPixelsMax = 1000
         self.colorRangeSliderInitial = 0.67
 
         # these entry variables are what we use
@@ -179,11 +179,22 @@ class imageColoriser(ctk.CTkFrame):
 
         if fileName:
             rawImage = mpimg.imread(fileName)
+            self.t = rawImage
+            if rawImage.dtype == "float32":
+                if fileName.endswith(".jpg") or fileName.endswith(".jpeg"):
+                    rawImage = (rawImage * 255).astype(np.uint8)
+                else:
+                    pass
             # special case with pngs
             if fileName.endswith(".png"):
+                # remove transparency, convert to white
+                if rawImage.shape[2] == 4:
+                    for i in np.argwhere(rawImage[:, :, 3] != 1):
+                        rawImage[i[0], i[1], :] = 1.0
                 rawImage = rawImage[:, :, :3] * 255
-                rawImage = rawImage.astype(np.uint16)
-
+                rawImage = rawImage.astype(np.uint64)
+                print(np.max(rawImage))
+            self.q = rawImage
             self.rawImage = rawImage
             self.rawImageExists = 1
 
@@ -252,7 +263,7 @@ class imageColoriser(ctk.CTkFrame):
         """
         Ensures that grayscale images have 3 dimensions to be filled with RGB values
         """
-        grayImage3D = np.stack((grayImage,) * 3, axis=-1)
+        grayImage3D = np.stack((grayImage,) * 3, axis=-1).astype(np.int64)
         return grayImage3D
 
     def addRandomisedColor(self):
@@ -912,7 +923,7 @@ class imageColoriser(ctk.CTkFrame):
             self.sidebarFrame,
             from_=0,
             to=self.NRandomPixelsMax,
-            number_of_steps=20,
+            number_of_steps=50,
             command=self.setNRandomPixels,
         )
         self.NRandomPixelsSlider.grid(
@@ -1063,7 +1074,3 @@ if __name__ == "__main__":
     root.geometry(f"{1300}x{750}")
     app = imageColoriser(master=root)
     app.mainloop()
-##
-# cc = app.coloredCoordinates
-# cv = app.colorValues
-image = app.rawImage

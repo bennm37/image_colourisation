@@ -38,9 +38,12 @@ class Coloriser:
             layer_i = layerITemplate @ self.a_s
             layer_i = layer_i.reshape(self.width, self.height)
             image[:, :, i] = layer_i
-        return image.astype(np.uint64)
+        return np.clip(image, 0, 255).astype(
+            np.uint8
+        )  # ensure range of output image is between 0, 255
 
     def kernelColoriseColumnalLarge(self):
+        print("Generating kernel...\n(Note: This process may take several minutes.)")
         image = np.zeros((self.width, self.height, 3))
         KD = self.getKD(self.colorCoordinates)
         n = self.colorCoordinates.shape[0]
@@ -50,14 +53,19 @@ class Coloriser:
             self.a_s = lag.solve(KD + self.delta * np.eye(n), self.colorValues[:, i])
             layerI = np.zeros((self.grayCoordinates.shape[0]))
             for col in range(n):
-                layerI += self.getColK(self.grayCoordinates, self.colorCoordinates, col)*self.a_s[col]
+                layerI += (
+                    self.getColK(self.grayCoordinates, self.colorCoordinates, col)
+                    * self.a_s[col]
+                )
             layerI = layerI.reshape(self.width, self.height)
             image[:, :, i] = layerI
-        return image.astype(np.uint16)
+        return np.clip(image, 0, 255).astype(
+            np.uint8
+        )  # ensure range of output image is between 0, 255
 
     def convNetColorise(self):
         pass
-    
+
     def getColK(self, x, y, col):
         # TODO: einsum or numexpr?
         # distXYSquared = np.einsum(
@@ -67,7 +75,9 @@ class Coloriser:
         #     optimize="optimal",
         # )
 
-        colXY = x[:] - y[col]
+        # normalised
+        # colXY = x[:] - y[col]
+        colXY = (x[:] - y[col]) / np.array([self.width, self.height])
         distXYKernelised = ne.evaluate(
             "exp(-distSquared / (s1)**2)",
             local_dict={
@@ -96,5 +106,3 @@ class Coloriser:
         for col in range(0, y.shape[0]):
             layerI[:, col] = self.getColK(x, y, col)[:]
         return layerI
-
-

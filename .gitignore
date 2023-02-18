@@ -133,3 +133,6 @@ dmypy.json
 # Ben
 inter_phase.py
 videos
+
+# zel
+flattenedImages/
