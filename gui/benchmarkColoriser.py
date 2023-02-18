@@ -110,6 +110,7 @@ def plotResults(resultsName):
     ax[0].scatter(df["nPixels"],df["averageLargeTimes"])
     ax[0].errorbar(df["nPixels"],df["averageLargeTimes"],yerr=df["stdLargeTimes"],label="Large Times")
     ax[0].legend()
+    ax[0].set_yscale("log")
     ax[0].set(xlabel="# Pixels",ylabel="Time (s)",title="Time")
 
     ax[1].scatter(df["nPixels"],df["averageFastMemory"])
@@ -117,12 +118,15 @@ def plotResults(resultsName):
     ax[1].scatter(df["nPixels"],df["averageLargeMemory"])
     ax[1].errorbar(df["nPixels"],df["averageLargeMemory"],yerr=df["stdLargeMemory"],label="Large Memory")
     ax[1].legend()
+    ax[1].set_yscale("log")
     ax[1].set(xlabel="# Pixels",ylabel="Memory (MB)",title="Memory")
     plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
     filename = "./images/fresco.png"
-    nPixels,times,memory = compareColorisers("./images/fresco.png",nTests=10,nTrials=3,small=25,large=800)
-    resultsName = saveResults(nPixels,times,memory,filename)
-    plotResults(resultsName)
+    # nPixels,times,memory = compareColorisers("./images/fresco.png",nTests=10,nTrials=3,small=25,large=800)
+    # resultsName = saveResults(nPixels,times,memory,filename)
+    plotResults("data/testBenchmarkingResults3.txt")
+    df = pd.read_csv("data/testBenchmarkingResults3.txt")
+    print(df["stdFastTimes"])
