@@ -2,8 +2,8 @@ from coloriserGUI import Coloriser
 import numpy as np
 import matplotlib.pyplot as plt
 
-rawImage = plt.imread("./images/fresco.png")
-rawImage = (256*rawImage).astype(np.float64)
+rawImage = plt.imread("./images/apple.jpeg")
+# rawImage = (256*rawImage).astype(np.float64)
 grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
 grayImage = np.dstack([grayImage] * 3)
 print(np.max(grayImage))
@@ -44,14 +44,14 @@ parameters = {
     "kernel": normalKernel,
 }
 c = Coloriser(grayImage, colorCoordinates, colorValues, parameters)
-colorisedImage = c.kernelColoriseColumnal2()
+colorisedImage = c.kernelColoriseColumnal()
 print(f"{np.max(colorisedImage)=}")
 print(f"{np.min(colorisedImage)=}")
 print(f"{colorisedImage.dtype=}")
 
 # pixel histogram
 fig, ax = plt.subplots()
-redPixelValues = colorisedImage[:, :, 0].flatten()
+redPixelValues = colorisedImage[:, :, 2].flatten()
 ax.hist(redPixelValues, bins=100)
 ax.set(xlim=(0, 300))
 plt.show()

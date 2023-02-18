@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 class Coloriser:
-    def __init__(self, grayImage, colorCoordinates, colorValues, parameters):
+    def __init__(self, grayImage, colorCoordinates, colorValues, parameters,verbose=False):
         """grayImage should be of shape width x height x 3, colorCoordinates n x 2 ,
         colorValues n x 3"""
         self.width, self.height, d = grayImage.shape
@@ -20,14 +20,16 @@ class Coloriser:
         self.sigma2 = parameters["sigma2"]
         self.p = parameters["p"]
         self.kernel = parameters["kernel"]
+        self.verbose = verbose
 
     def kernelColoriseColumnal(self):
         image = np.zeros((self.width, self.height, 3))
         KD = self.getKD(self.colorCoordinates)
         n = self.colorCoordinates.shape[0]
-        print(
-            "Generating template image layer...\n(Note: This process may take several minutes for large (> 1000 * 1000) images."
-        )
+        if self.verbose:
+            print(
+                "Generating template image layer...\n(Note: This process may take several minutes for large (> 1000 * 1000) images."
+            )
         layerITemplate = self.getLayerI(self.grayCoordinates, self.colorCoordinates)
         for i in range(3):
             self.a_s = lag.solve(
@@ -43,7 +45,8 @@ class Coloriser:
         KD = self.getKD(self.colorCoordinates)
         n = self.colorCoordinates.shape[0]
         for i in range(3):
-            print(f"Starting layer {i+1}")
+            if self.verbose:
+                print(f"Starting layer {i+1}")
             self.a_s = lag.solve(KD + self.delta * np.eye(n), self.colorValues[:, i])
             layerI = np.zeros((self.grayCoordinates.shape[0]))
             for col in range(n):

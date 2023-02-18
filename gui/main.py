@@ -474,9 +474,9 @@ class imageColoriser(ctk.CTkFrame):
             plt.imsave(
                 f"{self.colorisedFileName}", self.colorisedImage.astype(np.uint8)
             )
+            print("Image Saved Successfully!")
         except AttributeError:
             print("Please colorise the image first.")
-        print("Image Saved Successfully!")
 
     def generateColoredImage(self):
         """
@@ -511,7 +511,15 @@ class imageColoriser(ctk.CTkFrame):
             )
 
             # calling a method within this instance to colorise our image
-            self.colorisedImage = self.coloriserInstance.kernelColoriseColumnal()
+            self.width,self.height = self.rawImage.shape[0:2]
+            self.n = self.colorValues.shape[0]
+            self.sizeThreshHold = 5e8
+            if self.width*self.height*self.n < self.sizeThreshHold:
+                print("Using Fast Coloriser")
+                self.colorisedImage = self.coloriserInstance.kernelColoriseColumnal()
+            else:
+                print("Using Large Coloriser")
+                self.colorisedImage = self.coloriserInstance.kernelColoriseColumnalLarge()
             colorisedWindow.imshow(self.colorisedImage)
             colorisedWindow.axis("off")
             self.canvas.draw()
@@ -1051,7 +1059,7 @@ def popup_bonus():
 
 if __name__ == "__main__":
     root = ctk.CTk()
-    root.title("MMSC Image Colouriser")
+    root.title("MMSC Image Coloriser")
     root.geometry(f"{1300}x{750}")
     app = imageColoriser(master=root)
     app.mainloop()
