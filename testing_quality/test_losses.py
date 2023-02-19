@@ -124,7 +124,7 @@ def getInit(fileName):
     grayImage = np.round(grayImage).astype(np.uint16)  # 16 or 8?
     grayImage = np.stack((grayImage,) * 3, axis=-1).astype(np.int64)
     xSize, ySize, d = grayImage.shape
-    NRandomPixelsMax = 50
+    NRandomPixelsMax = round(float(rawImage.size) / 3 * 0.001)  # 0.1% of pixels
     # get random indices to eventually color in
     randomIndices = np.random.default_rng().choice(
         xSize * ySize, size=int(NRandomPixelsMax), replace=False
@@ -144,7 +144,8 @@ def getInit(fileName):
 def test_colorise(file_name):
 
     rawImage, grayImage, colorCoordinates, colorValues = getInit(file_name)
-
+    global xx
+    xx = rawImage
     # rawImage = readImage(file_name)
 
     normalKernel = lambda x: np.exp(-(x**2))
