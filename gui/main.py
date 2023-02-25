@@ -158,13 +158,13 @@ class imageColoriser(ctk.CTkFrame):
 
         # load file
         fileName = ctk.filedialog.askopenfilename(
-            initialdir=str(pathlib.Path(mainDirectory, "images")),
+            initialdir=str(pathlib.Path(mainDirectory, "flattenedImages")),
             title="Select A File",
             filetypes=(
+                ("all files", "*.*"),
                 ("jpg files", "*.jpg"),
                 ("png files", "*.png"),
                 ("jpeg files", "*.jpeg"),
-                ("all files", "*.*"),
             ),
         )
 
@@ -215,11 +215,10 @@ class imageColoriser(ctk.CTkFrame):
             self.grayImageExists = 1
 
             # show grayscale image
-            grayImagePLTWindow.imshow(grayImage, cmap="gray")
+            self.dimensionalisedGrayImage = self.dimensionalise(self.grayImage)
+            grayImagePLTWindow.imshow(self.dimensionalisedGrayImage)
             grayImagePLTWindow.axis("off")
             self.canvas.draw()
-
-            self.dimensionalisedGrayImage = self.dimensionalise(self.grayImage)
 
             xSize, ySize = self.grayImage.shape
 
@@ -522,15 +521,17 @@ class imageColoriser(ctk.CTkFrame):
             )
 
             # calling a method within this instance to colorise our image
-            self.width,self.height = self.rawImage.shape[0:2]
+            self.width, self.height = self.rawImage.shape[0:2]
             self.n = self.colorValues.shape[0]
             self.sizeThreshHold = 5e8
-            if self.width*self.height*self.n < self.sizeThreshHold:
+            if self.width * self.height * self.n < self.sizeThreshHold:
                 print("Using Fast Coloriser")
                 self.colorisedImage = self.coloriserInstance.kernelColoriseColumnal()
             else:
                 print("Using Large Coloriser")
-                self.colorisedImage = self.coloriserInstance.kernelColoriseColumnalLarge()
+                self.colorisedImage = (
+                    self.coloriserInstance.kernelColoriseColumnalLarge()
+                )
             colorisedWindow.imshow(self.colorisedImage)
             colorisedWindow.axis("off")
             self.canvas.draw()

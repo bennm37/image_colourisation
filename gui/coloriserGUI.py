@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import numpy.linalg as lag
 import numexpr as ne
@@ -5,7 +6,9 @@ import matplotlib.pyplot as plt
 
 
 class Coloriser:
-    def __init__(self, grayImage, colorCoordinates, colorValues, parameters,verbose=False):
+    def __init__(
+        self, grayImage, colorCoordinates, colorValues, parameters, verbose=False
+    ):
         """grayImage should be of shape width x height x 3, colorCoordinates n x 2 ,
         colorValues n x 3"""
         self.width, self.height, d = grayImage.shape
@@ -19,7 +22,6 @@ class Coloriser:
         self.sigma1 = parameters["sigma1"]
         self.sigma2 = parameters["sigma2"]
         self.p = parameters["p"]
-        self.kernel = parameters["kernel"]
         self.verbose = verbose
 
     def kernelColoriseColumnal(self):
