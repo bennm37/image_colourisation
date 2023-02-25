@@ -36,6 +36,17 @@ def getInit(fileName):
     # fileName = "chipmunk.jpg"
     imageToRead = pathlib.Path(mainDirectory, folder_name, fileName)
     rawImage = plt.imread(imageToRead)
+
+    if rawImage.dtype == "float32":
+        if fileName.endswith(".jpg") or fileName.endswith(".jpeg"):
+            rawImage = (rawImage * 255).astype(np.uint8)
+    if fileName.endswith(".png"):
+        # remove transparency, convert to white
+        if rawImage.shape[2] == 4:
+            for i in np.argwhere(rawImage[:, :, 3] != 1):
+                rawImage[i[0], i[1], :] = 1.0
+        rawImage = rawImage[:, :, :3] * 255
+        rawImage = rawImage.astype(np.uint64)
     grayImage = np.dot(rawImage[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
     grayImage = np.dstack([grayImage] * 3)
     xSize, ySize, d = grayImage.shape
@@ -178,7 +189,7 @@ def optimise(file_name, runNo):
 
 ##
 if __name__ == "__main__":
-    folder_name = "smolreal"
+    folder_name = "smolcart"
     resultsFolder = pathlib.Path(mainDirectory, "results")
     file_names = os.listdir(pathlib.Path(mainDirectory, folder_name))
     finalResults = pd.DataFrame()
@@ -189,4 +200,6 @@ if __name__ == "__main__":
         resultsDF = pd.DataFrame([resultsDict])
         finalResults = pd.concat([finalResults, resultsDF], ignore_index=True)
 
-    finalResults.to_csv("zella", index=False)
+    finalResults.to_csv("zellacartoon", index=False)
+    means = np.mean(finalResults)
+    std = np.std(finalResults)
