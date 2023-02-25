@@ -41,6 +41,7 @@ def getInit(fileName):
     xSize, ySize, d = grayImage.shape
     NRandomPixelsMax = 66
     # get random indices to eventually color in
+    np.random.seed(seed=190427)
     randomIndices = np.random.default_rng().choice(
         xSize * ySize, size=int(NRandomPixelsMax), replace=False
     )
