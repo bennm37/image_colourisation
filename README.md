@@ -3,7 +3,7 @@ This was a group project for the Mathematical Modelling and Scientific Computing
 
 ## Installation
 Clone the repository:\
-```git clone https://github.com/bennm37/image_colourisation.git``\
+```git clone https://github.com/bennm37/image_colourisation.git```\
 Change directory to the repository:\
 ```cd image_colourisation```\
 Create a virtual environment:\
