@@ -1,4 +1,20 @@
 # Case Study in Scientific Computing
+This was a group project for the Mathematical Modelling and Scientific Computing MSc in which we created a GUI for recolorising black and white images with limited colour information. The underlying algorithm relies on reproducing kernel hilbert spaces. We also investigated optimising the parameters of the model using bayesian optimisation.
+
+## Installation
+Clone the repository:\
+```git clone https://github.com/bennm37/image_colourisation.git``\
+Change directory to the repository:\
+```cd image_colourisation```\
+Create a virtual environment:\
+```python -m venv venv```\
+NOTE python>=3.10 is required for ```match``` statements.
+Activate the virtual environment:\
+```source venv/bin/activate```\
+Install the requirements:\
+```pip install -r requirements.txt```\
+Good to go! Try running gui/main.py
+
 
 ## Working Updates
 
