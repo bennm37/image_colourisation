@@ -1,0 +1,9 @@
+numpy 
+numexpr
+matplotlib
+tk
+customtkinter
+scipy
+# for optimisation
+# benderopt
+# hyperopt
