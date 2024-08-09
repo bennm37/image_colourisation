@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "image-colourisation"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+numexpr = "^2.10.1"
+tk = "^0.1.0"
+customtkinter = "^5.2.2"
+flake8 = "^7.1.1"
+black = "^24.8.0"
+scipy = "^1.14.0"
+matplotlib = "^3.9.1.post1"
+isort = "^5.13.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
