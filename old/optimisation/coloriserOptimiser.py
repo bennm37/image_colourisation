@@ -27,6 +27,7 @@ def kernelColorise(
 ):
     image = np.zeros((width, height, 3))
     KD = 0
+
     # for i in np.arange(3):
     def getK(X, Y, grayImage, sigma1, sigma2, p):
         """Generates the kernel matrix for 2 lists of indicies X and Y. X and Y

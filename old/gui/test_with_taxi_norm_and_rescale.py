@@ -4,12 +4,14 @@ import numexpr as ne
 
 # Zella's Magic
 import matplotlib.pyplot as plt
+
 # from benderopt.base import OptimizationProblem, Observation
 # from benderopt.optimizer import optimizers
 import numpy as np
 from pathlib import Path
 import matplotlib.image as mpimg
 from sys import getsizeof
+
 
 class test_coloriser_taxi(coloriserGUI.Coloriser):
     # initialize class as usual
@@ -32,7 +34,6 @@ class test_coloriser_taxi(coloriserGUI.Coloriser):
         grayX = self.grayImage[x[:, 0], x[:, 1]].astype(np.float64)
         grayY = self.grayImage[y[:, 0], y[:, 1]].astype(np.float64)
 
-
         grayXY_dist = abs(grayX[:] - grayY[col])
         gray_kernel = ne.evaluate(
             "exp(-grayXY_dist / (s2)**2)",
@@ -43,10 +44,11 @@ class test_coloriser_taxi(coloriserGUI.Coloriser):
         )
 
         return ne.evaluate("dist_kernel * gray_kernel")
-    
+
     @staticmethod
     def taxi_norm(x, y):
         return np.sum(np.abs(x - y), axis=1)
+
 
 class test_coloriser_normalized(coloriserGUI.Coloriser):
     # initialize class as usual
@@ -81,12 +83,14 @@ class test_coloriser_normalized(coloriserGUI.Coloriser):
         )
 
         return ne.evaluate("distXYKernelised * gray_kernel")
-    
+
+
 def readImage(name):
     fileName = Path(".", "images", name)
     rawImage = mpimg.imread(fileName)
     rawImage = np.round(rawImage).astype(np.uint8)
     return rawImage
+
 
 def generateCosts(rawImage, noisyImage):
     actualImage = rawImage.astype(np.float64)
@@ -97,6 +101,7 @@ def generateCosts(rawImage, noisyImage):
     bDiff = np.sum(differences[:, :, 2] * 0.114)
     finalDiff = rDiff + gDiff + bDiff
     return finalDiff
+
 
 def getInit(fileName):
     # fileName = "chipmunk.jpg"
@@ -124,6 +129,7 @@ def getInit(fileName):
     colorValues = rawImage[randomCoordinates[:, 0], randomCoordinates[:, 1]]
     return rawImage, grayImage, colorCoordinates, colorValues
 
+
 def plotImages(rawImage, noisyImage, improvedImage):
     mainWindowFigure = plt.figure()
     extraFigure = plt.figure()
@@ -136,6 +142,7 @@ def plotImages(rawImage, noisyImage, improvedImage):
     rawImageWindow.axis("off")
     rawImageWindow.set_title("raw image")
     plt.show()
+
 
 if __name__ == "__main__":
 
@@ -169,6 +176,3 @@ if __name__ == "__main__":
     colorImage = c.kernelColoriseColumnal()
     print(generateCosts(rawImage, colorImage))
     # plotImages(grayImage, rawImage, colorImage)
-
-
-
